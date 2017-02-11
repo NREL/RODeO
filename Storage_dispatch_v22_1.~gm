@@ -313,6 +313,10 @@ Scalars
 
          min_output_on_intervals 'minimum number of intervals the output side of the facility can be on at a time' /%min_runtime_instance%/
          min_input_on_intervals  'minimum number of intervals the input side of the facility can be on at a time' /%min_runtime_instance%/
+
+         current_interval        'current interval for real-time optimization runs'  /%current_int_instance%/
+         current_storage_lvl     'current storage level for real-time optimization runs' /%current_stor_intance%/
+         current_monthly_max     'current monthly maximum demand for real-time optimization runs' /%current_max_instance%/
 ;
 
 *reseed the random number generator

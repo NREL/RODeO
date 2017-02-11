@@ -70,6 +70,10 @@ $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  0
 $if not set CF_opt_instance        $set CF_opt_instance        0
 
+$if not set current_int_instance   $set current_int_instance   -1
+$if not set current_stor_intance   $set current_stor_intance   -1
+$if not set current_max_instance   $set current_max_instance   -1
+
 **** Settings for different CFs [176795.57895, 265193.368425, 353591.1579, 397790.0526375, 419889.50000625, 441988.947375] [40,60,80,90,95,100]
 
 $ontext
@@ -313,6 +317,10 @@ Scalars
 
          min_output_on_intervals 'minimum number of intervals the output side of the facility can be on at a time' /%min_runtime_instance%/
          min_input_on_intervals  'minimum number of intervals the input side of the facility can be on at a time' /%min_runtime_instance%/
+
+         current_interval        'current interval for real-time optimization runs'  /%current_int_instance%/
+         current_storage_lvl     'current storage level for real-time optimization runs' /%current_stor_intance%/
+         current_monthly_max     'current monthly maximum demand for real-time optimization runs' /%current_max_instance%/
 ;
 
 *reseed the random number generator
