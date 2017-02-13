@@ -26,7 +26,7 @@ $if not set elec_rate_instance     $set elec_rate_instance     579123115457a3ff5
 $if not set add_param_instance     $set add_param_instance     additional_parameters
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none
 $if not set outdir                 $set outdir                 RODeO\Output\Default
-
+*RODeO\Output\Default
 $if not set indir                  $set indir                  Default
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
@@ -54,7 +54,7 @@ $if not set interest_rate_inst     $set interest_rate_inst     0.07
 
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   4
+$if not set storage_cap_instance   $set storage_cap_instance   8
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
 $if not set op_period_instance     $set op_period_instance     8760
@@ -69,6 +69,11 @@ $if not set base_pwr_instance      $set base_pwr_instance      0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  0
 $if not set CF_opt_instance        $set CF_opt_instance        0
+
+$if not set current_int_instance   $set current_int_instance   -1
+$if not set next_int_instance      $set next_int_instance      1
+$if not set current_stor_intance   $set current_stor_intance   -1
+$if not set current_max_instance   $set current_max_instance   -1
 
 **** Settings for different CFs [176795.57895, 265193.368425, 353591.1579, 397790.0526375, 419889.50000625, 441988.947375] [40,60,80,90,95,100]
 
@@ -221,6 +226,7 @@ Files
          input_echo_file /%outdir%\Storage_dispatch_inputs_%file_name_instance%_%storage_cap_instance%hrs.csv/
          results_file    /%outdir%\Storage_dispatch_results_%file_name_instance%_%storage_cap_instance%hrs.csv/
          summary_file    /%outdir%\Storage_dispatch_summary_%file_name_instance%_%storage_cap_instance%hrs.csv/
+         RT_out_file    /%outdir%\Real_time_output_values.csv/
 ;
 
 Sets
@@ -251,6 +257,9 @@ Parameters
 ;
 
 * Adjust the files that are loaded
+*$include Input_files\%indir%\%elec_rate_instance%.txt
+*$include Input_files\%indir%\%add_param_instance%.txt
+*$include Input_files\%indir%\%ren_prof_instance%.txt
 $include RODeO\Input_files\%indir%\%elec_rate_instance%.txt
 $include RODeO\Input_files\%indir%\%add_param_instance%.txt
 $include RODeO\Input_files\%indir%\%ren_prof_instance%.txt
@@ -314,9 +323,14 @@ Scalars
          min_output_on_intervals 'minimum number of intervals the output side of the facility can be on at a time' /%min_runtime_instance%/
          min_input_on_intervals  'minimum number of intervals the input side of the facility can be on at a time' /%min_runtime_instance%/
 
-         current_interval        'current interval for real-time optimization runs'  /%current_int_instance%/
-         current_storage_lvl     'current storage level for real-time optimization runs' /%current_stor_intance%/
-         current_monthly_max     'current monthly maximum demand for real-time optimization runs' /%current_max_instance%/
+         current_interval        'current interval for real-time optimization runs (1-8759)'                     /%current_int_instance%/
+         next_interval           'next interval for real-time optimization runs (2-8760)'                        /%next_int_instance%/
+         current_storage_lvl     'current storage level for real-time optimization runs (0-100%, 0-1)'           /%current_stor_intance%/
+         current_monthly_max     'current monthly maximum demand for real-time optimization runs (0-100%, 0-1)'  /%current_max_instance%/
+;
+
+Set
+         next_int(interval)      Next interval set       /%next_int_instance%/
 ;
 
 *reseed the random number generator
@@ -572,6 +586,9 @@ Equations
          H2_CF_eqn2             limit Hydrogen_fraction
          H2_CF_eqn3             limit Hydrogen_fraction
 
+         RT_eqn1(interval)      equation to set current power values to enable running in real-time
+         RT_eqn2(interval)      equation to set current storage values to enable running in real-time
+
 **         one_active_device_eqn(interval) equation to ensure that both generator and pump cannot be simultaneously active
 ;
 
@@ -772,14 +789,14 @@ input_spinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) an
 input_nonspinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          input_nonspinres_MW(interval) =l= input_capacity_MW * input_nonspinres_limit_fraction;
 
-storage_level_accounting_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0)..
+storage_level_accounting_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and ord(interval)>current_interval)..
          storage_level_MWh(interval) =e= storage_level_MWh(interval-1)
          + input_power_MW(interval) * interval_length * input_efficiency
          - output_power_MW(interval) * interval_length / output_efficiency
          - H2_sold(interval) * H2_LHV;
 * LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
-storage_level_accounting_eqn2(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW = 0)..
+storage_level_accounting_eqn2(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW = 0 and ord(interval)>current_interval)..
          storage_level_MWh(interval) =e= storage_level_MWh(interval-1);
 * If input capacity is equal to zero then output device cannot interact with storage system so storage_level_MWh is held constant
 
@@ -792,15 +809,15 @@ H2_output_limit_eqn2(days)$(H2_use = 2)..
 H2_output_limit_eqn3(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and H2_use <= 1 and CF_opt=0)..
          H2_sold(interval) =e= H2_consumed(interval);
 
-storage_level_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW>0)..
+storage_level_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW>0 and ord(interval)>current_interval)..
          storage_level_MWh(interval) =l= input_capacity_MW * storage_capacity_hours
          - input_regdn_MW(interval) * interval_length * 0.5;
 
-storage_level_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW<=0)..
+storage_level_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW<=0 and ord(interval)>current_interval)..
          storage_level_MWh(interval) =l= output_capacity_MW * storage_capacity_hours
          - input_regdn_MW(interval) * interval_length * 0.5;
 
-storage_level_limit_eqn3(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)..
+storage_level_limit_eqn3(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>current_interval)..
          storage_level_MWh(interval) =g= (output_regup_MW(interval) + output_spinres_MW(interval) + output_nonspinres_MW(interval)) / input_efficiency * interval_length * 0.5;
 * Ensures that reserves can be provided if necessary for at least 1/2 hour.
 
@@ -809,6 +826,12 @@ output_startup_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord
 
 input_startup_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          input_start(interval) =g= input_active(interval) - input_active(interval-1);
+
+RT_eqn1(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)<=current_interval and current_monthly_max>=0)..
+         input_power_MW(interval) =e= current_monthly_max * input_capacity_MW;
+
+RT_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)<=current_interval and current_storage_lvl>=0)..
+         storage_level_MWh(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
 
 *one_active_device_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
 *         input_active(interval) + output_active(interval) =l= 1;
@@ -1320,6 +1343,14 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Input VOM cost ($), ',input_VOM_cost2 /;
                  put 'Output VOM cost ($), ',output_VOM_cost2 /;
                  put /;
+
+         if (next_interval>1,
+               put RT_out_file;
+                       put 'Interval, Electrolyzer Setpoint (MW)' /;
+                       loop(next_int, put  next_interval,input_power_MW.l(next_int) /;
+                       );
+         );
+
 else
 *         put input_echo_file;
 *                 put 'Error--solution not found.';
@@ -1327,4 +1358,6 @@ else
 *                 put 'Error--solution not found.';
          put summary_file;
                  put 'Error--solution not found.';
+*         put RT_out_file;
+*                 put 'Error--soultion not found.';
 );
