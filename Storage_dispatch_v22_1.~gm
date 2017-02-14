@@ -22,9 +22,9 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     574dbcac5457a3d3795e629f_15min
-$if not set add_param_instance     $set add_param_instance     additional_parameters_15min
-$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_15min
+$if not set elec_rate_instance     $set elec_rate_instance     574dbcac5457a3d3795e629f_5min
+$if not set add_param_instance     $set add_param_instance     additional_parameters_5min
+$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_5min
 $if not set outdir                 $set outdir                 RODeO\Output\Default
 *RODeO\Output\Default
 $if not set indir                  $set indir                  Default
@@ -57,11 +57,15 @@ $if not set out_heat_rate_instance $set out_heat_rate_instance 0
 $if not set storage_cap_instance   $set storage_cap_instance   8
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
-$if not set op_period_instance     $set op_period_instance     35040
-$if not set int_length_instance    $set int_length_instance    0.25
+
+* Next two values change the resoultion of the optimization
+*    hourly: 8760, 1     15min: 35040, 0.25       5min: 105120, 0.08333333333
+$if not set op_period_instance     $set op_period_instance     105120
+$if not set int_length_instance    $set int_length_instance    0.08333333333
+
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   0
-$if not set file_name_instance     $set file_name_instance     "TEST_22"
+$if not set file_name_instance     $set file_name_instance     "5min"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
@@ -71,11 +75,13 @@ $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  0
 $if not set CF_opt_instance        $set CF_opt_instance        0
 
-$if not set current_int_instance   $set current_int_instance   12000
-$if not set next_int_instance      $set next_int_instance      12001
+* Next values are used to initialize for real-time operation and shorten the run-time
+*    To turn off set everything to -1 except max_int_instance, which should be "inf"
+$if not set current_int_instance   $set current_int_instance   52560
+$if not set next_int_instance      $set next_int_instance      52561
 $if not set current_stor_intance   $set current_stor_intance   0.5
-$if not set current_max_instance   $set current_max_instance   0.5
-$if not set max_int_instance       $set max_int_instance       15000
+$if not set current_max_instance   $set current_max_instance   0.8
+$if not set max_int_instance       $set max_int_instance       84096
 
 **** Settings for different CFs [176795.57895, 265193.368425, 353591.1579, 397790.0526375, 419889.50000625, 441988.947375] [40,60,80,90,95,100]
 
@@ -634,7 +640,7 @@ operating_profit_eqn..
                  - VOM_cost * output_power_MW(interval) * interval_length
                  - output_startup_cost * output_capacity_MW * output_start(interval)
                  - input_startup_cost  * input_capacity_MW  * input_start(interval)
-                 + H2_price(interval) * H2_sold(interval) * interval_length
+                 + H2_price(interval) * H2_sold(interval)
                  - input_VOM_cost * input_power_MW(interval) * interval_length
                  - output_VOM_cost * output_power_MW(interval) * interval_length)
                  - sum(months, Fixed_cap(months) * Fixed_dem(months))
@@ -1132,7 +1138,7 @@ regdn_revenue = sum(interval, ( regdn_price(interval) - reg_cost ) * ( output_re
 spinres_revenue = sum(interval, spinres_price(interval) * ( output_spinres_MW.l(interval) + input_spinres_MW.l(interval) ) * interval_length );
 nonspinres_revenue = sum(interval, nonspinres_price(interval) * ( output_nonspinres_MW.l(interval) + input_nonspinres_MW.l(interval) ) * interval_length );
 startup_costs = sum(interval, output_startup_cost * output_capacity_MW * output_start.l(interval) + input_startup_cost * input_capacity_MW * input_start.l(interval) );
-H2_revenue = sum(interval, H2_price(interval) * H2_sold.l(interval) * interval_length);
+H2_revenue = sum(interval, H2_price(interval) * H2_sold.l(interval));
 actual_operating_profit = arbitrage_revenue + regup_revenue + regdn_revenue + spinres_revenue + nonspinres_revenue + H2_revenue - startup_costs
                         + Fixed_dem_charge_cost + Timed_dem_1_cost + Timed_dem_2_cost + Timed_dem_3_cost + Timed_dem_4_cost + Timed_dem_5_cost + Timed_dem_6_cost + Meter_cost
                         + input_cap_cost2 + output_cap_cost2 + input_FOM_cost2 + output_FOM_cost2 + input_VOM_cost2 + output_VOM_cost2;
