@@ -22,9 +22,9 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     579123115457a3ff57f1f983
-$if not set add_param_instance     $set add_param_instance     additional_parameters
-$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none
+$if not set elec_rate_instance     $set elec_rate_instance     574dbcac5457a3d3795e629f_15min
+$if not set add_param_instance     $set add_param_instance     additional_parameters_15min
+$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_15min
 $if not set outdir                 $set outdir                 RODeO\Output\Default
 *RODeO\Output\Default
 $if not set indir                  $set indir                  Default
@@ -57,11 +57,12 @@ $if not set out_heat_rate_instance $set out_heat_rate_instance 0
 $if not set storage_cap_instance   $set storage_cap_instance   8
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
-$if not set op_period_instance     $set op_period_instance     8760
+$if not set op_period_instance     $set op_period_instance     35040
+$if not set int_length_instance    $set int_length_instance    0.25
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   0
 $if not set file_name_instance     $set file_name_instance     "TEST_22"
-$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    397790.0526375
+$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
@@ -70,10 +71,11 @@ $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  0
 $if not set CF_opt_instance        $set CF_opt_instance        0
 
-$if not set current_int_instance   $set current_int_instance   -1
-$if not set next_int_instance      $set next_int_instance      1
-$if not set current_stor_intance   $set current_stor_intance   -1
-$if not set current_max_instance   $set current_max_instance   -1
+$if not set current_int_instance   $set current_int_instance   12000
+$if not set next_int_instance      $set next_int_instance      12001
+$if not set current_stor_intance   $set current_stor_intance   0.5
+$if not set current_max_instance   $set current_max_instance   0.5
+$if not set max_int_instance       $set max_int_instance       15000
 
 **** Settings for different CFs [176795.57895, 265193.368425, 353591.1579, 397790.0526375, 419889.50000625, 441988.947375] [40,60,80,90,95,100]
 
@@ -205,7 +207,7 @@ $offtext
 *        To remove FC, change "output_cap_instance" to 0.0001, "output_efficiency_inst" to 0.0000001 and "output_LSL_fraction" to 1
 *
 *        energy_only_instance = 0, 1 (0 = Energy only operation, 1 = All ancillary services included)
-*        H2_consume_adj_inst = adjusts the amount of H2 consumed from the uploaded "H2_consumed" file in kg
+*        H2_consume_adj_inst = adjusts the amount of H2 consumed from the uploaded "H2_consumed" file as capacity factor (%)
 *        H2_price_instance = adjusts the value of hydrogen from the uploaded "H2_price" file in $/kg
 *        H2_use_instance = 0, 1, or 2 for non-elec use of hydrogen  (0=no extra H2, 1=constant profile, 2=daily requirement)
 *        base_op_instance = 0, 1 (0 = normal operation, 1 = baseload input operation)
@@ -230,7 +232,7 @@ Files
 ;
 
 Sets
-         interval          hourly time intervals in study period /1 * 8760/
+         interval          hourly time intervals in study period /1 * %op_period_instance%/
          months            months in study period                /1 * 12/
          days              number of daily periods in study      /1 * 365/
          timed_dem_period  number of timed demand periods        /1 * 6/
@@ -265,7 +267,7 @@ $include RODeO\Input_files\%indir%\%add_param_instance%.txt
 $include RODeO\Input_files\%indir%\%ren_prof_instance%.txt
 
 Scalars
-         interval_length length of each interval (hours) /1/
+         interval_length length of each interval (hours) /%int_length_instance%/
          operating_period_length number of intervals in each operating period (rolling solution window) /%op_period_instance%/
 *1 week = 168 hourly intervals
 *set operating period length to full year length (8760 or 8784) to do full-year optimization without rolling window
@@ -323,10 +325,11 @@ Scalars
          min_output_on_intervals 'minimum number of intervals the output side of the facility can be on at a time' /%min_runtime_instance%/
          min_input_on_intervals  'minimum number of intervals the input side of the facility can be on at a time' /%min_runtime_instance%/
 
-         current_interval        'current interval for real-time optimization runs (1-8759)'                     /%current_int_instance%/
-         next_interval           'next interval for real-time optimization runs (2-8760)'                        /%next_int_instance%/
+         current_interval        'current interval for real-time optimization runs'                              /%current_int_instance%/
+         next_interval           'next interval for real-time optimization runs'                                 /%next_int_instance%/
          current_storage_lvl     'current storage level for real-time optimization runs (0-100%, 0-1)'           /%current_stor_intance%/
          current_monthly_max     'current monthly maximum demand for real-time optimization runs (0-100%, 0-1)'  /%current_max_instance%/
+         max_interval            'maximum interval for real-time optimization runs'                              /%max_int_instance%/
 ;
 
 Set
@@ -588,6 +591,8 @@ Equations
 
          RT_eqn1(interval)      equation to set current power values to enable running in real-time
          RT_eqn2(interval)      equation to set current storage values to enable running in real-time
+         RT_eqn3(interval)      equation to set power values to shorten running in real-time
+         RT_eqn4(interval)      equation to set storage values to shorten running in real-time
 
 **         one_active_device_eqn(interval) equation to ensure that both generator and pump cannot be simultaneously active
 ;
@@ -602,7 +607,7 @@ if (H2_use = 0,
 elseif H2_use=1,
          H2_price(interval) = H2_price(interval) * H2_price_adj;
          if (CF_opt=0,
-                 H2_consumed(interval) = H2_consumed(interval) * H2_consumed_adj;
+                 H2_consumed(interval) = H2_consumed(interval) * H2_consumed_adj * input_capacity_MW * input_efficiency / H2_LHV * 24 * interval_length;
          elseif CF_opt=1,
                  H2_consumed_adj = input_capacity_MW * input_efficiency / H2_LHV *24;
          );
@@ -789,14 +794,14 @@ input_spinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) an
 input_nonspinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          input_nonspinres_MW(interval) =l= input_capacity_MW * input_nonspinres_limit_fraction;
 
-storage_level_accounting_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and ord(interval)>current_interval)..
+storage_level_accounting_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and ord(interval)>current_interval and ord(interval)<max_interval )..
          storage_level_MWh(interval) =e= storage_level_MWh(interval-1)
          + input_power_MW(interval) * interval_length * input_efficiency
          - output_power_MW(interval) * interval_length / output_efficiency
          - H2_sold(interval) * H2_LHV;
 * LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
-storage_level_accounting_eqn2(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW = 0 and ord(interval)>current_interval)..
+storage_level_accounting_eqn2(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW = 0 and ord(interval)>current_interval and ord(interval)<max_interval )..
          storage_level_MWh(interval) =e= storage_level_MWh(interval-1);
 * If input capacity is equal to zero then output device cannot interact with storage system so storage_level_MWh is held constant
 
@@ -809,15 +814,17 @@ H2_output_limit_eqn2(days)$(H2_use = 2)..
 H2_output_limit_eqn3(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and H2_use <= 1 and CF_opt=0)..
          H2_sold(interval) =e= H2_consumed(interval);
 
-storage_level_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW>0 and ord(interval)>current_interval)..
+storage_level_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW>0 and ord(interval)>current_interval and ord(interval)<max_interval )..
          storage_level_MWh(interval) =l= input_capacity_MW * storage_capacity_hours
          - input_regdn_MW(interval) * interval_length * 0.5;
 
-storage_level_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW<=0 and ord(interval)>current_interval)..
+storage_level_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW<=0 and ord(interval)>current_interval and ord(interval)<max_interval )..
          storage_level_MWh(interval) =l= output_capacity_MW * storage_capacity_hours
          - input_regdn_MW(interval) * interval_length * 0.5;
 
-storage_level_limit_eqn3(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>current_interval)..
+*****(ord(interval)>current_interval OR ord(interval)<max_interval )
+
+storage_level_limit_eqn3(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>current_interval and ord(interval)<max_interval )..
          storage_level_MWh(interval) =g= (output_regup_MW(interval) + output_spinres_MW(interval) + output_nonspinres_MW(interval)) / input_efficiency * interval_length * 0.5;
 * Ensures that reserves can be provided if necessary for at least 1/2 hour.
 
@@ -831,6 +838,12 @@ RT_eqn1(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) 
          input_power_MW(interval) =e= current_monthly_max * input_capacity_MW;
 
 RT_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)<=current_interval and current_storage_lvl>=0)..
+         storage_level_MWh(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
+
+RT_eqn3(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>=max_interval and current_monthly_max>=0)..
+         input_power_MW(interval) =e= current_monthly_max * input_capacity_MW;
+
+RT_eqn4(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>=max_interval and current_storage_lvl>=0)..
          storage_level_MWh(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
 
 *one_active_device_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
@@ -862,9 +875,9 @@ input_min_on_eqn3(interval)$( min_input_on_intervals > 1 and ord(interval) > car
 
 Model arbitrage_and_AS /all/
 *set number of iterations before solver is terminated
-option iterlim = 100000;
+option iterlim = 1000000;
 *set number of seconds before the solver is terminated
-option reslim = 600;
+option reslim = 6000;
 *suppress listing of the equations in the listing file
 option limrow = 0;
 option limcol = 0;

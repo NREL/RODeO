@@ -13,11 +13,17 @@ function [out_mat] = interpolate_matrix(in_mat,Year_length,interval_length,set1)
                 end
             end
             out_mat((m01-1)*interval_length+1:m01*interval_length,:) = repmat(in_mat(m01,:),interval_length,1);
+        else
+            out_mat = in_mat;
         end
     elseif set1 == 2 
         [m01,n01] = size(in_mat);
-        out_mat = zeros(m01*interval_length,n01);
-        out_mat = reshape(permute(repmat(in_mat,1,1,interval_length),[3,1,2]),[],n01);
+        if (m01 ~= Year_length*interval_length)     % Interpolate to expand matrix if too short
+            out_mat = zeros(m01*interval_length,n01);
+            out_mat = reshape(permute(repmat(in_mat,1,1,interval_length),[3,1,2]),[],n01);
+        else
+            out_mat = in_mat;
+        end
     end
 end
 

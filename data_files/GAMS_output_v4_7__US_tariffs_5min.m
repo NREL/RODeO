@@ -8,7 +8,7 @@ cd(dir1);
 write_regular_files = input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
 Year_select = 2015;     % select year to be analyzed
 Year_length = 8760;     % length of year in hours
-interval_length = 4;    % used to create sub-hourly data files
+interval_length = 1;    % used to create sub-hourly data files
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
 % DST_year_end = datenum([2015,11,1,2,0,0]);  %Daylight savings time
 month_vec = {'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'};
@@ -70,6 +70,7 @@ for i1=1:n01     % Convert integer values to price values from URDB
     if mod(i1,1000)==0, display([num2str(i1),' of ',num2str(n01)]), end  % Display progress each 1000 intervals
 end
 num6 = interpolate_matrix(num6int2,Year_length,interval_length,2);
+num6B= interpolate_matrix(num6int,Year_length,interval_length,2);
 clear num6int num6int2
 
 % % % TOU tariff breakdown (input the TOU buckets for each region (one column for each region/node) (1=peak, 2=mid-peak, 3=off-peak))
@@ -150,7 +151,7 @@ end, clear i0 i1
 
 %% Create season values
 disp('Create season values...')
-date_values = (datenum(Year_select,1,1,0,0,0):(1/24/interval_length):datenum(Year_select,12,31,23,0,0))';
+date_values = (datenum(Year_select,1,1,0,0,0):(1/24/interval_length):datenum(Year_select,12,31,23,59,59))';
 interval1 = (1:length(date_values))';
 for i5=1:length(interval1)
     [Y1,M1,D1,H1,MN1,S1] = datevec(date_values(i5));
@@ -164,19 +165,21 @@ TOU_season = [];   % Initialize
 c_TOU=zeros(12,10,length(Scenarios1));  % Create matrix with the ability to handle 10 unique demand charge prices
 for i4=1:length(Scenarios1)
     for i5=1:length(interval1)
-        TOU_interim = num61(i5,i4)+1;  %Add 1 to adjust for 0 indexing in python
+        TOU_interim = num6B(i5,i4)+1;  %Add 1 to adjust for 0 indexing in python
         c_TOU(month_values(i5),TOU_interim,i4)=c_TOU(month_values(i5),TOU_interim,i4)+1;
         TOU_season(c_TOU(month_values(i5),TOU_interim,i4),month_values(i5),TOU_interim,i4) = i5;   
     end
     if mod(i4,1000)==0, display([num2str(i4),' of ',num2str(length(Scenarios1))]), end  % Display progress each 1000 intervals
 end, clear c_TOU TOU_interim i4 i5
-[mm1,nn1,oo1,pp1] = size(TOU_season);  % hours, month, TOU bin, utility
-
 Num_demand_tranches = 6;
+
+[mm1,nn1,oo1,pp1] = size(TOU_season);  % hours, month, TOU bin, utility
 if oo1>Num_demand_tranches  % Ensure that there are at least 6 entries in case we look at demand structures with more items in the future
     TOU_season(:,:,oo1+1:Num_demand_tranches,:)=0;
     error('Need to increase the number of demand charge tranches in Matlab script and in GAMS code')     
-end   
+elseif oo1<Num_demand_tranches
+    TOU_season(:,:,oo1+1:Num_demand_tranches,:)=0;
+end
 [mm1,nn1,oo1,pp1] = size(TOU_season);  % hours, month, TOU bin, utility
 
 GAMS_string1 = {};  % Initialize
@@ -288,15 +291,15 @@ data88 = reshape(num81,[],1,length(Scenarios1));                         % ($/mo
 %% Write regular tariff text files
 if strcmp(write_regular_files,'yes')
     [m1 n1 o1] = size(GAMS_string2);
+    % Add additional text to specify the resolution of the file being used
+    if     interval_length == 1;  add_txt1 = ['_hourly'];
+    elseif interval_length == 4;  add_txt1 = ['_15min'];
+    elseif interval_length == 12; add_txt1 = ['_5min'];
+    else                          add_txt1 = [''];
+    end
+    
     for i5=1:length(Scenarios1)
-        filename2_short = filename2{i5};
-        if interval_length == 4;    % Add additional text to specify the resolution of the file being used
-            add_txt1 = ['_15min'];
-        elseif interval_length == 12;
-            add_txt1 = ['_5min'];
-        else
-            add_txt1 = [''];
-        end
+        filename2_short = filename2{i5};        
         fileID = fopen([dir0,'Regular_tariffs\',char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
         data_most2 = [data11,data11B,data22];    % Combine energy price, AS price and other components listed in 'Inputs1'
         % data_most2(:,3:6,:) = 0;                        % AS     Remove AS prices
