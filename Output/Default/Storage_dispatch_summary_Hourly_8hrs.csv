@@ -1,4 +1,4 @@
-Run on a MSNT machine on 02/14/17 12:57:29.
+Run on a MSNT machine on 02/14/17 22:40:31.
 Optimal solution found within time limit:,Yes
 
 Renewable Capacity (MW),         0.00
@@ -19,17 +19,17 @@ hydrogen use,         1.00
 
 input
 LSL limit fraction,         0.10
-reg up limit fraction,         1.00
-reg down limit fraction,         1.00
-spining reserve limit fraction,         1.00
+reg up limit fraction,         0.00
+reg down limit fraction,         0.00
+spining reserve limit fraction,         0.00
 startup cost ($/MW-start), 0.0000000000
 minimum run intervals,         0.00
 
 output
 LSL limit fraction,         1.00
-reg up limit fraction,         1.00
-reg down limit fraction,         1.00
-spining reserve limit fraction,         1.00
+reg up limit fraction,         0.00
+reg down limit fraction,         0.00
+spining reserve limit fraction,         0.00
 startup cost ($/MW-start), 0.0000000000
 minimum run intervals,         0.00
 
