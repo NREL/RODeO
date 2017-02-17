@@ -1,12 +1,16 @@
 %% Collect, configure and output data into text files for use with GAMS
 clear all, close all, clc
-dir0 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\'];
-dir1 = [dir0,'data\'];
+
+% dir0 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\'];
+% dir1 = [dir0,'data\'];
+
+dir0 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\TXT_files\'];    % Output folder
+dir1 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\CSV_data\'];     % Input folder
 cd(dir1);
 
 % Prompt for which files to output
 write_regular_files = input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
-Year_select = 2015;     % select year to be analyzed
+Year_select = 2017;     % select year to be analyzed
 Year_length = 8760;     % length of year in hours
 interval_length = 1;    % used to create sub-hourly data files
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
@@ -83,7 +87,7 @@ clear num6int num6int2
 % % [num9,txt9,raw9] = xlsread('GAMS_nodes_caliso_v4_data');
 
 % Load tariff file names
-[numA,txtA,rawA] = xlsread('Tariffs_com_ind_20161202.xlsx');   
+[numA,txtA,rawA] = xlsread('Tariffs_com_ind_20170216.xlsx');   
 
 %% Clean number matrix
 disp('Clean and prepare matrices...')
@@ -289,16 +293,17 @@ data88 = reshape(num81,[],1,length(Scenarios1));                         % ($/mo
 
 
 %% Write regular tariff text files
+tic;
 if strcmp(write_regular_files,'yes')
     [m1 n1 o1] = size(GAMS_string2);
     % Add additional text to specify the resolution of the file being used
     if     interval_length == 1;  add_txt1 = ['_hourly'];
     elseif interval_length == 4;  add_txt1 = ['_15min'];
     elseif interval_length == 12; add_txt1 = ['_5min'];
-    else                          add_txt1 = [''];
+    else                          error('Need to define interval length')
     end
-    
-    for i5=1:length(Scenarios1)
+    init_val = 3491  % Used to adjust initial for loop value and for progress tracking
+    for i5=init_val:length(Scenarios1)
         filename2_short = filename2{i5};        
         fileID = fopen([dir0,'Regular_tariffs\',char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
         data_most2 = [data11,data11B,data22];    % Combine energy price, AS price and other components listed in 'Inputs1'
@@ -346,8 +351,8 @@ if strcmp(write_regular_files,'yes')
             else                   fprintf(fileID,'%i\t%g\t%s\n',i8,data66(i8,1,i5),'');
             end
         end
-        fclose(fileID);        
-        disp([num2str(i5),' of ',num2str(length(Scenarios1)),' - ',char(filename2(i5))])   
+        fclose(fileID); 
+        disp([num2str(i5),' of ',num2str(length(Scenarios1)),' - ',num2str(round(toc/abs(i5-init_val)*(length(Scenarios1)-i5)/60)),' min. remain - ',char(filename2(i5))])   
     end
     clear data_most2
     
