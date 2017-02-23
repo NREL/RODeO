@@ -101,7 +101,7 @@ for i0=1:length(files_tariff2)
 %     if max(strcmp(files_tariff2_short(int1(1)+1:int1(2)),Avoid_items_tariff))   % Skip several items
 %         continue
 %     end
-    for i1=[2]  %1:length(var1)   % Cycle through each variable
+    for i1=[1:2]  %1:length(var1)   % Cycle through each variable
     for i2=[5]  %1:length(var2)
     for i3=[4]  %1:length(var3)
     for i4=[1]  %1:length(var4)
