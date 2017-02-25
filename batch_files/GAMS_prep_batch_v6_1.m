@@ -1,14 +1,15 @@
 %% Prepare data to populate batch file.
 clear all, close all, clc
 dir1 = 'C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\';   % Set directory to send files
+dir2 = [dir1,'batch_files\'];
 cd(dir1); 
 
 % Define overall properties
 q = char(39);
-GAMS_loc = 'C:\GAMS\win64\24.8\gams.exe';
+GAMS_loc = 'C:\GAMS\win64\24.7\gams.exe';
 write_net_meter_files = 'no';
 GAMS_file= {'Storage_dispatch_v22_1'};      % Define below for each utility (3 file options)
-GAMS_lic = 'license=C:\GAMS\win64\24.8\gamslice.txt';
+GAMS_lic = 'license=C:\GAMS\win64\24.7\gamslice.txt';
 items_per_batch = 500;  % Select the number of items per batch file created
 
 outdir = 'Output\Default';
@@ -82,7 +83,7 @@ Avoid_items_tariff = {'E20R_','TOU8A_','TOU8R_','DGR_','TOU8CPP_'};   % Removes 
 Avoid_items_connection = {'_tran_','_pri_'};
 
 %%% Open first batch file
-fileID = fopen([dir1,['Batch_Regular_tariffs',num2str(c2),'.bat']],'wt');
+fileID = fopen([dir2,['Batch_Regular_tariffs',num2str(c2),'.bat']],'wt');
 
 for i0=1:length(files_tariff2)
     files_tariff2_short = files_tariff2{i0};
@@ -229,7 +230,7 @@ for i0=1:length(files_tariff2)
         if mod(c0,items_per_batch)==0
             fclose(fileID);
             c2=c2+1;            
-            fileID = fopen([dir1,['Batch_Regular_tariffs',num2str(c2),'.bat']],'wt');
+            fileID = fopen([dir2,['Batch_Regular_tariffs',num2str(c2),'.bat']],'wt');
         end
     end
     end
