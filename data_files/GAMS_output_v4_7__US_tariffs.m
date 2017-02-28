@@ -11,8 +11,8 @@ cd(dir1);
 % Prompt for which files to output
 write_regular_files = input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
 Year_select = 2017;     % select year to be analyzed
-Year_length = 8760;     % length of year in hours
-interval_length = 1;    % used to create sub-hourly data files
+Year_length = 8760;     % length of year in hours (hourly, 15 min, 5 min)
+interval_length = 1;    % used to create sub-hourly data files (1, 0.25, 0.83333333)
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
 % DST_year_end = datenum([2015,11,1,2,0,0]);  %Daylight savings time
 month_vec = {'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'};
@@ -20,7 +20,9 @@ month_vec = {'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','
 disp('Loading Files...')
 % Electricity price data (input any number of regions/nodes)
 [num1int] = xlsread('e_tou_8760.csv');                      % ($/kWh)
+num1int = num1int(2:end,:);                                 % Remove first row which contains the scenario number
 [num1A] = xlsread('e_prices.csv');                          % ($/kWh)
+num1A = num1A(2:end,:);                                     % Remove first row which contains the scenario number
 [m0,n0] = size(num1int); [m00,n00] = size(num1A);
 num1int2 = zeros(size(num1int));
 for i1=1:n0     % Convert integer values to price values from URDB 
@@ -61,11 +63,14 @@ clear num4Aint num4Bint num4Cint num4Dint
 
 % Fixed demand charge data (input the fixed demand charge price (one column for each region/node))
 [num5] = xlsread('d_flat_prices.csv');                      % ($/kW)
+num5 = num5(2:end,:);                                       % Remove first row which contains the scenario number
 [num5t,txt5t,raw5t] = xlsread('GAMS_Fix_dem_chg_times');    % Create structure for hours in each month
 
 % Timed demand charge data (input the timed demand charge price (one column for each region/node))
 [num6int] = xlsread('d_tou_8760.csv');
+num6int = num6int(2:end,:);                                 % Remove first row which contains the scenario number
 [num6A] = xlsread('d_tou_prices.csv');
+num6A = num6A(2:end,:);                                     % Remove first row which contains the scenario number
 [m01,n01] = size(num6int);
 [m02,n02] = size(num6A);
 num6int2 = zeros(size(num6int));
@@ -82,12 +87,13 @@ clear num6int num6int2
 
 % Meter cost (cost per month for SCE and SDGE and cost per day for PGE)
 [num8] = xlsread('fixed_charge.csv');                       % ($/month/meter)
+num8 = num8(2:end,:);                                       % Remove first row which contains the scenario number
 
 % % % Load file describing the nodal data to be analyzed
 % % [num9,txt9,raw9] = xlsread('GAMS_nodes_caliso_v4_data');
 
 % Load tariff file names
-[numA,txtA,rawA] = xlsread('Tariffs_com_ind_20170216.xlsx');   
+[numA,txtA,rawA] = xlsread('tariff_property_list.csv');   
 
 %% Clean number matrix
 disp('Clean and prepare matrices...')
@@ -112,8 +118,8 @@ num81 = num8;  num81(isnan(num81)) = 0;    % Remove NaN values
 
 %% Clean and prepare text
 % Remove incomplete energy price node names
-txt11 = rawA(2:(n0+1),2);   
-txt12 = rawA(2:(n0+1),7);
+txt11 = rawA(2:(n0+1),2);       % URDB Tariff_id column
+txt12 = rawA(2:(n0+1),6);       % Utility column
 txt11(:,find(isnan(sum(num1)))) = [];  
 txt12(:,find(isnan(sum(num1)))) = [];  
 Scenarios1 = txt11(~cellfun('isempty',txt11));
@@ -262,8 +268,8 @@ Inputs2 = {'NG_price(interval)','H2_consumed(interval)','H2_price(interval)','in
 Inputs3 = {'renewable_signal(interval)'};
     
 % Energy price: Utility tariffs (OASIS data added later)                   ($/MWh) 
-data11 = reshape(num11,[],1,length(Scenarios1))*1000;                       % Separate energy price data by number of scenarios and categories
-data11B = zeros(size(data11)); %%% reshape(num11B,[],1,length(Scenarios1))*1000; % Separate energy price data by number of scenarios and categories
+data11 = reshape(num11,[],1,length(Scenarios1))*1000;                       % Separate energy purchase price data by number of scenarios and categories
+data11B = zeros(size(data11)); %%% reshape(num11B,[],1,length(Scenarios1))*1000; % Separate energy sale price data by number of scenarios and categories
     % % data11B= data11;    % Repeat for sale price
 % AS Data: NS,RegD,RegU,Spin                                               ($/MWh)
 data22 = zeros(size(data11,1),4,size(data11,3));  %%% data2; 
@@ -302,7 +308,7 @@ if strcmp(write_regular_files,'yes')
     elseif interval_length == 12; add_txt1 = ['_5min'];
     else                          error('Need to define interval length')
     end
-    init_val = 3491  % Used to adjust initial for loop value and for progress tracking
+    init_val = 3680;  % Used to adjust initial for loop value and for progress tracking
     for i5=init_val:length(Scenarios1)
         filename2_short = filename2{i5};        
         fileID = fopen([dir0,'Regular_tariffs\',char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
