@@ -10,14 +10,14 @@ GAMS_loc = 'C:\GAMS\win64\24.7\gams.exe';
 write_net_meter_files = 'no';
 GAMS_file= {'Storage_dispatch_v22_1'};      % Define below for each utility (3 file options)
 GAMS_lic = 'license=C:\GAMS\win64\24.7\gamslice.txt';
-items_per_batch = 500;  % Select the number of items per batch file created
+items_per_batch = 300;  % Select the number of items per batch file created
 
 Workdir_instance = 'Users\jeichman\Documents\gamsdir\projdir\';
 outdir = 'Output\Default';
 indir = 'Input_files\Default';
 
 % Load filenames
-files_tariff = dir([dir1,'\Input_files\Default\']);
+files_tariff = dir([dir1,'Input_files\Default\']);
 files_tariff2={files_tariff.name}';  % Identify files in a folder    
 for i0=1:length(files_tariff2) % Remove items from list that do not fit criteria
     if ((~isempty(strfind(files_tariff2{i0},'additional_parameters'))+~isempty(strfind(files_tariff2{i0},'renewable_profiles')))>0)     % Skip files called "additional_parameters" or "renewable profile" 
@@ -227,7 +227,7 @@ for i0=1:length(files_tariff2)
                     ' --',batch_header{36},'="',outdir,'"',...
                     ' --',batch_header{37},'="',indir,'"',...
                     ' --',batch_header{38},'="',Workdir_instance,'"',...
-                    ' --',batch_header{39},'="',{num2str(0)},'"',...
+                    ' --',batch_header{39},'="',num2str(0),'"',...
                     ];
         fprintf(fileID,'%s\n',GAMS_batch);
         if mod(c0,items_per_batch)==0
