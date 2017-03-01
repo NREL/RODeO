@@ -1,4 +1,4 @@
-Run on a MSNT machine on 02/28/17 10:33:36.
+Run on a MSNT machine on 02/28/17 22:16:47.
 Optimal solution found within time limit:,Yes
 
 Renewable Capacity (MW),         0.00
@@ -33,33 +33,33 @@ spining reserve limit fraction,         1.00
 startup cost ($/MW-start), 0.0000000000
 minimum run intervals,         0.00
 
-actual operating profit ($), 172405240.15
-total electricity input (MWh),   7884006.31
+actual operating profit ($), -8.019486E+8
+total electricity input (MWh),  11749356.31
 total electricity output (MWh),         0.00
 output to input ratio,         0.00
-input capacity factor,         0.90
+input capacity factor,         1.34
 output capacity factor,         UNDF
 average regup (MW),         0.00
 average regdn (MW),         0.00
 average spinres (MW),         0.00
 average nonspinres (MW),         0.00
-number of input power system starts,         2.00
+number of input power system starts,         1.00
 number of output power system starts,      8760.00
-arbitrage revenue ($),-5.069599E+8
+arbitrage revenue ($),-1.054953E+9
 regup revenue ($),         0.00
 regdn revenue ($),         0.00
 spinres revenue ($),         0.00
 nonspinres revenue ($),         0.00
 hydrogen revenue ($), 871160917.29
-startup costs ($),         0.02
-Fixed demand charge ($), -62661466.22
+startup costs ($),         0.01
+Fixed demand charge ($), -3.156178E+8
 Timed demand charge 1 ($),         0.00
-Timed demand charge 2 ($),         0.00
-Timed demand charge 3 ($),         0.00
-Timed demand charge 4 ($),         0.00
+Timed demand charge 2 ($),   -435010.65
+Timed demand charge 3 ($), -50230888.16
+Timed demand charge 4 ($), -1.227289E+8
 Timed demand charge 5 ($),         0.00
 Timed demand charge 6 ($),         0.00
-Meter cost ($),     -4800.00
+Meter cost ($),    -14390.16
 Renewable Penetration net meter (%),         0.00
 Input annualized capital cost ($), -1.132715E+8
 Output annualized capital cost ($),         0.00
