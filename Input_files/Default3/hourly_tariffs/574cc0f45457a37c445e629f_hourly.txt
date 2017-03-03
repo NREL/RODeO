@@ -1,17 +1,17 @@
 $onempty
 Set
-	Month_Jan(interval)	hours	/1*8760/
-	Month_Feb(interval)	hours	//
-	Month_Mar(interval)	hours	//
-	Month_Apr(interval)	hours	//
-	Month_May(interval)	hours	//
-	Month_Jun(interval)	hours	//
-	Month_Jul(interval)	hours	//
-	Month_Aug(interval)	hours	//
-	Month_Sep(interval)	hours	//
-	Month_Oct(interval)	hours	//
-	Month_Nov(interval)	hours	//
-	Month_Dec(interval)	hours	//
+	Month_Jan(interval)	hours	/1*744/
+	Month_Feb(interval)	hours	/745*1416/
+	Month_Mar(interval)	hours	/1417*2160/
+	Month_Apr(interval)	hours	/2161*2880/
+	Month_May(interval)	hours	/2881*3624/
+	Month_Jun(interval)	hours	/3625*4344/
+	Month_Jul(interval)	hours	/4345*5088/
+	Month_Aug(interval)	hours	/5089*5832/
+	Month_Sep(interval)	hours	/5833*6552/
+	Month_Oct(interval)	hours	/6553*7296/
+	Month_Nov(interval)	hours	/7297*8016/
+	Month_Dec(interval)	hours	/8017*8760/
 
 	Jan_1(interval)	hours	/1*744/
 	Jan_2(interval)	hours	//

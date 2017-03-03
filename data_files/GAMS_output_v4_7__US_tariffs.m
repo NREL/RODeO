@@ -235,15 +235,18 @@ GAMS_stringA = cell(12,length(Scenarios1));  % Initialize
 date_vector1 = datevec(date_values(:));
 for i6=1:length(Scenarios1)
     for i5=1:12
-        if (sum(num51(:,i6))+sum(num6A(:,i6)) == 0),  % Used to remove fixed demand intervals if there is no timed or fixed demand charge (encourages smooth operation profiles) 
-            if i5==1, col1 = (1:Year_length)';
-            else      GAMS_stringA(i5,i6)={'//'};
-                      continue
-            end
-        else
-            col1 = find(date_vector1(:,2)==i5);
-        end
+        col1 = find(date_vector1(:,2)==i5);
         i4=1;
+        
+%         if (sum(num51(:,i6))+sum(num6A(:,i6)) == 0),  % Used to remove fixed demand intervals if there is no timed or fixed demand charge (encourages smooth operation profiles) 
+%             if i5==1, col1 = (1:Year_length)';
+%             else      GAMS_stringA(i5,i6)={'//'};
+%                       continue
+%             end
+%         else
+%             col1 = find(date_vector1(:,2)==i5);
+%         end
+
         while i4<=length(col1)  % Hours
             % Create string for breakdown by TOU bins, months and utilities in GAMS                
             if isempty(col1)    % Check if entry is empty and skip

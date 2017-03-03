@@ -1,4 +1,4 @@
-Run on a MSNT machine on 03/02/17 14:53:26.
+Run on a MSNT machine on 03/03/17 01:33:33.
 Optimal solution found within time limit:,Yes
 
 Renewable Capacity (MW),         0.00
@@ -33,7 +33,7 @@ spining reserve limit fraction,         1.00
 startup cost ($/MW-start), 0.0000000000
 minimum run intervals,         0.00
 
-actual operating profit ($), -9.560386E+8
+actual operating profit ($), -9.559480E+8
 total electricity input (MWh),   7884006.31
 total electricity output (MWh),         0.00
 output to input ratio,         0.00
@@ -43,7 +43,7 @@ average regup (MW),         0.00
 average regdn (MW),         0.00
 average spinres (MW),         0.00
 average nonspinres (MW),         0.00
-number of input power system starts,      8750.00
+number of input power system starts,         1.00
 number of output power system starts,      8760.00
 arbitrage revenue ($),-1.697979E+9
 regup revenue ($),         0.00
@@ -51,8 +51,8 @@ regdn revenue ($),         0.00
 spinres revenue ($),         0.00
 nonspinres revenue ($),         0.00
 hydrogen revenue ($), 871160917.29
-startup costs ($),        87.50
-Fixed demand charge ($),    -90452.72
+startup costs ($),         0.01
+Fixed demand charge ($),         0.00
 Timed demand charge 1 ($),         0.00
 Timed demand charge 2 ($),         0.00
 Timed demand charge 3 ($),         0.00

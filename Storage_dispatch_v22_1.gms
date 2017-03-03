@@ -21,11 +21,10 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     574cbd8e5457a37c445e629e_hourly
+$if not set elec_rate_instance     $set elec_rate_instance     574dbcac5457a3d3795e629f_hourly
 $if not set add_param_instance     $set add_param_instance     additional_parameters_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_hourly
 $if not set load_prof_instance     $set load_prof_instance     basic_building_0_hourly
-$if not set Workdir_instance       $set Workdir_instance       Users\jeichman\Documents\gamsdir\projdir\
 $if not set outdir                 $set outdir                 RODeO\Output\Default
 $if not set indir                  $set indir                  RODeO\Input_files\Default3\hourly_tariffs
 $call 'if not exist %outdir%\nul mkdir %outdir%'
@@ -57,6 +56,7 @@ $if not set out_heat_rate_instance $set out_heat_rate_instance 0
 $if not set storage_cap_instance   $set storage_cap_instance   8
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
+$if not set ramp_penalty_instance  $set ramp_penalty_instance  0
 
 * Next two values change the resoultion of the optimization
 *    hourly: 8760, 1     15min: 35040, 0.25       5min: 105120, 0.08333333333
@@ -65,7 +65,7 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   0
-$if not set file_name_instance     $set file_name_instance     "hourly_PGE_A1_nonTOU_TEST_ramp_penalty"
+$if not set file_name_instance     $set file_name_instance     "hourly_PGE_E20_no_ramp_penalty"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
@@ -126,7 +126,6 @@ Parameters
          Fixed_dem(months)                       "Fixed demand charge $/MW-month"
          Timed_dem(timed_dem_period)             "Timed demand charge $/MW-month"
          Load_profile(interval)                  "Load profile (MW)"
-         Fixed_dem_min(months)                   "Sets minimum value for fixed demand profiles (to ensure more consistent operation)"  /set.months 100/
 ;
 
 * Adjust the files that are loaded
@@ -199,6 +198,7 @@ Scalars
          current_monthly_max     'current monthly maximum demand for real-time optimization runs (0-100%, 0-1)'  /%current_max_instance%/
          max_interval            'maximum interval for real-time optimization runs'                              /%max_int_instance%/
          read_MPC_file           'read controller values from excel file'                                        /%read_MPC_file_instance%/
+         ramp_penalty            'set ramp penalty for input and output devices'                                 /%ramp_penalty_instance%/
 ;
 
 Set
@@ -206,33 +206,33 @@ Set
 ;
 
 * Loads predictive controller values from excel file
-$call GDXXRW.exe I=/%Workdir_instance%\%indir%\controller_input_values.xlsx O=/%Workdir_instance%\%indir%\controller_input_values.gdx par=current_interval2 rng=A2 Dim=0
+$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_interval2 rng=A2 Dim=0
 scalar current_interval2
-$GDXIN /%indir%\controller_input_values.gdx
+$GDXIN %indir%\controller_input_values.gdx
 $LOAD current_interval2
 $GDXIN
 
-$call GDXXRW.exe I=/%Workdir_instance%\%indir%\controller_input_values.xlsx O=/%Workdir_instance%\%indir%\controller_input_values.gdx par=next_interval2 rng=B2 Dim=0
+$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=next_interval2 rng=B2 Dim=0
 scalar next_interval2
-$GDXIN /%indir%\controller_input_values.gdx
+$GDXIN %indir%\controller_input_values.gdx
 $LOAD next_interval2
 $GDXIN
 
-$call GDXXRW.exe I=/%Workdir_instance%\%indir%\controller_input_values.xlsx O=/%Workdir_instance%\%indir%\controller_input_values.gdx par=current_storage_lvl2 rng=C2 Dim=0
+$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_storage_lvl2 rng=C2 Dim=0
 scalar current_storage_lvl2
-$GDXIN /%indir%\controller_input_values.gdx
+$GDXIN %indir%\controller_input_values.gdx
 $LOAD current_storage_lvl2
 $GDXIN
 
-$call GDXXRW.exe I=/%Workdir_instance%\%indir%\controller_input_values.xlsx O=/%Workdir_instance%\%indir%\controller_input_values.gdx par=current_monthly_max2 rng=D2 Dim=0
+$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_monthly_max2 rng=D2 Dim=0
 scalar current_monthly_max2
-$GDXIN /%indir%\\controller_input_values.gdx
+$GDXIN %indir%\controller_input_values.gdx
 $LOAD current_monthly_max2
 $GDXIN
 
-$call GDXXRW.exe I=/%Workdir_instance%\%indir%\controller_input_values.xlsx O=/%Workdir_instance%\%indir%\controller_input_values.gdx par=max_interval2 rng=E2 Dim=0
+$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=max_interval2 rng=E2 Dim=0
 scalar max_interval2
-$GDXIN /%indir%\controller_input_values.gdx
+$GDXIN %indir%\controller_input_values.gdx
 $LOAD max_interval2
 $GDXIN
 
@@ -306,9 +306,6 @@ Scalars
          operating_period_max_index      value of last index in current operating period
          rolling_window_min_index        value of first index in current rolling window
          rolling_window_max_index        value of last index in current rolling window
-         m                               for loop variable /0/
-         x                               interim variable for converting from 8760 interval to 365 days /0/
-         ramp_price                     "Cost of ramping for output device ($/MW)"   /0.001/
 ;
 
 Positive Variables
@@ -340,6 +337,11 @@ Positive Variables
          cap_6(months)           Sets max capacity for the month (MW)
 
          Hydrogen_fraction       Sets the capacity factor
+
+         input_ramp_pos(interval)  Positive ramp rate constraint (used to linearize absolute value)
+         input_ramp_neg(interval)  Negative ramp rate constraint (used to linearize absolute value)
+         output_ramp_pos(interval) Positive ramp rate constraint (used to linearize absolute value)
+         output_ramp_neg(interval) Negative ramp rate constraint (used to linearize absolute value)
 ;
 
 Binary Variables
@@ -494,6 +496,9 @@ Equations
          RT_eqn3(interval)      equation to set power values to shorten running in real-time
          RT_eqn4(interval)      equation to set storage values to shorten running in real-time
 
+         output_ramp_eqn(interval)       equation to limit ramping with penalty price
+         input_ramp_eqn(interval)        equation to limit ramping with penalty price
+
 **         one_active_device_eqn(interval) equation to ensure that both generator and pump cannot be simultaneously active
 ;
 
@@ -512,11 +517,6 @@ elseif H2_use=1,
                  H2_consumed_adj = input_capacity_MW * input_efficiency / H2_LHV *24;
          );
 elseif H2_use=2,
-);
-
-* Smooths the profile for values without a demand charge (could also implement through a ramp penalty in the future)
-if (sum(months,Fixed_dem(months))=0,
-         Fixed_dem(months) = Fixed_dem_min(months);
 );
 
 H2_CF_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and CF_opt=1)..
@@ -541,7 +541,9 @@ operating_profit_eqn..
                  - input_startup_cost  * input_capacity_MW  * input_start(interval)
                  + H2_price(interval) * H2_sold(interval)
                  - input_VOM_cost * input_power_MW(interval) * interval_length
-                 - output_VOM_cost * output_power_MW(interval) * interval_length)
+                 - output_VOM_cost * output_power_MW(interval) * interval_length
+                 - (input_ramp_pos(interval)+input_ramp_neg(interval))*ramp_penalty
+                 - (output_ramp_pos(interval)+output_ramp_neg(interval))*ramp_penalty )
                  - sum(months, Fixed_cap(months) * Fixed_dem(months))
                  - sum(months, cap_1(months) * Timed_dem("1"))
                  - sum(months, cap_2(months) * Timed_dem("2"))
@@ -572,6 +574,12 @@ output_spinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) a
 output_nonspinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          output_nonspinres_MW(interval) =l= output_capacity_MW * output_nonspinres_limit_fraction * ( 1 - output_active(interval) );
 *         output_nonspinres_MW(interval) =l= 0;
+
+output_ramp_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+         output_power_MW(interval)-output_power_MW(interval-1) =e= output_ramp_pos(interval)-output_ramp_neg(interval);
+
+input_ramp_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+         input_power_MW(interval)-input_power_MW(interval-1) =e= input_ramp_pos(interval)-input_ramp_neg(interval);
 
 input_pwr_eqn(interval)$(baseload_operation = 1)..
          input_power_MW(interval) =e=  input_capacity_MW * H2_consumed_adj;
@@ -1067,7 +1075,6 @@ display spinres_revenue;
 display nonspinres_revenue;
 display arbitrage_revenue;
 display actual_operating_profit;
-display Fixed_dem_min;
 * display Fixed_cap_val;
 * display cap_1_val;
 * display cap_2_val;

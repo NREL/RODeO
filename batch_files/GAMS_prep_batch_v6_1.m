@@ -12,7 +12,6 @@ GAMS_file= {'Storage_dispatch_v22_1'};      % Define below for each utility (3 f
 GAMS_lic = 'license=C:\GAMS\win64\24.7\gamslice.txt';
 items_per_batch = 300;  % Select the number of items per batch file created
 
-Workdir_instance = 'Users\jeichman\Documents\gamsdir\projdir\';
 outdir = 'Output\Default';
 indir = 'Input_files\Default';
 
@@ -34,7 +33,7 @@ batch_header = {'file_name_instance','gas_price_instance','zone_instance','year_
                 'lookahead_instance','energy_only_instance','H2_consume_adj_inst','H2_price_instance',...
                 'H2_use_instance','base_op_instance','NG_price_adj_instance','Renewable_MW_instance',...
                 'elec_rate_instance','add_param_instance','ren_prof_instance','current_int_instance',...
-                'next_int_instance','current_stor_intance','current_max_instance','max_int_instance','outdir','indir','Workdir_instance','read_MPC_file_instance'};
+                'next_int_instance','current_stor_intance','current_max_instance','max_int_instance','outdir','indir','Load_prof_instance','read_MPC_file_instance'};
 
 %% Create batch file names for regular tariffs
 % Variations (expand files created based on following items)
@@ -147,9 +146,9 @@ for i0=1:length(files_tariff2)
         end
         
         % Determine the resolution of the tariff file
-        if     (strfind(files_tariff2_short,'_hourly'))>0, val66 = val6(1,:); additional_parameters='additional_parameters_hourly'; renewable_profiles2=[renewable_profiles{i5},'_hourly'];
-        elseif (strfind(files_tariff2_short,'_15min'))>0,  val66 = val6(2,:); additional_parameters='additional_parameters_15min';  renewable_profiles2=[renewable_profiles{i5},'_15min'];
-        elseif (strfind(files_tariff2_short,'_5min'))>0,   val66 = val6(3,:); additional_parameters='additional_parameters_5min';   renewable_profiles2=[renewable_profiles{i5},'_5min'];
+        if     (strfind(files_tariff2_short,'_hourly'))>0, val66 = val6(1,:); additional_parameters='additional_parameters_hourly'; renewable_profiles2=[renewable_profiles{i5},'_hourly']; Load_profile=['basic_building_0','_hourly'];
+        elseif (strfind(files_tariff2_short,'_15min'))>0,  val66 = val6(2,:); additional_parameters='additional_parameters_15min';  renewable_profiles2=[renewable_profiles{i5},'_15min'];  Load_profile=['basic_building_0','_15min'];
+        elseif (strfind(files_tariff2_short,'_5min'))>0,   val66 = val6(3,:); additional_parameters='additional_parameters_5min';   renewable_profiles2=[renewable_profiles{i5},'_5min'];   Load_profile=['basic_building_0','_5min'];
         else   error('Correct resolution not found');            
         end
         
@@ -226,7 +225,7 @@ for i0=1:length(files_tariff2)
                     ' --',batch_header{35},'="',max_int_instance{c0},'"',...
                     ' --',batch_header{36},'="',outdir,'"',...
                     ' --',batch_header{37},'="',indir,'"',...
-                    ' --',batch_header{38},'="',Workdir_instance,'"',...
+                    ' --',batch_header{38},'="',Load_profile,'"',...
                     ' --',batch_header{39},'="',num2str(0),'"',...
                     ];
         fprintf(fileID,'%s\n',GAMS_batch);
