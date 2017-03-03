@@ -21,13 +21,13 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     574dbcac5457a3d3795e629f_hourly
+$if not set elec_rate_instance     $set elec_rate_instance     574cbd8e5457a37c445e629e_hourly
 $if not set add_param_instance     $set add_param_instance     additional_parameters_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_hourly
 $if not set load_prof_instance     $set load_prof_instance     basic_building_0_hourly
 $if not set Workdir_instance       $set Workdir_instance       Users\jeichman\Documents\gamsdir\projdir\
 $if not set outdir                 $set outdir                 RODeO\Output\Default
-$if not set indir                  $set indir                  RODeO\Input_files\Default
+$if not set indir                  $set indir                  RODeO\Input_files\Default3\hourly_tariffs
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
@@ -65,7 +65,7 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   0
-$if not set file_name_instance     $set file_name_instance     "hourly_TEST_without_load"
+$if not set file_name_instance     $set file_name_instance     "hourly_PGE_A1_nonTOU_TEST_ramp_penalty"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
@@ -126,6 +126,7 @@ Parameters
          Fixed_dem(months)                       "Fixed demand charge $/MW-month"
          Timed_dem(timed_dem_period)             "Timed demand charge $/MW-month"
          Load_profile(interval)                  "Load profile (MW)"
+         Fixed_dem_min(months)                   "Sets minimum value for fixed demand profiles (to ensure more consistent operation)"  /set.months 100/
 ;
 
 * Adjust the files that are loaded
@@ -299,14 +300,15 @@ else
 *period to give residual value to stored energy at the end of the current
 *operating period
 Scalars
-         number_of_solves number of times the model will be solved after moving the solve window
-         solve_index index used to loop through all of the solves
-         operating_period_min_index value of first index in current operating period
-         operating_period_max_index value of last index in current operating period
-         rolling_window_min_index value of first index in current rolling window
-         rolling_window_max_index value of last index in current rolling window
-         m for loop variable /0/
-         x interim variable for converting from 8760 interval to 365 days /0/
+         number_of_solves                number of times the model will be solved after moving the solve window
+         solve_index                     index used to loop through all of the solves
+         operating_period_min_index      value of first index in current operating period
+         operating_period_max_index      value of last index in current operating period
+         rolling_window_min_index        value of first index in current rolling window
+         rolling_window_max_index        value of last index in current rolling window
+         m                               for loop variable /0/
+         x                               interim variable for converting from 8760 interval to 365 days /0/
+         ramp_price                     "Cost of ramping for output device ($/MW)"   /0.001/
 ;
 
 Positive Variables
@@ -512,6 +514,11 @@ elseif H2_use=1,
 elseif H2_use=2,
 );
 
+* Smooths the profile for values without a demand charge (could also implement through a ramp penalty in the future)
+if (sum(months,Fixed_dem(months))=0,
+         Fixed_dem(months) = Fixed_dem_min(months);
+);
+
 H2_CF_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and CF_opt=1)..
          H2_sold(interval) =e= H2_consumed(interval) * H2_consumed_adj * Hydrogen_fraction;
 
@@ -574,6 +581,7 @@ input_LSL_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(inte
 
 input_capacity_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          input_power_MW(interval) + input_regdn_MW(interval) =l= input_capacity_MW * input_active(interval);
+
 
 *** Fixed Demand Charge ***
 Fixed_dem_Jan(Month_Jan)$( rolling_window_min_index <= ord(Month_Jan) and ord(Month_Jan) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Jan) =l= Fixed_cap("1");
@@ -1059,6 +1067,7 @@ display spinres_revenue;
 display nonspinres_revenue;
 display arbitrage_revenue;
 display actual_operating_profit;
+display Fixed_dem_min;
 * display Fixed_cap_val;
 * display cap_1_val;
 * display cap_2_val;

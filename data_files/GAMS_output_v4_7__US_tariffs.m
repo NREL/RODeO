@@ -9,10 +9,10 @@ dir1 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\CSV_data\'];     % I
 cd(dir1);
 
 % Prompt for which files to output
-write_regular_files = input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
+write_regular_files = 'yes'; %input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
 Year_select = 2017;     % select year to be analyzed
-Year_length = 8760;     % length of year in hours (hourly, 15 min, 5 min)
-interval_length = 1;    % used to create sub-hourly data files (1, 0.25, 0.83333333)
+Year_length = 8760;     % length of year in hours
+interval_length = 1;    % used to create sub-hourly data files (1, 4, or 12)
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
 % DST_year_end = datenum([2015,11,1,2,0,0]);  %Daylight savings time
 month_vec = {'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'};
@@ -64,7 +64,6 @@ clear num4Aint num4Bint num4Cint num4Dint
 % Fixed demand charge data (input the fixed demand charge price (one column for each region/node))
 [num5] = xlsread('d_flat_prices.csv');                      % ($/kW)
 num5 = num5(2:end,:);                                       % Remove first row which contains the scenario number
-[num5t,txt5t,raw5t] = xlsread('GAMS_Fix_dem_chg_times');    % Create structure for hours in each month
 
 % Timed demand charge data (input the timed demand charge price (one column for each region/node))
 [num6int] = xlsread('d_tou_8760.csv');
@@ -232,32 +231,41 @@ GAMS_string2 = reshape(GAMS_string1,12,oo1,[]);
 clear i4 i5 i6 i7 Y1 M1 D1 H1 MN1 S1 c1 c2 interim1 interim2 col1
 
 %%% Create monthly time vector
-GAMS_stringA = {};  % Initialize
+GAMS_stringA = cell(12,length(Scenarios1));  % Initialize
 date_vector1 = datevec(date_values(:));
-for i5=1:12
-    col1 = find(date_vector1(:,2)==i5); 
-    col2(i5) = max(date_vector1(col1,3));
-    i4=1;
-    while i4<=length(col1)  % Hours
-        % Create string for breakdown by TOU bins, months and utilities in GAMS                
-        if isempty(col1)    % Check if entry is empty and skip
-            break
-        end
-        interim1=col1(i4); interim2=1; c2=0;                
-        if i4==1
-            GAMS_stringA(i5,1)={'/'};   % Begin entry
-        end
-        GAMS_stringA(i5,1)={[GAMS_stringA{i5,1},num2str(interim1),'*']}; % Add first item to current entry
-        while interim2==1   % Loop and find the number of continuous items
-            if i4==length(col1) c2=1;  break
+for i6=1:length(Scenarios1)
+    for i5=1:12
+        if (sum(num51(:,i6))+sum(num6A(:,i6)) == 0),  % Used to remove fixed demand intervals if there is no timed or fixed demand charge (encourages smooth operation profiles) 
+            if i5==1, col1 = (1:Year_length)';
+            else      GAMS_stringA(i5,i6)={'//'};
+                      continue
             end
-            i4=i4+1; interim2=col1(i4)-col1(i4-1);
+        else
+            col1 = find(date_vector1(:,2)==i5);
         end
-        if c2==1, GAMS_stringA(i5,1)={[GAMS_stringA{i5,1},num2str(col1(i4)),'/']}; break % Final entry
-        else      GAMS_stringA(i5,1)={[GAMS_stringA{i5,1},num2str(col1(i4-1)),',']};     % Make interim entry an continue looping
+        i4=1;
+        while i4<=length(col1)  % Hours
+            % Create string for breakdown by TOU bins, months and utilities in GAMS                
+            if isempty(col1)    % Check if entry is empty and skip
+                break
+            end
+            interim1=col1(i4); interim2=1; c2=0;                
+            if i4==1
+                GAMS_stringA(i5,i6)={'/'};   % Begin entry
+            end
+            GAMS_stringA(i5,i6)={[GAMS_stringA{i5,i6},num2str(interim1),'*']}; % Add first item to current entry
+            while interim2==1   % Loop and find the number of continuous items
+                if i4==length(col1) c2=1;  break
+                end
+                i4=i4+1; interim2=col1(i4)-col1(i4-1);
+            end
+            if c2==1, GAMS_stringA(i5,i6)={[GAMS_stringA{i5,i6},num2str(col1(i4)),'/']}; break % Final entry
+            else      GAMS_stringA(i5,i6)={[GAMS_stringA{i5,i6},num2str(col1(i4-1)),',']};     % Make interim entry an continue looping
+            end
         end
     end
-end, clear i4 i5 col1 intermi1 intermi2
+    if mod(i6,1000)==0, display([num2str(i6),' of ',num2str(length(Scenarios1))]), end  % Display progress each 1000 intervals
+end, clear i4 i5 i6 col1 intermi1 intermi2
 
 %% Populate each data row with basic information and utility data
 disp('Populate data rows...')
@@ -308,7 +316,7 @@ if strcmp(write_regular_files,'yes')
     elseif interval_length == 12; add_txt1 = ['_5min'];
     else                          error('Need to define interval length')
     end
-    init_val = 3680;  % Used to adjust initial for loop value and for progress tracking
+    init_val = 1;  % Used to adjust initial for loop value and for progress tracking
     for i5=init_val:length(Scenarios1)
         filename2_short = filename2{i5};        
         fileID = fopen([dir0,'Regular_tariffs\',char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
@@ -322,7 +330,7 @@ if strcmp(write_regular_files,'yes')
         fprintf(fileID,'%s\n','$onempty');
         fprintf(fileID,'%s\n','Set');
         for i6=1:m1
-            fprintf(fileID,'\t%s\t%s\t%s\n',['Month_',month_vec{i6},'(interval)'],'hours',GAMS_stringA{i6});
+            fprintf(fileID,'\t%s\t%s\t%s\n',['Month_',month_vec{i6},'(interval)'],'hours',GAMS_stringA{i6,i5});
         end
         fprintf(fileID,'\n');
         for i6=1:m1

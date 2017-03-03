@@ -12,10 +12,13 @@ import numpy as np
 import warnings 
 warnings.simplefilter("ignore",UserWarning)
 
-#dir0 = '//Nrelqnap01d/PLEXOS/Projects/US_Tariff_analysis/Output/'  # Location to put database files
-dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Output/'  # Location to put database files
-#dir1 = dir0+'Default/'                                             # Location of csv files
-dir1 = dir0+'Test/'                                             # Location of csv files
+#dir0 = '//Nrelqnap01d/PLEXOS/Projects/US_Tariff_analysis/Output/'   # Location to put database files
+#dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Output/'  # Location to put database files
+dir0 = 'C:/Users/jeichman/Documents/Publications/INL-NREL Electrolyzer project/Operation_Profiles_to_INL/'  # Location to put database files
+
+#dir1 = dir0+'Default/'                                              # Location of csv files
+#dir1 = dir0+'Test/'                                                 # Location of csv files
+dir1 = dir0+'PGE_profiles/'                                         # Location of csv files
 
 c0 = [0,0,0]
 files2load_input={}
