@@ -141,7 +141,7 @@ Scalars
 *set operating period length to full year length (8760 or 8784) to do full-year optimization without rolling window
          look_ahead_length number of additional intervals to look past the current operating period /%lookahead_instance%/
 
-         output_capacity_MW output capacity of storage faciligty (MW)  /%output_cap_instance%/
+         output_capacity_MW output capacity of storage facility (MW)  /%output_cap_instance%/
          input_capacity_MW  input capacity of storage facility (MW)  /%input_cap_instance%/
          storage_capacity_hours storage capacity of storage facility (hours at rated INPUT capacity) /%storage_cap_instance%/
 
