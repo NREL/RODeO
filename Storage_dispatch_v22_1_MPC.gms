@@ -1,10 +1,20 @@
-$Title Hydrogen Station Model Optimization
+$Title Arbitrage and Ancillary Services for a Price Taking Storage Facility
 
 $OnText
 
-This model determines optimal behavior for a hydrogen station model
+This model determines optimal behavior for a st  orage, generator or DR facility.
+Storage facilities include battery, pumped hydro, hydrogen, or compressed air.
+
 The model assumes price-taking behavior.  The intent of the model is to allow
 either perfect knowledge or forecast prices at user-specified forecast horizons.
+
+Written March and April 2012 by Aaron Townsend
+Edited by Josh Eichman
+
+Notes:
+To run as DR device set output values to 0 except output_eff which must be >0
+To run as storage device set values for input and output as desired
+To run as baseload DR device setup same as for DR device and set base_op_instance=1
 
 $OffText
 
@@ -15,8 +25,8 @@ $if not set elec_rate_instance     $set elec_rate_instance     574dbcac5457a3d37
 $if not set add_param_instance     $set add_param_instance     additional_parameters_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_hourly
 $if not set load_prof_instance     $set load_prof_instance     basic_building_0_hourly
-$if not set outdir                 $set outdir                 RODeO\Output\Default
-$if not set indir                  $set indir                  RODeO\Input_files\Default3\hourly_tariffs
+$if not set outdir                 $set outdir                 GAMS_Outputs
+$if not set indir                  $set indir                  GAMS_Inputs
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
@@ -38,7 +48,7 @@ $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
 $if not set input_VOM_cost_inst    $set input_VOM_cost_inst    0
 $if not set output_VOM_cost_inst   $set output_VOM_cost_inst   0
 $if not set input_lifetime_inst    $set input_lifetime_inst    20
-$if not set output_lifetime_inst   $set output_lifetime_inst   0
+$if not set output_lifetime_inst   $set output_lifetime_inst   20
 $if not set interest_rate_inst     $set interest_rate_inst     0.07
 
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
@@ -55,7 +65,7 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   0
-$if not set file_name_instance     $set file_name_instance     "hourly_PGE_E20_no_ramp_penalty"
+$if not set file_name_instance     $set file_name_instance     "TEST_MPC"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
@@ -70,8 +80,8 @@ $if not set current_int_instance   $set current_int_instance   -1
 $if not set next_int_instance      $set next_int_instance      1
 $if not set current_stor_intance   $set current_stor_intance   0.5
 $if not set current_max_instance   $set current_max_instance   0.8
-$if not set max_int_instance       $set max_int_instance       Inf
-$if not set read_MPC_file_instance $set read_MPC_file_instance 0
+$if not set max_int_instance       $set max_int_instance       inf
+$if not set read_MPC_file_instance $set read_MPC_file_instance 1
 
 *        energy_only_instance = 0, 1 (0 = Energy only operation, 1 = All ancillary services included)
 *        H2_consume_adj_inst = adjusts the amount of H2 consumed from the uploaded "H2_consumed" file as capacity factor (%)
@@ -86,7 +96,7 @@ Files
          input_echo_file /%outdir%\Storage_dispatch_inputs_%file_name_instance%_%storage_cap_instance%hrs.csv/
          results_file    /%outdir%\Storage_dispatch_results_%file_name_instance%_%storage_cap_instance%hrs.csv/
          summary_file    /%outdir%\Storage_dispatch_summary_%file_name_instance%_%storage_cap_instance%hrs.csv/
-         RT_out_file    /%outdir%\Real_time_output_values.csv/
+         RT_out_file     /%outdir%\Real_time_output_values.csv/
 ;
 
 Sets
@@ -119,16 +129,16 @@ Parameters
 ;
 
 * Adjust the files that are loaded
-$include /%indir%\%elec_rate_instance%.txt
-$include /%indir%\%add_param_instance%.txt
-$include /%indir%\%ren_prof_instance%.txt
-$include /%indir%\%load_prof_instance%.txt
+$include C:\RSCAD_5\BIN\INL\GAMS_Inputs\%elec_rate_instance%.txt
+$include C:\RSCAD_5\BIN\INL\GAMS_Inputs\%add_param_instance%.txt
+$include C:\RSCAD_5\BIN\INL\GAMS_Inputs\%ren_prof_instance%.txt
+$include C:\RSCAD_5\BIN\INL\GAMS_Inputs\%load_prof_instance%.txt
 
 Scalars
          interval_length length of each interval (hours) /%int_length_instance%/
          operating_period_length number of intervals in each operating period (rolling solution window) /%op_period_instance%/
-* 1 week = 168 hourly intervals
-* set operating period length to full year length (8760 or 8784) to do full-year optimization without rolling window
+*1 week = 168 hourly intervals
+*set operating period length to full year length (8760 or 8784) to do full-year optimization without rolling window
          look_ahead_length number of additional intervals to look past the current operating period /%lookahead_instance%/
 
          output_capacity_MW output capacity of storage facility (MW)  /%output_cap_instance%/
@@ -196,33 +206,33 @@ Set
 ;
 
 * Loads predictive controller values from excel file
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_interval2 rng=A2 Dim=0
+$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=current_interval2 rng=A2 Dim=0
 scalar current_interval2
-$GDXIN %indir%\controller_input_values.gdx
+$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
 $LOAD current_interval2
 $GDXIN
 
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=next_interval2 rng=B2 Dim=0
+$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=next_interval2 rng=B2 Dim=0
 scalar next_interval2
-$GDXIN %indir%\controller_input_values.gdx
+$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
 $LOAD next_interval2
 $GDXIN
 
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_storage_lvl2 rng=C2 Dim=0
+$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=current_storage_lvl2 rng=C2 Dim=0
 scalar current_storage_lvl2
-$GDXIN %indir%\controller_input_values.gdx
+$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
 $LOAD current_storage_lvl2
 $GDXIN
 
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_monthly_max2 rng=D2 Dim=0
+$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=current_monthly_max2 rng=D2 Dim=0
 scalar current_monthly_max2
-$GDXIN %indir%\controller_input_values.gdx
+$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
 $LOAD current_monthly_max2
 $GDXIN
 
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=max_interval2 rng=E2 Dim=0
+$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=max_interval2 rng=E2 Dim=0
 scalar max_interval2
-$GDXIN %indir%\controller_input_values.gdx
+$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
 $LOAD max_interval2
 $GDXIN
 
@@ -981,6 +991,7 @@ Parameters
          cap_6_val(months)        determine power cap for demand period 6 (MW)
 ;
 
+
 * calculate values to be output in the report
 Fixed_cap_val(months) = Fixed_cap.l(months);
 cap_1_val(months) = cap_1.l(months);
@@ -1000,12 +1011,15 @@ Meter_cost = -(meter_mnth_chg("1") * 12);
 
 elec_in_MWh  = sum(interval,  (input_power_MW.l(interval) + Load_profile(interval)) * interval_length );
 elec_output_MWh = sum(interval, output_power_MW.l(interval) * interval_length );
-output_input_ratio = elec_output_MWh / elec_in_MWh;
-input_capacity_factor  =  elec_in_MWh / (  input_capacity_MW * card(interval) * interval_length );
-output_capacity_factor = elec_output_MWh / ( output_capacity_MW * card(interval) * interval_length );
-avg_regup_MW = sum(interval, output_regup_MW.l(interval) + input_regup_MW.l(interval) ) / card(interval);
-avg_regdn_MW = sum(interval, output_regdn_MW.l(interval) + input_regdn_MW.l(interval) ) / card(interval);
-avg_spinres_MW = sum(interval, output_spinres_MW.l(interval) + input_spinres_MW.l(interval) ) / card(interval);
+if(elec_in_MWh=0,        output_input_ratio = 0;
+else                     output_input_ratio = elec_output_MWh / elec_in_MWh; );
+if(output_capacity_MW=0, input_capacity_factor = 0;
+else                     input_capacity_factor = elec_in_MWh / ( input_capacity_MW * card(interval) * interval_length ); );
+if(output_capacity_MW=0, output_capacity_factor = 0;
+else                     output_capacity_factor = elec_output_MWh / ( output_capacity_MW * card(interval) * interval_length ); );
+avg_regup_MW      = sum(interval, output_regup_MW.l(interval) + input_regup_MW.l(interval) ) / card(interval);
+avg_regdn_MW      = sum(interval, output_regdn_MW.l(interval) + input_regdn_MW.l(interval) ) / card(interval);
+avg_spinres_MW    = sum(interval, output_spinres_MW.l(interval) + input_spinres_MW.l(interval) ) / card(interval);
 avg_nonspinres_MW = sum(interval, output_nonspinres_MW.l(interval) + input_nonspinres_MW.l(interval) ) / card(interval);
 
 num_input_starts = sum(interval, input_start.l(interval) );
@@ -1050,8 +1064,7 @@ if (Renewable_pen_input_net>1,
          );
 
 
-
-if (1=1,
+if (0,
 option decimals=8;
 display elec_in_MWh;
 display elec_output_MWh;
@@ -1080,9 +1093,11 @@ display actual_operating_profit;
 *display max_interval;
 );
 
+
 * - - - - write output to files - - - -
 if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_and_AS.modelstat=8),
 
+         if(1,
          put input_echo_file;
                  PUT 'Run on a %system.filesys% machine on %system.date% %system.time%.' /;
                  put 'Optimal solution found within time limit:,',
@@ -1266,9 +1281,10 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Input VOM cost ($), ',input_VOM_cost2 /;
                  put 'Output VOM cost ($), ',output_VOM_cost2 /;
                  put /;
+         );
 
-         if (next_interval>1,
-               put RT_out_file;
+         if ((next_interval>1 or max_interval<1E12),
+                       put RT_out_file;
                        put 'Interval, Electrolyzer Setpoint (MW)' /;
                        loop(next_int, put  next_interval,',',
                                            input_power_MW.l(next_int) /;
@@ -1280,8 +1296,15 @@ else
 *                 put 'Error--solution not found.';
 *         put results_file;
 *                 put 'Error--solution not found.';
-         put summary_file;
-                 put 'Error--solution not found.';
+***       put summary_file;
+***               put 'Error--solution not found.';
 *         put RT_out_file;
 *                 put 'Error--soultion not found.';
+         if ((next_interval>1 or max_interval<1E12),
+                       put RT_out_file;
+                       put 'Interval, Electrolyzer Setpoint (MW)' /;
+                       loop(next_int, put  next_interval,',',
+                                           input_power_MW.l(next_int) /;
+                       );
+         );
 );
