@@ -133,6 +133,7 @@ $include C:\RSCAD_5\BIN\INL\GAMS_Inputs\%elec_rate_instance%.txt
 $include C:\RSCAD_5\BIN\INL\GAMS_Inputs\%add_param_instance%.txt
 $include C:\RSCAD_5\BIN\INL\GAMS_Inputs\%ren_prof_instance%.txt
 $include C:\RSCAD_5\BIN\INL\GAMS_Inputs\%load_prof_instance%.txt
+$include C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.txt
 
 Scalars
          interval_length length of each interval (hours) /%int_length_instance%/
@@ -204,37 +205,6 @@ Scalars
 Set
          next_int(interval)      Next interval           /%next_int_instance%/
 ;
-
-* Loads predictive controller values from excel file
-$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=current_interval2 rng=A2 Dim=0
-scalar current_interval2
-$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
-$LOAD current_interval2
-$GDXIN
-
-$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=next_interval2 rng=B2 Dim=0
-scalar next_interval2
-$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
-$LOAD next_interval2
-$GDXIN
-
-$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=current_storage_lvl2 rng=C2 Dim=0
-scalar current_storage_lvl2
-$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
-$LOAD current_storage_lvl2
-$GDXIN
-
-$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=current_monthly_max2 rng=D2 Dim=0
-scalar current_monthly_max2
-$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
-$LOAD current_monthly_max2
-$GDXIN
-
-$call GDXXRW.exe I=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.xlsx O=C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx par=max_interval2 rng=E2 Dim=0
-scalar max_interval2
-$GDXIN C:\RSCAD_5\BIN\INL\GAMS_Inputs\controller_input_values.gdx
-$LOAD max_interval2
-$GDXIN
 
 if (read_MPC_file=1,
          current_interval = current_interval2;
@@ -1283,7 +1253,7 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put /;
          );
 
-         if ((next_interval>1 or max_interval<1E12),
+         if ((next_interval>1 or max_interval<inf),
                        put RT_out_file;
                        put 'Interval, Electrolyzer Setpoint (MW)' /;
                        loop(next_int, put  next_interval,',',
@@ -1300,7 +1270,7 @@ else
 ***               put 'Error--solution not found.';
 *         put RT_out_file;
 *                 put 'Error--soultion not found.';
-         if ((next_interval>1 or max_interval<1E12),
+         if ((next_interval>1 or max_interval<inf),
                        put RT_out_file;
                        put 'Interval, Electrolyzer Setpoint (MW)' /;
                        loop(next_int, put  next_interval,',',

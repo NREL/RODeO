@@ -1,0 +1,7 @@
+parameter	
+	current_interval2	/100/
+	next_interval2		/101/
+	current_storage_lvl2	/0.5/
+	current_monthly_max2	/0.8/
+	max_interval2		/1000/
+;
