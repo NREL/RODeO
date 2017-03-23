@@ -1,20 +1,10 @@
-$Title Arbitrage and Ancillary Services for a Price Taking Storage Facility
+$Title Hydrogen Station Model Optimization
 
 $OnText
 
-This model determines optimal behavior for a st  orage, generator or DR facility.
-Storage facilities include battery, pumped hydro, hydrogen, or compressed air.
-
+This model determines optimal behavior for a hydrogen station model
 The model assumes price-taking behavior.  The intent of the model is to allow
 either perfect knowledge or forecast prices at user-specified forecast horizons.
-
-Written March and April 2012 by Aaron Townsend
-Edited by Josh Eichman
-
-Notes:
-To run as DR device set output values to 0 except output_eff which must be >0
-To run as storage device set values for input and output as desired
-To run as baseload DR device setup same as for DR device and set base_op_instance=1
 
 $OffText
 
@@ -65,7 +55,7 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   0
-$if not set file_name_instance     $set file_name_instance     "TEST_eqn"
+$if not set file_name_instance     $set file_name_instance     "hourly_PGE_E20_no_ramp_penalty"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
@@ -137,8 +127,8 @@ $include /%indir%\%load_prof_instance%.txt
 Scalars
          interval_length length of each interval (hours) /%int_length_instance%/
          operating_period_length number of intervals in each operating period (rolling solution window) /%op_period_instance%/
-*1 week = 168 hourly intervals
-*set operating period length to full year length (8760 or 8784) to do full-year optimization without rolling window
+* 1 week = 168 hourly intervals
+* set operating period length to full year length (8760 or 8784) to do full-year optimization without rolling window
          look_ahead_length number of additional intervals to look past the current operating period /%lookahead_instance%/
 
          output_capacity_MW output capacity of storage facility (MW)  /%output_cap_instance%/
@@ -519,11 +509,163 @@ elseif H2_use=1,
 elseif H2_use=2,
 );
 
+
+
+
+
+*
+* Input files ::: identifier for station, time, vehicle inital tank fill, vehicle desired tank fill, vehicle max wait time (opt.)
+*
+* To Do: Load
+*
+*
+*
+
+Set
+         interval                "Time intervals in study (min./mth)"    /1 * 1440/
+         totbanks                Total number of storage banks           /1 * 9/
+         LPbanks(totbanks)       Number of low pressure banks            /1 * 3/
+         MPbanks(totbanks)       Number of medium pressure banks         /4 * 6/
+         HPbanks(totbanks)       Number of high pressure banks           /6 * 9/
+         tot_comps               Total number of compressors             /1 * 4/
+         MP_comps(tot_comps)     Number of medium pressure compressors   /1 * 2/
+         HP_comps(tot_comps)     Number of high pressure compressors     /3 * 4/
+         tot_dispensers          Total number of dispensers              /1 * 3/
+         veh_num                 Total number of vehicles                /1 * 20/
+;
+
+Parameter
+         interval_length                 length of each interval                           / 0.016666667 /
+         min_per_hour                    minutes per hour                                  / 60 /
+         max_storage_lvl(totbanks)       "maximum storage level by bank (kg)"              / 63,  63,  63,  28,  28,  28,  20,  20,  20  /
+*         max_pressure_lvl(totbanks)      "maximum storage pressure by bank (bar)"          / 200, 200, 200, 415, 415, 415, 900, 900, 900 /
+         comp_flowrate_max0(tot_comps)   "Compressor flowrate (kg/hour)"                   / 2.7, 2.7, 18, 18 /
+         comp_flowrate_max(tot_comps)    "Compressor flowrate (kg/min)"
+*         comp_MP_flowrate                "Medium pressure compressor flowrate (kg/sec)"   / 0.00075 /
+*         comp_HP_flowrate                "High pressure compressor flowrate (kg/sec)"     / 0.005 /
+         vehicle_fillrate(tot_dispensers) "Maximum fillrate to vehicles (kg/min)"          / 1, 1, 1 /
+         comp_efficiency(tot_comps)      "Compressor efficiency (kWh/kg)"                  / 0.5, 0.5, 0.25, 0.25 /
+*         comp_MP_efficiency              "Medium pressure compressor efficiency (kWh/kg)" / 0.5 /
+*         comp_HP_efficiency              "High pressure compressor efficiency (kWh/kg)"   / 0.25 /
+         pre_cool_base(tot_dispensers)   "Pre-cooling base energy consumption (kW/hr)"     / 0,0,0 /
+         pre_cool_eff(tot_dispensers)    "Pre-cooling energy consumption (kWh/kg)"         / 0.1,0.1,0.1 /
+
+         elec_purchase_price(interval)           "electricity price in each interval ($/MWh)"
+         elec_sale_price(interval)               "electricity price in each interval ($/MWh)"
+         elec_purchase_price_forecast(interval)  "electricity price forecast in each interval ($/MWh)"
+         elec_sale_price_forecast(interval)      "electricity price forecast in each interval ($/MWh)"
+
+         vehicle_arrival(interval,veh_num)       "input vehicle filling profiles"
+         vehicle_initial_SOC(interval,veh_num)   "SOC when vehicles arrive"
+         vehicle_final_SOC(interval,veh_num)     "Acceptable SOC when vehicles leave"
+         vehicle_max_wait(intervalveh_num)       "Maximum time in which vehicles must be filled (min)"
+;
+Variables
+         operating_profit                        "net profit or loss from operations ($)"
+;
+
+Binary Variables
+         comp_active(interval,tot_comps)         binary variable indicating if compressors are active
+;
+
+Positive Variables
+         comp_power_tot(interval,tot_comps)      "Total compressor power timeseries (kW)"
+         comp_flow_tot(interval,tot_comps)       "Total compressor flow timeseries (kg/min)"
+*         comp_power_MP(interval,MP_comps)        "Medium compressor power timeseries (kW)"
+*         comp_power_HP(interval,HP_comps)        "Medium compressor power timeseries (kW)"
+         storage_level_tanks(interval,totbanks)  "Storage level for each bank (kg)"
+*         storage_level_LP(interval,LPbanks)      "LP Storage level for each bank (kg)"
+*         storage_level_MP(interval,MPbanks)      "MP Storage level for each bank (kg)"
+*         storage_level_HP(interval,HPbanks)      "HP Storage level for each bank (kg)"
+         pre_cooling_power(interval)             "Power to operate precooling (kW)"
+;
+
+Equations
+         operating_profit_eqn                    equation that sums the operating profits for the facility
+         storage_level_1(interval,totbanks)
+         storage_level_2(interval,totbanks)
+
+;
+
+comp_flowrate_max(tot_comps) = comp_flowrate_max0(tot_comps) / min_per_hour;
+
+*reseed the random number generator
+execseed = 1 + gmillisec(jnow);
+
+elec_purchase_price_forecast(interval) = elec_purchase_price(interval);
+elec_sale_price_forecast(interval) = elec_sale_price(interval);
+
+
+
+operating_profit_eqn..
+         operating_profit =e= sum( (interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ),
+                         (elec_sale_price_forecast(interval) * (output_power_MW(interval)) * interval_length)
+                       - (elec_purchase_price_forecast(interval) * input_power_MW(interval) * interval_length)
+                       + H2_price(interval) * H2_sold(interval)
+                       ;
+
+storage_level_1(interval,totbanks)..
+         storage_level_tanks(interval,totbanks) =l= max_storage_lvl(totbanks)
+
+storage_level_2(interval,totbanks)..
+         storage_level_tanks(interval,totbanks)-storage_level_tanks(interval-1,totbanks) =l=  FLOWRATE     make another eqn > flowrate
+
+
+         storage_level_tanks(interval,"1")-comp_flow_tot(interval,tot_comps)*comp_active(interval,tot_comps) =l= comp_flowrate_max(tot_comps);
+
+
+
+
+
+****     set binary values for each flow timeseries and make the sum of the flow values = # compressors
+
+
+
+
+
+
+* Storage tanks can either be filling, emptying, or doing nothing (can use two binarys, two veariables or continuous value neg, 0, pos)
+* How to track flows?  Can track
+* comp_flowrate is the max (can be less if needed)
+
+
+
+transfer_LP_to_MP(interval)
+transfer_MP_to_HP(interval)
+
+
+
+
+H2_sold(interval)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 H2_CF_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and CF_opt=1)..
          H2_sold(interval) =e= H2_consumed(interval) * H2_consumed_adj * Hydrogen_fraction;
 
 H2_CF_eqn2$(CF_opt=1).. Hydrogen_fraction =l= 1;
 H2_CF_eqn3$(CF_opt=0).. Hydrogen_fraction =e= 1;
+
 
 *** Cost function: Elec sale price, elec purchase price, regup, regdown, spin, nonspin, NGout/in, unused VOM cost, startup cost, H2 price, VOM cost, demand charge (fixed and timed), meter cost, cap and FOM cost
 operating_profit_eqn..
