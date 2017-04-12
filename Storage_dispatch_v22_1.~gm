@@ -65,14 +65,14 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   0
-$if not set file_name_instance     $set file_name_instance     "PGE_TEST"
+$if not set file_name_instance     $set file_name_instance     "EY_Base_574cbd8e5457a37c445e629e_hourly_optCF_0RE_NoRE"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  0
-$if not set CF_opt_instance        $set CF_opt_instance        0
+$if not set CF_opt_instance        $set CF_opt_instance        1
 
 * Next values are used to initialize for real-time operation and shorten the run-time
 *    To turn off set current_int = -1, next_int = 1 and max_int_instance = Inf
@@ -1084,7 +1084,7 @@ display actual_operating_profit;
 * display cap_4_val;
 * display cap_5_val;
 * display cap_6_val;
-* display Hydrogen_fraction_val;
+display Hydrogen_fraction_val;
 *display current_interval;
 *display next_interval;
 *display current_storage_lvl;

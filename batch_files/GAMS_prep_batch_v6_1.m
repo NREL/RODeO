@@ -12,14 +12,17 @@ GAMS_file= {'Storage_dispatch_v22_1'};      % Define below for each utility (3 f
 GAMS_lic = 'license=C:\GAMS\win64\24.7\gamslice.txt';
 items_per_batch = 300;  % Select the number of items per batch file created
 
-outdir = 'Output\Default';
-indir = 'Input_files\Default';
+outdir = 'Output\PGE';
+indir = 'Input_files\Default3';
 
 % Load filenames
-files_tariff = dir([dir1,'Input_files\Default\']);
+files_tariff = dir([dir1,'Input_files\Default3\hourly_tariffs\']);
 files_tariff2={files_tariff.name}';  % Identify files in a folder    
 for i0=1:length(files_tariff2) % Remove items from list that do not fit criteria
-    if ((~isempty(strfind(files_tariff2{i0},'additional_parameters'))+~isempty(strfind(files_tariff2{i0},'renewable_profiles')))>0)     % Skip files called "additional_parameters" or "renewable profile" 
+    if ((~isempty(strfind(files_tariff2{i0},'additional_parameters'))+...
+         ~isempty(strfind(files_tariff2{i0},'renewable_profiles'))+...
+         ~isempty(strfind(files_tariff2{i0},'controller_input_values'))+...
+         ~isempty(strfind(files_tariff2{i0},'building')))>0)     % Skip files called "additional_parameters" or "renewable profile" 
     else
         load_file1(i0)=~isempty(strfind(files_tariff2{i0},'.txt'));       % Find only txt files
     end

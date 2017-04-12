@@ -1,0 +1,1623 @@
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                 04/12/17 11:27:33 Page 1
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+   2   
+       
+      This model determines optimal behavior for a st  orage, generator or DR facility.
+      Storage facilities include battery, pumped hydro, hydrogen, or compressed air.
+       
+      The model assumes price-taking behavior.  The intent of the model is to allow
+      either perfect knowledge or forecast prices at user-specified forecast horizons.
+       
+      Written March and April 2012 by Aaron Townsend
+      Edited by Josh Eichman
+       
+      Notes:
+      To run as DR device set output values to 0 except output_eff which must be >0
+      To run as storage device set values for input and output as desired
+      To run as baseload DR device setup same as for DR device and set base_op_instance=1
+       
+  20   
+  21  *set defaults for parameters usually passed in by a calling program
+  22  *so that this script can be run directly if desired
+  23   
+  31   
+  35   
+  53   
+  60   
+  61  * Next two values change the resoultion of the optimization
+  62  *    hourly: 8760, 1     15min: 35040, 0.25       5min: 105120, 0.08333333333
+  65   
+  76   
+  77  * Next values are used to initialize for real-time operation and shorten the run-time
+  78  *    To turn off set current_int = -1, next_int = 1 and max_int_instance = Inf
+  85   
+  86  *        energy_only_instance = 0, 1 (0 = Energy only operation, 1 = All ancillary services included)
+  87  *        H2_consume_adj_inst = adjusts the amount of H2 consumed from the uploaded "H2_consumed" file as capacity factor (%)
+  88  *        H2_price_instance = adjusts the value of hydrogen from the uploaded "H2_price" file in $/kg
+  89  *        H2_use_instance = 0, 1, or 2 for non-elec use of hydrogen  (0=no extra H2, 1=constant profile, 2=daily requirement)
+  90  *        base_op_instance = 0, 1 (0 = normal operation, 1 = baseload input operation)
+  91  *        base_pwr_instance = fraction of power setting   (0.198346561 for 100 and 0.793386238 for 400)   (revised: 0.7935049289 80%CF, eff=0.7)
+  92  *        NG_avg_price_instance = multiplier for adjusting natural gas price (i.e., NG_price = NG_price * NG_price_adj     (AVG = 6.8598 for ERCOT 2006, 4.21118 for CAISO 0711 2022, 3.61115 for CAISO 2012)
+  93  *        CF_opt_instance = 0, 1 for selecting optimization method (0 runs with fixed CF, 1 finds optimal CF)
+  94   
+  95  Files
+  96           input_echo_file /Output\PGE\Storage_dispatch_inputs_EY_Base_574dbcac5457a3d3795e629f_hourly_optCF_0RE_NoRE_8hrs.csv/
+  97           results_file    /Output\PGE\Storage_dispatch_results_EY_Base_574dbcac5457a3d3795e629f_hourly_optCF_0RE_NoRE_8hrs.csv/
+  98           summary_file    /Output\PGE\Storage_dispatch_summary_EY_Base_574dbcac5457a3d3795e629f_hourly_optCF_0RE_NoRE_8hrs.csv/
+  99           RT_out_file    /Output\PGE\Real_time_output_values.csv/
+ 100  ;
+ 101   
+ 102  Sets
+ 103           interval          hourly time intervals in study period /1 * 8760/
+ 104           months            months in study period                /1 * 12/
+ 105           days              number of daily periods in study      /1 * 365/
+ 106           timed_dem_period  number of timed demand periods        /1 * 6/
+ 107           input_value       single value
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                 04/12/17 11:27:33 Page 2
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 108  ;
+ 109   
+ 110  Parameters
+ 111           elec_purchase_price(interval)           "electricity price in each interval ($/MWh)"
+ 112           elec_sale_price(interval)               "electricity price in each interval ($/MWh)"
+ 113           regup_price(interval)                   "price paid for regulation up ancillary service ($/MW)"
+ 114           regdn_price(interval)                   "price paid for regulation down ancillary service ($/MW)"
+ 115           spinres_price(interval)                 "price paid for spinning reserve ancillary service ($/MW)"
+ 116           nonspinres_price(interval)              "price paid for nonspinning reserve ancillary service ($/MW)"
+ 117           NG_price(interval)                      "natural gas price in each interval ($/MMBtu)"
+ 118           elec_purchase_price_forecast(interval)  "electricity price forecast in each interval ($/MWh)"
+ 119           elec_sale_price_forecast(interval)      "electricity price forecast in each interval ($/MWh)"
+ 120           H2_consumed(interval)                   "Amount of H2 consumed each interval (kg)"
+ 121           H2_price(interval)                      "Price for Hydrogen for each interval ($/kg)"
+ 122           input_power_baseload(interval)          "Establishes the input power signal under baseload operation (MW)"
+ 123           renewable_signal(interval)              "Renewable generation signal (MW) (range from 0 to 1)"
+ 124           meter_mnth_chg(interval)                "monthly charge for meter ($/meter/month)"
+ 125           Renewable_power(interval)               "Scaled renewable signal based on 'Renewable_MW'"
+ 126           Fixed_dem(months)                       "Fixed demand charge $/MW-month"
+ 127           Timed_dem(timed_dem_period)             "Timed demand charge $/MW-month"
+ 128           Load_profile(interval)                  "Load profile (MW)"
+ 129  ;
+ 130   
+ 131  * Adjust the files that are loaded
+ 132  $include /Input_files\Default3\574dbcac5457a3d3795e629f_hourly.txt
+****                                                                   $282
+ 133  $include /Input_files\Default3\additional_parameters_hourly.txt
+****                                                                $282
+ 134  $include /Input_files\Default3\renewable_profiles_none_hourly.txt
+****                                                                  $282
+ 135  $include /Input_files\Default3\basic_building_0_hourly.txt
+****                                                           $282
+ 136   
+ 137  Scalars
+ 138           interval_length length of each interval (hours) /1/
+ 139           operating_period_length number of intervals in each operating period (rolling solution window) /8760/
+ 140  *1 week = 168 hourly intervals
+ 141  *set operating period length to full year length (8760 or 8784) to do full-year optimization without rolling window
+ 142           look_ahead_length number of additional intervals to look past the current operating period /0/
+ 143   
+ 144           output_capacity_MW output capacity of storage facility (MW)  /0/
+ 145           input_capacity_MW  input capacity of storage facility (MW)  /1000/
+ 146           storage_capacity_hours storage capacity of storage facility (hours at rated INPUT capacity) /8/
+ 147   
+ 148           output_LSL_fraction output lower sustainable limit as a fraction of the output capacity /0/
+ 149           output_regup_limit_fraction regulation up capacity limit as a fraction of the output capacity (value set below)
+ 150           output_regdn_limit_fraction regulation down capacity limit as a fraction of the output capacity (value set below)
+ 151           output_spinres_limit_fraction spinning reserve capacity limit as a fraction of the output capacity (value set below)
+ 152           output_nonspinres_limit_fraction nonspinning reserve capacity limit as a fraction of the output capacity (value set below)
+ 153   
+ 154           input_LSL_fraction input lower sustainable limit as a fraction of the input capacity /0/
+ 155           input_regup_limit_fraction regulation up capacity limit as a fraction of the input capacity (value set below)
+ 156           input_regdn_limit_fraction regulation down capacity limit as a fraction of the input capacity (value set below)
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                 04/12/17 11:27:33 Page 3
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 157           input_spinres_limit_fraction spinning reserve capacity limit as a fraction of the input capacity (value set below)
+ 158           input_nonspinres_limit_fraction nonspinning reserve capacity limit as a fraction of the input capacity (value set below)
+ 159   
+ 160           input_efficiency "efficiency of storage mechanism (LHV)" /0.613668913/
+ 161           output_efficiency "efficiency of conversion back to electricity (LHV)" /1/
+ 162           input_heat_rate "heat rate of facility (MMBtu/MWh produced)" /0/
+ 163           output_heat_rate "heat rate of facility (MMBtu/MWh produced)" /0/
+ 164           input_startup_cost "cost to startup the input side of the facility ($/MW-start)" /1e-05/
+ 165           output_startup_cost "cost to startup the output side of the facility ($/MW-start)" /0/
+ 166   
+ 167           input_cap_cost "upfront capital cost ($/MW)" /1200000/
+ 168           output_cap_cost "upfront capital cost ($/MW)" /0/
+ 169           input_FOM_cost "upfront capital cost ($/MW-year)" /8400/
+ 170           output_FOM_cost "upfront capital cost ($/MW-year)" /0/
+ 171           input_VOM_cost "upfront capital cost ($/MWh)" /0/
+ 172           output_VOM_cost "upfront capital cost ($/MWh)" /0/
+ 173   
+ 174           input_lifetime "equipment lifetime (years)" /20/
+ 175           output_lifetime "equipment lifetime (years)" /0/
+ 176   
+ 177           interest_rate "interest rate on debt" /0.07/
+ 178   
+ 179           VOM_cost "variable O&M cost associated with selling electricity ($/MWh)" /0/
+ 180           reg_cost "variable costs associated with providing regulation ($/MW-h)" /0/
+ 181   
+ 182           H2_use "Determines if Hydrogen outputted as a product or not (toggle)" /1/
+ 183           H2_price_adj "Determines if Hydrogen outputted as a product or not" /6/
+ 184           H2_consumed_adj "Determines if Hydrogen outputted as a product or not" /0.9/
+ 185           H2_LHV "Lower Heating Value of Hydrogen (MWh/kg)" /0.033322222/
+ 186           H2_HHV "Higher Heating Value of Hydrogen (MWh/kg)" /0.039411111/
+ 187           baseload_operation "Determines if input is operated with baseload duty cycle" /1/
+ 188           NG_price_adj "Average price of natural gas ($/MMBTU)" /1/
+ 189           Renewable_MW "Installed renewable capacity (MW)" /0/
+ 190           CF_opt "Select optimization criteria for system" /1/
+ 191   
+ 192           min_output_on_intervals 'minimum number of intervals the output side of the facility can be on at a time' /0/
+ 193           min_input_on_intervals  'minimum number of intervals the input side of the facility can be on at a time' /0/
+ 194   
+ 195           current_interval        'current interval for real-time optimization runs'                              /-1/
+ 196           next_interval           'next interval for real-time optimization runs'                                 /1/
+ 197           current_storage_lvl     'current storage level for real-time optimization runs (0-100%, 0-1)'           /0/
+ 198           current_monthly_max     'current monthly maximum demand for real-time optimization runs (0-100%, 0-1)'  /0/
+ 199           max_interval            'maximum interval for real-time optimization runs'                              /Inf/
+ 200           read_MPC_file           'read controller values from excel file'                                        /0/
+ 201           ramp_penalty            'set ramp penalty for input and output devices'                                 /0/
+ 202  ;
+ 203   
+ 204  Set
+ 205           next_int(interval)      Next interval           /1/
+ 206  ;
+ 207   
+      * Loads predictive controller values from excel file
+      $call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_interval2 rng=A2 Dim=0
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                 04/12/17 11:27:33 Page 4
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+      scalar current_interval2
+      $GDXIN %indir%\controller_input_values.gdx
+      $LOAD current_interval2
+      $GDXIN
+       
+      $call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=next_interval2 rng=B2 Dim=0
+      scalar next_interval2
+      $GDXIN %indir%\controller_input_values.gdx
+      $LOAD next_interval2
+      $GDXIN
+       
+      $call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_storage_lvl2 rng=C2 Dim=0
+      scalar current_storage_lvl2
+      $GDXIN %indir%\controller_input_values.gdx
+      $LOAD current_storage_lvl2
+      $GDXIN
+       
+      $call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_monthly_max2 rng=D2 Dim=0
+      scalar current_monthly_max2
+      $GDXIN %indir%\controller_input_values.gdx
+      $LOAD current_monthly_max2
+      $GDXIN
+       
+      $call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=max_interval2 rng=E2 Dim=0
+      scalar max_interval2
+      $GDXIN %indir%\controller_input_values.gdx
+      $LOAD max_interval2
+      $GDXIN
+       
+      if (read_MPC_file=1,
+               current_interval = current_interval2;
+               next_interval = next_interval2;
+               current_storage_lvl = current_storage_lvl2;
+               current_monthly_max = current_monthly_max2;
+               max_interval = max_interval2;
+      else
+      );
+ 249   
+ 250  *reseed the random number generator
+ 251  execseed = 1 + gmillisec(jnow);
+ 252  *generate an imperfect price forecast
+ 253  *elec_price_forecast(interval) = elec_price(interval) * uniform(0.95, 1.05);
+ 254  elec_purchase_price_forecast(interval) = elec_purchase_price(interval);
+****                                                             $141
+ 255  elec_sale_price_forecast(interval) = elec_sale_price(interval);
+****                                                     $141
+ 256   
+ 257  * Scale renewable signal to desired installed capacity level
+ 258  Renewable_power(interval) = renewable_signal(interval) * Renewable_MW;
+****                                             $141
+ 259   
+ 260  * Adjust the lifetime if it is equal to zero and zero the cost components (i.e., raising to the power of 0 throws an error)
+ 261  if (output_lifetime=0, output_lifetime=1; output_cap_cost=0; output_FOM_cost=0; output_VOM_cost=0; );
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                 04/12/17 11:27:33 Page 5
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 262  if ( input_lifetime=0,  input_lifetime=1;  input_cap_cost=0;  input_FOM_cost=0;  input_VOM_cost=0; );
+ 263   
+ 264  *check to make sure operating period length is not longer than the number of intervals in the input file
+ 265  if ( operating_period_length > card(interval), operating_period_length = card(interval) );
+ 266   
+ 267  *set values for allowable AS capacities
+ 268  if (1=1,
+ 269           output_regup_limit_fraction      = 0;
+ 270           output_regdn_limit_fraction      = 0;
+ 271           output_spinres_limit_fraction    = 0;
+ 272           output_nonspinres_limit_fraction = 0;
+ 273   
+ 274           input_regup_limit_fraction       = 0;
+ 275           input_regdn_limit_fraction       = 0;
+ 276           input_spinres_limit_fraction     = 0;
+ 277           input_nonspinres_limit_fraction  = 0;
+ 278  elseif 1=1,
+ 279           output_regup_limit_fraction      = 1;
+ 280           output_regdn_limit_fraction      = 1;
+ 281           output_spinres_limit_fraction    = 1;
+ 282           output_nonspinres_limit_fraction = 1;
+ 283   
+ 284           input_regup_limit_fraction       = 0;
+ 285           input_regdn_limit_fraction       = 0;
+ 286           input_spinres_limit_fraction     = 0;
+ 287           input_nonspinres_limit_fraction  = 0;
+ 288  else
+ 289           output_regup_limit_fraction      = 1;
+ 290           output_regdn_limit_fraction      = 1;
+ 291           output_spinres_limit_fraction    = 1;
+ 292           output_nonspinres_limit_fraction = 1;
+ 293   
+ 294           input_regup_limit_fraction       = 1;
+ 295           input_regdn_limit_fraction       = 1;
+ 296           input_spinres_limit_fraction     = 1;
+ 297           input_nonspinres_limit_fraction  = 1;
+ 298  );
+ 299   
+ 300  *scalars for rolling window implementation
+ 301  *note that the rolling window is the current operating period plus a look-ahead
+ 302  *period to give residual value to stored energy at the end of the current
+ 303  *operating period
+ 304  Scalars
+ 305           number_of_solves                number of times the model will be solved after moving the solve window
+ 306           solve_index                     index used to loop through all of the solves
+ 307           operating_period_min_index      value of first index in current operating period
+ 308           operating_period_max_index      value of last index in current operating period
+ 309           rolling_window_min_index        value of first index in current rolling window
+ 310           rolling_window_max_index        value of last index in current rolling window
+ 311  ;
+ 312   
+ 313  Positive Variables
+ 314           output_power_MW(interval)       output capacity actually supplying power to the grid (MW)
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                 04/12/17 11:27:33 Page 6
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 315           output_regup_MW(interval)       output capacity committed for regulation up ancillary service (MW)
+ 316           output_regdn_MW(interval)       output capacity committed for regulation down ancillary service (MW)
+ 317           output_spinres_MW(interval)     output capacity committed for spinning reserve ancillary service (MW)
+ 318           output_nonspinres_MW(interval)  output capacity committed for nonspinning reserve ancillary service (MW)
+ 319   
+ 320           input_power_MW(interval)        input capacity actually buying power from the grid (MW)
+ 321           input_regup_MW(interval)        input capacity committed for regulation up ancillary service (MW)
+ 322           input_regdn_MW(interval)        input capacity committed for regulation down ancillary service (MW)
+ 323           input_spinres_MW(interval)      input capacity committed for spinning reserve ancillary service (MW)
+ 324           input_nonspinres_MW(interval)   input capacity committed for nonspinning reserve ancillary service (MW)
+ 325           input_power_MW_ren(interval)    actual amount of renewable generation used (MWh)
+ 326           input_power_MW_non_ren(interval) actual amount of non renewable generation used (MWh)
+ 327   
+ 328           storage_level_MWh(interval) amount of energy stored at the end of each interval (MWh)
+ 329   
+ 330           H2_sold(interval)       Determines how much hydrogen is sold
+ 331           H2_sold_daily(days)     Represents how much hydrogen is sold each day
+ 332   
+ 333           Fixed_cap(months)       Sets peak capacity for the fixed demand charges (MW)
+ 334           cap_1(months)           Sets max capacity for the month (MW)
+ 335           cap_2(months)           Sets max capacity for the month (MW)
+ 336           cap_3(months)           Sets max capacity for the month (MW)
+ 337           cap_4(months)           Sets max capacity for the month (MW)
+ 338           cap_5(months)           Sets max capacity for the month (MW)
+ 339           cap_6(months)           Sets max capacity for the month (MW)
+ 340   
+ 341           Hydrogen_fraction       Sets the capacity factor
+ 342   
+ 343           input_ramp_pos(interval)  Positive ramp rate constraint (used to linearize absolute value)
+ 344           input_ramp_neg(interval)  Negative ramp rate constraint (used to linearize absolute value)
+ 345           output_ramp_pos(interval) Positive ramp rate constraint (used to linearize absolute value)
+ 346           output_ramp_neg(interval) Negative ramp rate constraint (used to linearize absolute value)
+ 347  ;
+ 348   
+ 349  Binary Variables
+ 350           output_active(interval) binary variable indicating if the output system is active
+ 351           input_active(interval) binary variable indicating if the input system is active
+ 352   
+ 353           output_start(interval) binary variable indicating if the output system started up in this interval
+ 354           input_start(interval) binary variable indicating if the input system started up in this interval
+ 355  ;
+ 356   
+ 357  Variables
+ 358           operating_profit "net profit or loss from operations, before paying for capital costs ($)"
+ 359  ;
+ 360   
+ 361  Equations
+ 362           operating_profit_eqn equation that sums the operating profits for the storage facility
+ 363   
+ 364           output_LSL_eqn(interval) equation that limits the lower sustainable limit for the output of the facility
+ 365           output_capacity_limit_eqn(interval) equation that limits the upper limit for the output of the facility
+ 366           output_regup_limit_eqn(interval) equation that limits the amount of regulation up the output side of the facilty can offer
+ 367           output_regdn_limit_eqn(interval) equation that limits the amount of regulation down the output side of the facilty can offer
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                 04/12/17 11:27:33 Page 7
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 368           output_spinres_limit_eqn(interval) equation that limits the amount of spinning reserve the output side of the facilty can offer
+ 369           output_nonspinres_limit_eqn(interval) equation that limits the amount of nonspinning reserve the output side of the facility can offer
+ 370   
+ 371           input_pwr_eqn(interval) equation that defines the input power for baseload operation
+ 372           input_LSL_eqn(interval) equation that limits the lower sustainable limit for the input of the facility
+ 373           input_capacity_limit_eqn(interval) equation that limits the upper limit for the input of the facility
+ 374           input_capacity_limit_eqn2(interval) equation that limits the upper limit for the input of the facility
+ 375           input_ren_contribution(interval) equation that sets the amount of renewable gen consumed
+ 376           input_regup_limit_eqn(interval) equation that limits the amount of regulation up the input side of the facilty can offer
+ 377           input_regdn_limit_eqn(interval) equation that limits the amount of regulation down the input side of the facilty can offer
+ 378           input_spinres_limit_eqn(interval) equation that limits the amount of spinning reserve the input side of the facilty can offer
+ 379           input_nonspinres_limit_eqn(interval) equation that limits the amount of nonspinning reserve the input side of the facility can offer
+ 380   
+ 381           storage_level_accounting_eqn(interval) equation that keeps track of how much energy is in storage on an output power basis for storage or pump technologies (MWh)
+ 382           storage_level_accounting_eqn2(interval) equation that keeps track of how much energy is in storage on an output power basis for generation only technologies (MWh)
+ 383           storage_level_limit_eqn(interval) equation that limits the storage level to the maximum capacity of the storage facility including ancillary services (MWh)
+ 384           storage_level_limit_eqn2(interval) equation that limits the storage level to the maximum capacity of the storage facility including ancillary services (MWh)
+ 385           storage_level_limit_eqn3(interval) equation that limits the storage level to the maximum capacity of the storage facility including ancillary services (MWh)
+ 386   
+ 387           output_startup_eqn(interval) equation that determines if the output side of the facility started up
+ 388           input_startup_eqn(interval) equation that determines if the input side of the facility started up
+ 389   
+ 390           H2_output_limit_eqn(days) equation that calculates the daily H2 consumed from the hourly production vector
+ 391           H2_output_limit_eqn2(days) equation that limits the maximum hydrogen production per day
+ 392           H2_output_limit_eqn3(interval) equation that ensures the H2_sold = H2_consumed
+ 393   
+ 394           output_min_on_eqn1(interval) equation that requires that if the output unit turns off during the first few intervals of the year it must stay on for all of the previous intervals
+ 395           output_min_on_eqn2(interval) equation that enforces minimum on-time for most of the intervals of the year
+ 396           output_min_on_eqn3(interval) equation that enforces minimum on-time for the ending intervals of the year
+ 397           input_min_on_eqn1(interval)  equation that requires that if the input unit turns off during the first few intervals of the year it must stay on for all of the previous intervals
+ 398           input_min_on_eqn2(interval)  equation that enforces minimum on-time for most of the intervals of the year
+ 399           input_min_on_eqn3(interval)  equation that enforces minimum on-time for the ending intervals of the year
+ 400   
+ 401           Fixed_dem_Jan(Month_Jan)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 402           Fixed_dem_Feb(Month_Feb)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 403           Fixed_dem_Mar(Month_Mar)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 404           Fixed_dem_Apr(Month_Apr)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 405           Fixed_dem_May(Month_May)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 406           Fixed_dem_Jun(Month_Jun)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 407           Fixed_dem_Jul(Month_Jul)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 408           Fixed_dem_Aug(Month_Aug)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 409           Fixed_dem_Sep(Month_Sep)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 410           Fixed_dem_Oct(Month_Oct)     equation that enforces fixed demand charge in given month
+****                                 $120
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                 04/12/17 11:27:33 Page 8
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 411           Fixed_dem_Nov(Month_Nov)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 412           Fixed_dem_Dec(Month_Dec)     equation that enforces fixed demand charge in given month
+****                                 $120
+ 413   
+ 414           Jan_1_eqn(Jan_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 415           Feb_1_eqn(Feb_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 416           Mar_1_eqn(Mar_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 417           Apr_1_eqn(Apr_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 418           May_1_eqn(May_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 419           Jun_1_eqn(Jun_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 420           Jul_1_eqn(Jul_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 421           Aug_1_eqn(Aug_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 422           Sep_1_eqn(Sep_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 423           Oct_1_eqn(Oct_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 424           Nov_1_eqn(Nov_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 425           Dec_1_eqn(Dec_1)       equation that enforces timed demand charge in given month
+****                         $120
+ 426   
+ 427           Jan_2_eqn(Jan_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 428           Feb_2_eqn(Feb_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 429           Mar_2_eqn(Mar_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 430           Apr_2_eqn(Apr_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 431           May_2_eqn(May_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 432           Jun_2_eqn(Jun_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 433           Jul_2_eqn(Jul_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 434           Aug_2_eqn(Aug_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 435           Sep_2_eqn(Sep_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 436           Oct_2_eqn(Oct_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 437           Nov_2_eqn(Nov_2)       equation that enforces timed demand charge in given month
+****                         $120
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                 04/12/17 11:27:33 Page 9
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 438           Dec_2_eqn(Dec_2)       equation that enforces timed demand charge in given month
+****                         $120
+ 439   
+ 440           Jan_3_eqn(Jan_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 441           Feb_3_eqn(Feb_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 442           Mar_3_eqn(Mar_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 443           Apr_3_eqn(Apr_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 444           May_3_eqn(May_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 445           Jun_3_eqn(Jun_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 446           Jul_3_eqn(Jul_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 447           Aug_3_eqn(Aug_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 448           Sep_3_eqn(Sep_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 449           Oct_3_eqn(Oct_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 450           Nov_3_eqn(Nov_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 451           Dec_3_eqn(Dec_3)       equation that enforces timed demand charge in given month
+****                         $120
+ 452   
+ 453           Jan_4_eqn(Jan_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 454           Feb_4_eqn(Feb_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 455           Mar_4_eqn(Mar_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 456           Apr_4_eqn(Apr_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 457           May_4_eqn(May_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 458           Jun_4_eqn(Jun_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 459           Jul_4_eqn(Jul_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 460           Aug_4_eqn(Aug_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 461           Sep_4_eqn(Sep_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 462           Oct_4_eqn(Oct_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 463           Nov_4_eqn(Nov_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 464           Dec_4_eqn(Dec_4)       equation that enforces timed demand charge in given month
+****                         $120
+ 465   
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 10
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 466           Jan_5_eqn(Jan_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 467           Feb_5_eqn(Feb_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 468           Mar_5_eqn(Mar_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 469           Apr_5_eqn(Apr_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 470           May_5_eqn(May_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 471           Jun_5_eqn(Jun_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 472           Jul_5_eqn(Jul_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 473           Aug_5_eqn(Aug_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 474           Sep_5_eqn(Sep_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 475           Oct_5_eqn(Oct_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 476           Nov_5_eqn(Nov_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 477           Dec_5_eqn(Dec_5)       equation that enforces timed demand charge in given month
+****                         $120
+ 478   
+ 479           Jan_6_eqn(Jan_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 480           Feb_6_eqn(Feb_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 481           Mar_6_eqn(Mar_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 482           Apr_6_eqn(Apr_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 483           May_6_eqn(May_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 484           Jun_6_eqn(Jun_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 485           Jul_6_eqn(Jul_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 486           Aug_6_eqn(Aug_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 487           Sep_6_eqn(Sep_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 488           Oct_6_eqn(Oct_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 489           Nov_6_eqn(Nov_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 490           Dec_6_eqn(Dec_6)       equation that enforces timed demand charge in given month
+****                         $120
+ 491   
+ 492           H2_CF_eqn(interval)    equation to adjust the CF for H2 equipment
+ 493           H2_CF_eqn2             limit Hydrogen_fraction
+ 494           H2_CF_eqn3             limit Hydrogen_fraction
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 11
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 495   
+ 496           RT_eqn1(interval)      equation to set current power values to enable running in real-time
+ 497           RT_eqn2(interval)      equation to set current storage values to enable running in real-time
+ 498           RT_eqn3(interval)      equation to set power values to shorten running in real-time
+ 499           RT_eqn4(interval)      equation to set storage values to shorten running in real-time
+ 500   
+ 501           output_ramp_eqn(interval)       equation to limit ramping with penalty price
+ 502           input_ramp_eqn(interval)        equation to limit ramping with penalty price
+ 503   
+ 504  **         one_active_device_eqn(interval) equation to ensure that both generator and pump cannot be simultaneously active
+ 505  ;
+ 506   
+ 507  * Adjusts the price of natural gas to the selected value "NG_price_adj"
+ 508  NG_price(interval) = NG_price(interval) * NG_price_adj;
+****                              $141
+ 509   
+ 510  * Check to see if H2 will be exported for this analysis (i.e., H2 = 1 or 2)
+ 511  if (H2_use = 0,
+ 512           H2_consumed(interval) = H2_consumed(interval) * 0;
+****                                             $141
+ 513           H2_price(interval)    = H2_price(interval)*0;
+****                                          $141
+ 514  elseif H2_use=1,
+ 515           H2_price(interval) = H2_price(interval) * H2_price_adj;
+ 516           if (CF_opt=0,
+ 517                   H2_consumed(interval) = H2_consumed(interval) * H2_consumed_adj * input_capacity_MW * input_efficiency / H2_LHV * 24 * interval_length;
+ 518           elseif CF_opt=1,
+ 519                   H2_consumed_adj = input_capacity_MW * input_efficiency / H2_LHV *24;
+ 520           );
+ 521  elseif H2_use=2,
+ 522  );
+ 523   
+ 524  H2_CF_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and CF_opt=1)..
+ 525           H2_sold(interval) =e= H2_consumed(interval) * H2_consumed_adj * Hydrogen_fraction;
+ 526   
+ 527  H2_CF_eqn2$(CF_opt=1).. Hydrogen_fraction =l= 1;
+ 528  H2_CF_eqn3$(CF_opt=0).. Hydrogen_fraction =e= 1;
+ 529   
+ 530  *** Cost function: Elec sale price, elec purchase price, regup, regdown, spin, nonspin, NGout/in, unused VOM cost, startup cost, H2 price, VOM cost, demand charge (fixed and timed), meter cost, cap and FOM cost
+ 531  operating_profit_eqn..
+ 532           operating_profit =e= sum( (interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ),
+ 533                     (elec_sale_price_forecast(interval) * (output_power_MW(interval)) * interval_length)
+ 534                   - (elec_purchase_price_forecast(interval) * input_power_MW_non_ren(interval) * interval_length)
+ 535                   + ( regup_price(interval) - reg_cost ) * ( output_regup_MW(interval) + input_regup_MW(interval) ) * interval_length
+ 536                   + ( regdn_price(interval) - reg_cost ) * ( output_regdn_MW(interval) + input_regdn_MW(interval) ) * interval_length
+ 537                   + spinres_price(interval) * ( output_spinres_MW(interval) + input_spinres_MW(interval) ) * interval_length
+ 538                   + nonspinres_price(interval) * ( output_nonspinres_MW(interval) + input_nonspinres_MW(interval) ) * interval_length
+ 539                   - output_heat_rate * NG_price(interval) * output_power_MW(interval) * interval_length
+ 540                   - input_heat_rate * NG_price(interval) * input_power_MW(interval) * interval_length
+ 541                   - VOM_cost * output_power_MW(interval) * interval_length
+ 542                   - output_startup_cost * output_capacity_MW * output_start(interval)
+ 543                   - input_startup_cost  * input_capacity_MW  * input_start(interval)
+ 544                   + H2_price(interval) * H2_sold(interval)
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 12
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 545                   - input_VOM_cost * input_power_MW(interval) * interval_length
+ 546                   - output_VOM_cost * output_power_MW(interval) * interval_length
+ 547                   - (input_ramp_pos(interval)+input_ramp_neg(interval))*ramp_penalty
+ 548                   - (output_ramp_pos(interval)+output_ramp_neg(interval))*ramp_penalty )
+ 549                   - sum(months, Fixed_cap(months) * Fixed_dem(months))
+ 550                   - sum(months, cap_1(months) * Timed_dem("1"))
+ 551                   - sum(months, cap_2(months) * Timed_dem("2"))
+ 552                   - sum(months, cap_3(months) * Timed_dem("3"))
+ 553                   - sum(months, cap_4(months) * Timed_dem("4"))
+ 554                   - sum(months, cap_5(months) * Timed_dem("5"))
+ 555                   - sum(months, cap_6(months) * Timed_dem("6"))
+ 556                   - meter_mnth_chg("1") * 12
+ 557                   - (input_cap_cost+input_FOM_cost*input_lifetime) * input_capacity_MW * (interest_rate+(interest_rate/(power((1+interest_rate),input_lifetime)-1)))
+ 558                   - (output_cap_cost+output_FOM_cost*output_lifetime) * output_capacity_MW * (interest_rate+(interest_rate/(power((1+interest_rate),output_lifetime)-1)))
+ 559                   ;
+ 560   
+ 561  output_LSL_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 562           output_power_MW(interval) - output_regdn_MW(interval) =g= output_LSL_fraction * output_capacity_MW * output_active(interval);
+ 563   
+ 564  output_capacity_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 565           output_power_MW(interval) + output_regup_MW(interval) + output_spinres_MW(interval) =l= output_capacity_MW * output_active(interval);
+ 566   
+ 567  output_regup_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 568           output_regup_MW(interval) =l= output_capacity_MW * output_regup_limit_fraction;
+ 569   
+ 570  output_regdn_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 571           output_regdn_MW(interval) =l= output_capacity_MW * output_regdn_limit_fraction;
+ 572   
+ 573  output_spinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 574           output_spinres_MW(interval) =l= output_capacity_MW * output_spinres_limit_fraction;
+ 575   
+ 576  output_nonspinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 577           output_nonspinres_MW(interval) =l= output_capacity_MW * output_nonspinres_limit_fraction * ( 1 - output_active(interval) );
+ 578  *         output_nonspinres_MW(interval) =l= 0;
+ 579   
+ 580  output_ramp_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 581           output_power_MW(interval)-output_power_MW(interval-1) =e= output_ramp_pos(interval)-output_ramp_neg(interval);
+ 582   
+ 583  input_ramp_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 584           input_power_MW(interval)-input_power_MW(interval-1) =e= input_ramp_pos(interval)-input_ramp_neg(interval);
+ 585   
+ 586  input_pwr_eqn(interval)$(baseload_operation = 1)..
+ 587           input_power_MW(interval) =e=  input_capacity_MW * H2_consumed_adj;
+ 588   
+ 589  input_LSL_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 590           input_power_MW(interval) - input_regup_MW(interval) - input_spinres_MW(interval) - input_nonspinres_MW(interval) =g= input_LSL_fraction * input_capacity_MW * input_active(interval);
+ 591   
+ 592  input_capacity_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 593           input_power_MW(interval) + input_regdn_MW(interval) =l= input_capacity_MW * input_active(interval);
+ 594   
+ 595   
+ 596  *** Fixed Demand Charge ***
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 13
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 597  Fixed_dem_Jan(Month_Jan)$( rolling_window_min_index <= ord(Month_Jan) and ord(Month_Jan) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Jan) =l= Fixed_cap("1");
+****                                                                                                                                                           $171
+ 598  Fixed_dem_Feb(Month_Feb)$( rolling_window_min_index <= ord(Month_Feb) and ord(Month_Feb) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Feb) =l= Fixed_cap("2");
+****                                                                                                                                                           $171
+ 599  Fixed_dem_Mar(Month_Mar)$( rolling_window_min_index <= ord(Month_Mar) and ord(Month_Mar) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Mar) =l= Fixed_cap("3");
+****                                                                                                                                                           $171
+ 600  Fixed_dem_Apr(Month_Apr)$( rolling_window_min_index <= ord(Month_Apr) and ord(Month_Apr) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Apr) =l= Fixed_cap("4");
+****                                                                                                                                                           $171
+ 601  Fixed_dem_May(Month_May)$( rolling_window_min_index <= ord(Month_May) and ord(Month_May) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_May) =l= Fixed_cap("5");
+****                                                                                                                                                           $171
+ 602  Fixed_dem_Jun(Month_Jun)$( rolling_window_min_index <= ord(Month_Jun) and ord(Month_Jun) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Jun) =l= Fixed_cap("6");
+****                                                                                                                                                           $171
+ 603  Fixed_dem_Jul(Month_Jul)$( rolling_window_min_index <= ord(Month_Jul) and ord(Month_Jul) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Jul) =l= Fixed_cap("7");
+****                                                                                                                                                           $171
+ 604  Fixed_dem_Aug(Month_Aug)$( rolling_window_min_index <= ord(Month_Aug) and ord(Month_Aug) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Aug) =l= Fixed_cap("8");
+****                                                                                                                                                           $171
+ 605  Fixed_dem_Sep(Month_Sep)$( rolling_window_min_index <= ord(Month_Sep) and ord(Month_Sep) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Sep) =l= Fixed_cap("9");
+****                                                                                                                                                           $171
+ 606  Fixed_dem_Oct(Month_Oct)$( rolling_window_min_index <= ord(Month_Oct) and ord(Month_Oct) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Oct) =l= Fixed_cap("10");
+****                                                                                                                                                           $171
+ 607  Fixed_dem_Nov(Month_Nov)$( rolling_window_min_index <= ord(Month_Nov) and ord(Month_Nov) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Nov) =l= Fixed_cap("11");
+****                                                                                                                                                           $171
+ 608  Fixed_dem_Dec(Month_Dec)$( rolling_window_min_index <= ord(Month_Dec) and ord(Month_Dec) <= rolling_window_max_index ).. input_power_MW_non_ren(Month_Dec) =l= Fixed_cap("12");
+****                                                                                                                                                           $171
+ 609  *************************
+ 610  **** Demand Charge 1 ****
+ 611  Jan_1_eqn(Jan_1)$( rolling_window_min_index <= ord(Jan_1) and ord(Jan_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Jan_1) =l= Cap_1("1");
+****                                                                                                                                       $171
+ 612  Feb_1_eqn(Feb_1)$( rolling_window_min_index <= ord(Feb_1) and ord(Feb_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Feb_1) =l= Cap_1("2");
+****                                                                                                                                       $171
+ 613  Mar_1_eqn(Mar_1)$( rolling_window_min_index <= ord(Mar_1) and ord(Mar_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Mar_1) =l= Cap_1("3");
+****                                                                                                                                       $171
+ 614  Apr_1_eqn(Apr_1)$( rolling_window_min_index <= ord(Apr_1) and ord(Apr_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Apr_1) =l= Cap_1("4");
+****                                                                                                                                       $171
+ 615  May_1_eqn(May_1)$( rolling_window_min_index <= ord(May_1) and ord(May_1) <= rolling_window_max_index ).. input_power_MW_non_ren(May_1) =l= Cap_1("5");
+****                                                                                                                                       $171
+ 616  Jun_1_eqn(Jun_1)$( rolling_window_min_index <= ord(Jun_1) and ord(Jun_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Jun_1) =l= Cap_1("6");
+****                                                                                                                                       $171
+ 617  Jul_1_eqn(Jul_1)$( rolling_window_min_index <= ord(Jul_1) and ord(Jul_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Jul_1) =l= Cap_1("7");
+****                                                                                                                                       $171
+ 618  Aug_1_eqn(Aug_1)$( rolling_window_min_index <= ord(Aug_1) and ord(Aug_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Aug_1) =l= Cap_1("8");
+****                                                                                                                                       $171
+ 619  Sep_1_eqn(Sep_1)$( rolling_window_min_index <= ord(Sep_1) and ord(Sep_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Sep_1) =l= Cap_1("9");
+****                                                                                                                                       $171
+ 620  Oct_1_eqn(Oct_1)$( rolling_window_min_index <= ord(Oct_1) and ord(Oct_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Oct_1) =l= Cap_1("10");
+****                                                                                                                                       $171
+ 621  Nov_1_eqn(Nov_1)$( rolling_window_min_index <= ord(Nov_1) and ord(Nov_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Nov_1) =l= Cap_1("11");
+****                                                                                                                                       $171
+ 622  Dec_1_eqn(Dec_1)$( rolling_window_min_index <= ord(Dec_1) and ord(Dec_1) <= rolling_window_max_index ).. input_power_MW_non_ren(Dec_1) =l= Cap_1("12");
+****                                                                                                                                       $171
+ 623  *************************
+ 624  **** Demand Charge 2 ****
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 14
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 625  Jan_2_eqn(Jan_2)$( rolling_window_min_index <= ord(Jan_2) and ord(Jan_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Jan_2) =l= Cap_2("1");
+****                                                                                                                                       $171
+ 626  Feb_2_eqn(Feb_2)$( rolling_window_min_index <= ord(Feb_2) and ord(Feb_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Feb_2) =l= Cap_2("2");
+****                                                                                                                                       $171
+ 627  Mar_2_eqn(Mar_2)$( rolling_window_min_index <= ord(Mar_2) and ord(Mar_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Mar_2) =l= Cap_2("3");
+****                                                                                                                                       $171
+ 628  Apr_2_eqn(Apr_2)$( rolling_window_min_index <= ord(Apr_2) and ord(Apr_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Apr_2) =l= Cap_2("4");
+****                                                                                                                                       $171
+ 629  May_2_eqn(May_2)$( rolling_window_min_index <= ord(May_2) and ord(May_2) <= rolling_window_max_index ).. input_power_MW_non_ren(May_2) =l= Cap_2("5");
+****                                                                                                                                       $171
+ 630  Jun_2_eqn(Jun_2)$( rolling_window_min_index <= ord(Jun_2) and ord(Jun_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Jun_2) =l= Cap_2("6");
+****                                                                                                                                       $171
+ 631  Jul_2_eqn(Jul_2)$( rolling_window_min_index <= ord(Jul_2) and ord(Jul_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Jul_2) =l= Cap_2("7");
+****                                                                                                                                       $171
+ 632  Aug_2_eqn(Aug_2)$( rolling_window_min_index <= ord(Aug_2) and ord(Aug_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Aug_2) =l= Cap_2("8");
+****                                                                                                                                       $171
+ 633  Sep_2_eqn(Sep_2)$( rolling_window_min_index <= ord(Sep_2) and ord(Sep_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Sep_2) =l= Cap_2("9");
+****                                                                                                                                       $171
+ 634  Oct_2_eqn(Oct_2)$( rolling_window_min_index <= ord(Oct_2) and ord(Oct_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Oct_2) =l= Cap_2("10");
+****                                                                                                                                       $171
+ 635  Nov_2_eqn(Nov_2)$( rolling_window_min_index <= ord(Nov_2) and ord(Nov_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Nov_2) =l= Cap_2("11");
+****                                                                                                                                       $171
+ 636  Dec_2_eqn(Dec_2)$( rolling_window_min_index <= ord(Dec_2) and ord(Dec_2) <= rolling_window_max_index ).. input_power_MW_non_ren(Dec_2) =l= Cap_2("12");
+****                                                                                                                                       $171
+ 637  *************************
+ 638  **** Demand Charge 3 ****
+ 639  Jan_3_eqn(Jan_3)$( rolling_window_min_index <= ord(Jan_3) and ord(Jan_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Jan_3) =l= Cap_3("1");
+****                                                                                                                                       $171
+ 640  Feb_3_eqn(Feb_3)$( rolling_window_min_index <= ord(Feb_3) and ord(Feb_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Feb_3) =l= Cap_3("2");
+****                                                                                                                                       $171
+ 641  Mar_3_eqn(Mar_3)$( rolling_window_min_index <= ord(Mar_3) and ord(Mar_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Mar_3) =l= Cap_3("3");
+****                                                                                                                                       $171
+ 642  Apr_3_eqn(Apr_3)$( rolling_window_min_index <= ord(Apr_3) and ord(Apr_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Apr_3) =l= Cap_3("4");
+****                                                                                                                                       $171
+ 643  May_3_eqn(May_3)$( rolling_window_min_index <= ord(May_3) and ord(May_3) <= rolling_window_max_index ).. input_power_MW_non_ren(May_3) =l= Cap_3("5");
+****                                                                                                                                       $171
+ 644  Jun_3_eqn(Jun_3)$( rolling_window_min_index <= ord(Jun_3) and ord(Jun_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Jun_3) =l= Cap_3("6");
+****                                                                                                                                       $171
+ 645  Jul_3_eqn(Jul_3)$( rolling_window_min_index <= ord(Jul_3) and ord(Jul_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Jul_3) =l= Cap_3("7");
+****                                                                                                                                       $171
+ 646  Aug_3_eqn(Aug_3)$( rolling_window_min_index <= ord(Aug_3) and ord(Aug_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Aug_3) =l= Cap_3("8");
+****                                                                                                                                       $171
+ 647  Sep_3_eqn(Sep_3)$( rolling_window_min_index <= ord(Sep_3) and ord(Sep_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Sep_3) =l= Cap_3("9");
+****                                                                                                                                       $171
+ 648  Oct_3_eqn(Oct_3)$( rolling_window_min_index <= ord(Oct_3) and ord(Oct_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Oct_3) =l= Cap_3("10");
+****                                                                                                                                       $171
+ 649  Nov_3_eqn(Nov_3)$( rolling_window_min_index <= ord(Nov_3) and ord(Nov_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Nov_3) =l= Cap_3("11");
+****                                                                                                                                       $171
+ 650  Dec_3_eqn(Dec_3)$( rolling_window_min_index <= ord(Dec_3) and ord(Dec_3) <= rolling_window_max_index ).. input_power_MW_non_ren(Dec_3) =l= Cap_3("12");
+****                                                                                                                                       $171
+ 651  *************************
+ 652  **** Demand Charge 4 ****
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 15
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 653  Jan_4_eqn(Jan_4)$( rolling_window_min_index <= ord(Jan_4) and ord(Jan_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Jan_4) =l= Cap_4("1");
+****                                                                                                                                       $171
+ 654  Feb_4_eqn(Feb_4)$( rolling_window_min_index <= ord(Feb_4) and ord(Feb_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Feb_4) =l= Cap_4("2");
+****                                                                                                                                       $171
+ 655  Mar_4_eqn(Mar_4)$( rolling_window_min_index <= ord(Mar_4) and ord(Mar_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Mar_4) =l= Cap_4("3");
+****                                                                                                                                       $171
+ 656  Apr_4_eqn(Apr_4)$( rolling_window_min_index <= ord(Apr_4) and ord(Apr_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Apr_4) =l= Cap_4("4");
+****                                                                                                                                       $171
+ 657  May_4_eqn(May_4)$( rolling_window_min_index <= ord(May_4) and ord(May_4) <= rolling_window_max_index ).. input_power_MW_non_ren(May_4) =l= Cap_4("5");
+****                                                                                                                                       $171
+ 658  Jun_4_eqn(Jun_4)$( rolling_window_min_index <= ord(Jun_4) and ord(Jun_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Jun_4) =l= Cap_4("6");
+****                                                                                                                                       $171
+ 659  Jul_4_eqn(Jul_4)$( rolling_window_min_index <= ord(Jul_4) and ord(Jul_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Jul_4) =l= Cap_4("7");
+****                                                                                                                                       $171
+ 660  Aug_4_eqn(Aug_4)$( rolling_window_min_index <= ord(Aug_4) and ord(Aug_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Aug_4) =l= Cap_4("8");
+****                                                                                                                                       $171
+ 661  Sep_4_eqn(Sep_4)$( rolling_window_min_index <= ord(Sep_4) and ord(Sep_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Sep_4) =l= Cap_4("9");
+****                                                                                                                                       $171
+ 662  Oct_4_eqn(Oct_4)$( rolling_window_min_index <= ord(Oct_4) and ord(Oct_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Oct_4) =l= Cap_4("10");
+****                                                                                                                                       $171
+ 663  Nov_4_eqn(Nov_4)$( rolling_window_min_index <= ord(Nov_4) and ord(Nov_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Nov_4) =l= Cap_4("11");
+****                                                                                                                                       $171
+ 664  Dec_4_eqn(Dec_4)$( rolling_window_min_index <= ord(Dec_4) and ord(Dec_4) <= rolling_window_max_index ).. input_power_MW_non_ren(Dec_4) =l= Cap_4("12");
+****                                                                                                                                       $171
+ 665  *************************
+ 666  **** Demand Charge 5 ****
+ 667  Jan_5_eqn(Jan_5)$( rolling_window_min_index <= ord(Jan_5) and ord(Jan_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Jan_5) =l= Cap_5("1");
+****                                                                                                                                       $171
+ 668  Feb_5_eqn(Feb_5)$( rolling_window_min_index <= ord(Feb_5) and ord(Feb_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Feb_5) =l= Cap_5("2");
+****                                                                                                                                       $171
+ 669  Mar_5_eqn(Mar_5)$( rolling_window_min_index <= ord(Mar_5) and ord(Mar_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Mar_5) =l= Cap_5("3");
+****                                                                                                                                       $171
+ 670  Apr_5_eqn(Apr_5)$( rolling_window_min_index <= ord(Apr_5) and ord(Apr_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Apr_5) =l= Cap_5("4");
+****                                                                                                                                       $171
+ 671  May_5_eqn(May_5)$( rolling_window_min_index <= ord(May_5) and ord(May_5) <= rolling_window_max_index ).. input_power_MW_non_ren(May_5) =l= Cap_5("5");
+****                                                                                                                                       $171
+ 672  Jun_5_eqn(Jun_5)$( rolling_window_min_index <= ord(Jun_5) and ord(Jun_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Jun_5) =l= Cap_5("6");
+****                                                                                                                                       $171
+ 673  Jul_5_eqn(Jul_5)$( rolling_window_min_index <= ord(Jul_5) and ord(Jul_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Jul_5) =l= Cap_5("7");
+****                                                                                                                                       $171
+ 674  Aug_5_eqn(Aug_5)$( rolling_window_min_index <= ord(Aug_5) and ord(Aug_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Aug_5) =l= Cap_5("8");
+****                                                                                                                                       $171
+ 675  Sep_5_eqn(Sep_5)$( rolling_window_min_index <= ord(Sep_5) and ord(Sep_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Sep_5) =l= Cap_5("9");
+****                                                                                                                                       $171
+ 676  Oct_5_eqn(Oct_5)$( rolling_window_min_index <= ord(Oct_5) and ord(Oct_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Oct_5) =l= Cap_5("10");
+****                                                                                                                                       $171
+ 677  Nov_5_eqn(Nov_5)$( rolling_window_min_index <= ord(Nov_5) and ord(Nov_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Nov_5) =l= Cap_5("11");
+****                                                                                                                                       $171
+ 678  Dec_5_eqn(Dec_5)$( rolling_window_min_index <= ord(Dec_5) and ord(Dec_5) <= rolling_window_max_index ).. input_power_MW_non_ren(Dec_5) =l= Cap_5("12");
+****                                                                                                                                       $171
+ 679  *************************
+ 680  **** Demand Charge 6 ****
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 16
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 681  Jan_6_eqn(Jan_6)$( rolling_window_min_index <= ord(Jan_6) and ord(Jan_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Jan_6) =l= Cap_6("1");
+****                                                                                                                                       $171
+ 682  Feb_6_eqn(Feb_6)$( rolling_window_min_index <= ord(Feb_6) and ord(Feb_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Feb_6) =l= Cap_6("2");
+****                                                                                                                                       $171
+ 683  Mar_6_eqn(Mar_6)$( rolling_window_min_index <= ord(Mar_6) and ord(Mar_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Mar_6) =l= Cap_6("3");
+****                                                                                                                                       $171
+ 684  Apr_6_eqn(Apr_6)$( rolling_window_min_index <= ord(Apr_6) and ord(Apr_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Apr_6) =l= Cap_6("4");
+****                                                                                                                                       $171
+ 685  May_6_eqn(May_6)$( rolling_window_min_index <= ord(May_6) and ord(May_6) <= rolling_window_max_index ).. input_power_MW_non_ren(May_6) =l= Cap_6("5");
+****                                                                                                                                       $171
+ 686  Jun_6_eqn(Jun_6)$( rolling_window_min_index <= ord(Jun_6) and ord(Jun_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Jun_6) =l= Cap_6("6");
+****                                                                                                                                       $171
+ 687  Jul_6_eqn(Jul_6)$( rolling_window_min_index <= ord(Jul_6) and ord(Jul_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Jul_6) =l= Cap_6("7");
+****                                                                                                                                       $171
+ 688  Aug_6_eqn(Aug_6)$( rolling_window_min_index <= ord(Aug_6) and ord(Aug_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Aug_6) =l= Cap_6("8");
+****                                                                                                                                       $171
+ 689  Sep_6_eqn(Sep_6)$( rolling_window_min_index <= ord(Sep_6) and ord(Sep_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Sep_6) =l= Cap_6("9");
+****                                                                                                                                       $171
+ 690  Oct_6_eqn(Oct_6)$( rolling_window_min_index <= ord(Oct_6) and ord(Oct_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Oct_6) =l= Cap_6("10");
+****                                                                                                                                       $171
+ 691  Nov_6_eqn(Nov_6)$( rolling_window_min_index <= ord(Nov_6) and ord(Nov_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Nov_6) =l= Cap_6("11");
+****                                                                                                                                       $171
+ 692  Dec_6_eqn(Dec_6)$( rolling_window_min_index <= ord(Dec_6) and ord(Dec_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Dec_6) =l= Cap_6("12");
+****                                                                                                                                       $171
+ 693  *************************
+ 694   
+ 695  input_capacity_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 696           input_power_MW_ren(interval)-Load_profile(interval)+input_power_MW_non_ren(interval) =e= input_power_MW(interval);
+ 697   
+ 698  input_ren_contribution(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 699           input_power_MW_ren(interval) =l= Renewable_power(interval);
+ 700   
+ 701  input_regup_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 702           input_regup_MW(interval) =l= input_capacity_MW * input_regup_limit_fraction;
+ 703   
+ 704  input_regdn_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 705           input_regdn_MW(interval) =l= input_capacity_MW * input_regdn_limit_fraction;
+ 706   
+ 707  input_spinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 708           input_spinres_MW(interval) =l= input_capacity_MW * input_spinres_limit_fraction;
+ 709   
+ 710  input_nonspinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 711           input_nonspinres_MW(interval) =l= input_capacity_MW * input_nonspinres_limit_fraction;
+ 712   
+ 713  storage_level_accounting_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and baseload_operation=0 and ord(interval)>current_interval and ord(interval)<max_interval )..
+ 714           storage_level_MWh(interval) =e= storage_level_MWh(interval-1)
+ 715           + input_power_MW(interval) * interval_length * input_efficiency
+ 716           - output_power_MW(interval) * interval_length / output_efficiency
+ 717           - H2_sold(interval) * H2_LHV;
+ 718  * LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
+ 719   
+ 720  storage_level_accounting_eqn2(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW = 0 and baseload_operation=0 and ord(interval)>current_interval and ord(interval)<max_interval )..
+ 721           storage_level_MWh(interval) =e= storage_level_MWh(interval-1);
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 17
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 722  * If input capacity is equal to zero then output device cannot interact with storage system so storage_level_MWh is held constant
+ 723   
+ 724  H2_output_limit_eqn(days)$(H2_use = 2)..
+ 725           H2_sold_daily(days) =e= sum( interval$(floor(div(ord(interval)-1,24))+1 = ord(days) ), H2_sold(interval) );
+ 726   
+ 727  H2_output_limit_eqn2(days)$(H2_use = 2)..
+ 728           H2_sold_daily(days) =e= sum( interval$(floor(div(ord(interval)-1,24))+1 = ord(days) ), H2_consumed(interval) );
+ 729   
+ 730  H2_output_limit_eqn3(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and H2_use <= 1 and CF_opt=0)..
+ 731           H2_sold(interval) =e= H2_consumed(interval);
+ 732   
+ 733  storage_level_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW>0 and ord(interval)>current_interval and ord(interval)<max_interval )..
+ 734           storage_level_MWh(interval) =l= input_capacity_MW * storage_capacity_hours
+ 735           - input_regdn_MW(interval) * interval_length * 0.5;
+ 736   
+ 737  storage_level_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW<=0 and ord(interval)>current_interval and ord(interval)<max_interval )..
+ 738           storage_level_MWh(interval) =l= output_capacity_MW * storage_capacity_hours
+ 739           - input_regdn_MW(interval) * interval_length * 0.5;
+ 740   
+ 741  *****(ord(interval)>current_interval OR ord(interval)<max_interval )
+ 742   
+ 743  storage_level_limit_eqn3(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>current_interval and ord(interval)<max_interval )..
+ 744           storage_level_MWh(interval) =g= (output_regup_MW(interval) + output_spinres_MW(interval) + output_nonspinres_MW(interval)) / input_efficiency * interval_length * 0.5;
+ 745  * Ensures that reserves can be provided if necessary for at least 1/2 hour.
+ 746   
+ 747  output_startup_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 748           output_start(interval) =g= output_active(interval) - output_active(interval-1);
+ 749   
+ 750  input_startup_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 751           input_start(interval) =g= input_active(interval) - input_active(interval-1);
+ 752   
+ 753  RT_eqn1(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)<=current_interval and current_monthly_max>=0)..
+ 754           input_power_MW(interval) =e= current_monthly_max * input_capacity_MW;
+ 755   
+ 756  RT_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)<=current_interval and current_storage_lvl>=0)..
+ 757           storage_level_MWh(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
+ 758   
+ 759  RT_eqn3(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>=max_interval and current_monthly_max>=0)..
+ 760           input_power_MW(interval) =e= current_monthly_max * input_capacity_MW;
+ 761   
+ 762  RT_eqn4(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>=max_interval and current_storage_lvl>=0)..
+ 763           storage_level_MWh(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
+ 764   
+ 765  *one_active_device_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 766  *         input_active(interval) + output_active(interval) =l= 1;
+ 767   
+ 768   
+ 769  alias (interval, interval_alias);
+ 770  *note that min runtime constraints are not generated if min runtimes would not be binding--this reduces the execution time significantly
+ 771  output_min_on_eqn1(interval)$( min_output_on_intervals > 1 and 1 < ord(interval) and ord(interval) <= min_output_on_intervals and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 772           sum(interval_alias$( ord(interval_alias) <= ord(interval) ), output_active(interval_alias) ) =g= ord(interval) * ( output_active(interval) - output_active(interval + 1) );
+ 773   
+ 774  output_min_on_eqn2(interval)$( min_output_on_intervals > 1 and 1 < ord(interval) and ord(interval) <= card(interval) - min_output_on_intervals + 1 and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 18
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 775           sum(interval_alias$( ord(interval) <= ord(interval_alias) and ord(interval_alias) <= ord(interval) + min_output_on_intervals - 1 ),
+ 776               output_active(interval_alias) ) =g= min_output_on_intervals * ( output_active(interval) - output_active(interval - 1) );
+ 777   
+ 778  output_min_on_eqn3(interval)$( min_output_on_intervals > 1 and ord(interval) > card(interval) - min_output_on_intervals + 1 and ord(interval) < card(interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_inde
+      x )..
+ 779           sum(interval_alias$( ord(interval) <= ord(interval_alias) ), output_active(interval_alias) ) =g= (card(interval) - ord(interval) + 1) * ( output_active(interval) - output_active(interval - 1) );
+ 780   
+ 781  input_min_on_eqn1(interval)$( min_input_on_intervals > 1 and 1 < ord(interval) and ord(interval) <= min_input_on_intervals and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 782           sum(interval_alias$( ord(interval_alias) <= ord(interval) ), input_active(interval_alias) ) =g= ord(interval) * ( input_active(interval) - input_active(interval + 1) );
+ 783   
+ 784  input_min_on_eqn2(interval)$( min_input_on_intervals > 1 and 1 < ord(interval) and ord(interval) <= card(interval) - min_input_on_intervals + 1 and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+ 785           sum(interval_alias$( ord(interval) <= ord(interval_alias) and ord(interval_alias) <= ord(interval) + min_input_on_intervals - 1 ),
+ 786               input_active(interval_alias) ) =g= min_input_on_intervals * ( input_active(interval) - input_active(interval - 1) );
+ 787   
+ 788  input_min_on_eqn3(interval)$( min_input_on_intervals > 1 and ord(interval) > card(interval) - min_input_on_intervals + 1 and ord(interval) < card(interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )
+      ..
+ 789           sum(interval_alias$( ord(interval) <= ord(interval_alias) ), input_active(interval_alias) ) =g= (card(interval) - ord(interval) + 1) * ( input_active(interval) - input_active(interval - 1) );
+ 790   
+ 791   
+ 792  Model arbitrage_and_AS /all/
+ 793  *set number of iterations before solver is terminated
+ 794  option iterlim = 1000000;
+ 795  *set number of seconds before the solver is terminated
+ 796  option reslim = 6000;
+ 797  *suppress listing of the equations in the listing file
+ 798  option limrow = 0;
+ 799  option limcol = 0;
+ 800  *suppress listing of the solution in the listing file
+ 801  option solprint = off;
+ 802  option sysout = off;
+ 803   
+ 804  *prepare for rolling window solution
+ 805   
+ 806  *determine the number of times the model will be solved
+ 807  number_of_solves = ceil( card(interval) / operating_period_length );
+ 808   
+ 809  *set optcr so that (best feasible - best possible) / (best feasible + 1e-10) < optcr
+ 810  * default is 0.1 = 10%, which seems too big
+ 811  * 0.01 = 1%
+ 812  option optcr=0.01;
+ 813   
+ 814  *give initial values to all of the variables
+ 815  output_power_MW.l(interval)      = 0;
+ 816  output_regup_MW.l(interval)      = 0;
+ 817  output_regdn_MW.l(interval)      = 0;
+ 818  output_spinres_MW.l(interval)    = 0;
+ 819  output_nonspinres_MW.l(interval) = 0;
+ 820  input_power_MW.l(interval)       = 1;
+ 821  input_regup_MW.l(interval)       = 0;
+ 822  input_regdn_MW.l(interval)       = 0;
+ 823  input_spinres_MW.l(interval)     = 0;
+ 824  input_nonspinres_MW.l(interval)  = 0;
+ 825  storage_level_MWh.l(interval)    = 1;
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 19
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 826  output_active.l(interval)        = 0;
+ 827  input_active.l(interval)         = 0;
+ 828  output_start.l(interval)         = 0;
+ 829  input_start.l(interval)          = 1;
+ 830  H2_sold.l(interval)              = 0;
+ 831  H2_sold_daily.l(days)            = 0;
+ 832  if(H2_use = 2,
+ 833           H2_sold_daily.l(days)            = 24;
+ 834  * need value above 0 for initialization
+ 835  );
+ 836   
+ 837  scalars
+ 838           no_error indicator of whether the model encountered an error
+ 839           optimal_solution_reached indicator of whether the model found an optimal solution before the time limit expired
+ 840           solve_index index for solve loop
+ 841  ;
+ 842   
+ 843  no_error = 1;
+ 844  optimal_solution_reached = 1;
+ 845  solve_index = 1;
+ 846   
+ 847  while ( solve_index <= number_of_solves and no_error = 1 ,
+ 848   
+ 849  *        fix all variables' values
+ 850  *        (will relax the values within the rolling window later)
+ 851           output_power_MW.fx(interval)      = output_power_MW.l(interval)  ;
+ 852           output_regup_MW.fx(interval)      = output_regup_MW.l(interval)  ;
+ 853           output_regdn_MW.fx(interval)      = output_regdn_MW.l(interval)  ;
+ 854           output_spinres_MW.fx(interval)    = output_spinres_MW.l(interval);
+ 855           output_nonspinres_MW.fx(interval) = output_nonspinres_MW.l(interval);
+ 856           input_power_MW.fx(interval)       = input_power_MW.l(interval)   ;
+ 857           input_regup_MW.fx(interval)       = input_regup_MW.l(interval)   ;
+ 858           input_regdn_MW.fx(interval)       = input_regdn_MW.l(interval)   ;
+ 859           input_spinres_MW.fx(interval)     = input_spinres_MW.l(interval) ;
+ 860           input_nonspinres_MW.fx(interval)  = input_nonspinres_MW.l(interval);
+ 861           storage_level_MWh.fx(interval)    = storage_level_MWh.l(interval);
+ 862           output_active.fx(interval)        = output_active.l(interval)    ;
+ 863           input_active.fx(interval)         = input_active.l(interval)     ;
+ 864           output_start.fx(interval)         = output_start.l(interval)     ;
+ 865           input_start.fx(interval)          = input_start.l(interval)      ;
+ 866           H2_sold.fx(interval)              = H2_sold.l(interval)          ;
+ 867           H2_sold_daily.fx(days)            = H2_sold_daily.l(days)        ;
+ 868   
+ 869  *        calculate the min and max indices for the rolling window
+ 870           operating_period_min_index = ( solve_index-1 ) * operating_period_length + 1;
+ 871           operating_period_max_index = ( solve_index ) * operating_period_length;
+ 872           rolling_window_min_index   = operating_period_min_index;
+ 873           rolling_window_max_index   = operating_period_max_index + look_ahead_length;
+ 874   
+ 875  *        relax variables in current rolling window
+ 876           output_power_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      = 0;
+ 877           output_regup_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      = 0;
+ 878           output_regdn_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      = 0;
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 20
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 879           output_spinres_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )    = 0;
+ 880           output_nonspinres_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) = 0;
+ 881           input_power_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       = 0;
+ 882           input_regup_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       = 0;
+ 883           input_regdn_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       = 0;
+ 884           input_spinres_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )     = 0;
+ 885           input_nonspinres_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )  = 0;
+ 886           storage_level_MWh.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )    = 0;
+ 887           output_active.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )        = 0;
+ 888           input_active.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )         = 0;
+ 889           output_start.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )         = 0;
+ 890           input_start.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )          = 0;
+ 891           H2_sold.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )              = 0;
+ 892           H2_sold_daily.lo(days)$(H2_use=2)                                                                                             = 0;
+ 893   
+ 894           output_power_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      =  inf;
+ 895           output_regup_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      =  inf;
+ 896           output_regdn_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      =  inf;
+ 897           output_spinres_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )    =  inf;
+ 898           output_nonspinres_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) =  inf;
+ 899           input_power_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       =  inf;
+ 900           input_regup_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       =  inf;
+ 901           input_regdn_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       =  inf;
+ 902           input_spinres_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )     =  inf;
+ 903           input_nonspinres_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )  =  inf;
+ 904           storage_level_MWh.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )    =  inf;
+ 905           output_active.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )        =  1;
+ 906           input_active.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )         =  1;
+ 907           output_start.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )         =  1;
+ 908           input_start.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )          =  1;
+ 909   
+ 910           H2_sold.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )              = inf;
+ 911           H2_sold_daily.up(days)$(H2_use=2)                                                                                             = inf;
+ 912   
+ 913   
+ 914           Solve arbitrage_and_AS using MIP maximizing operating_profit;
+****                                                                       $257
+ 915   
+ 916   
+ 917  *        modelstat = 1 means optimal LP solution
+ 918  *        modelstat = 6 means model ran out of time, feasible integer solution found but not yet optimal
+ 919  *        modelstat = 8 means optimal integer solution found
+ 920           if( ( arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=8 ),
+ 921                   solve_index = solve_index + 1;
+ 922   
+ 923                   if ( arbitrage_and_AS.solvestat = 2 or arbitrage_and_AS.solvestat = 3,
+ 924                           optimal_solution_reached = 0;
+ 925                   );
+ 926   
+ 927           elseif ( arbitrage_and_AS.modelstat = 6 ),
+ 928                   solve_index = solve_index + 1;
+ 929                   optimal_solution_reached = 0;
+ 930   
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 21
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 931           else
+ 932                   no_error = 0;
+ 933           );
+ 934   
+ 935  );
+ 936  *end of for loop
+ 937   
+ 938  *calculate values to export in reports
+ 939  Scalars
+ 940           elec_in_MWh              MWh of electricity bought over the simulated time period
+ 941           elec_output_MWh          MWh of electricity sold over the simulated time period
+ 942           output_input_ratio       ratio of elec output to elec output
+ 943           input_capacity_factor    capacity factor for buying side of the facility
+ 944           output_capacity_factor   capacity factor for the selling side of the facility
+ 945           avg_regup_MW             average capacity sold to regup (MW per interval)
+ 946           avg_regdn_MW             average capacity sold to regdn (MW per interval)
+ 947           avg_spinres_MW           average capacity sold to spinning reserve (MW per interval)
+ 948           avg_nonspinres_MW        average capacity sold to nonspinning reserve (MW per interval)
+ 949   
+ 950           num_input_starts         number of compressor or input power system starts
+ 951           num_output_starts        number of turbine or output power system starts
+ 952   
+ 953           fuel_cost                cost of fuel (dollars)
+ 954           elec_cost                cost of electricity (dollars)
+ 955           VOM_cost_val             cost of VOM (dollars)
+ 956           arbitrage_revenue        operating profits due to electricity purchases and sales (dollars)
+ 957           regup_revenue            operating profits due to regulation up AS market (dollars)
+ 958           regdn_revenue            operating profits due to regulation down AS market (dollars)
+ 959           spinres_revenue          operating profits due to spinning reserve AS market (dollars)
+ 960           nonspinres_revenue       operating profits due to nonspinning reserve AS market (dollars)
+ 961           H2_revenue               operating profits due to selling hydrogen (dollars)
+ 962           startup_costs            cost due to startups
+ 963           actual_operating_profit  actual operating profits (dollars)
+ 964           Renewable_pen_input      renewable penetration of input device (%)
+ 965           Renewable_pen_input_net  renewable penetration of input device for net metering (%)
+ 966   
+ 967           Fixed_dem_charge_cost    Yearly Fixed demand charge cost
+ 968           Timed_dem_1_cost         Yearly Timed demand charge cost
+ 969           Timed_dem_2_cost         Yearly Timed demand charge cost
+ 970           Timed_dem_3_cost         Yearly Timed demand charge cost
+ 971           Timed_dem_4_cost         Yearly Timed demand charge cost
+ 972           Timed_dem_5_cost         Yearly Timed demand charge cost
+ 973           Timed_dem_6_cost         Yearly Timed demand charge cost
+ 974           Meter_cost               Yearly cost for operating meter
+ 975   
+ 976           input_cap_cost2          Annualized capital cost
+ 977           output_cap_cost2         Annualized capital cost
+ 978           input_FOM_cost2          Annualized FOM cost
+ 979           output_FOM_cost2         Annualized FOM cost
+ 980           input_VOM_cost2          Annualized VOM cost
+ 981           output_VOM_cost2         Annualized VOM cost
+ 982   
+ 983           Hydrogen_fraction_val    Optimized Capacity Factor (%)
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 22
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+ 984  ;
+ 985   
+ 986  Parameters
+ 987           Fixed_cap_val(months)    determine calculated value for fixed demand (MW)
+ 988           cap_1_val(months)        determine power cap for demand period 1 (MW)
+ 989           cap_2_val(months)        determine power cap for demand period 2 (MW)
+ 990           cap_3_val(months)        determine power cap for demand period 3 (MW)
+ 991           cap_4_val(months)        determine power cap for demand period 4 (MW)
+ 992           cap_5_val(months)        determine power cap for demand period 5 (MW)
+ 993           cap_6_val(months)        determine power cap for demand period 6 (MW)
+ 994  ;
+ 995   
+ 996  * calculate values to be output in the report
+ 997  Fixed_cap_val(months) = Fixed_cap.l(months);
+****                                    $141
+ 998  cap_1_val(months) = cap_1.l(months);
+****                            $141
+ 999  cap_2_val(months) = cap_2.l(months);
+****                            $141
+1000  cap_3_val(months) = cap_3.l(months);
+****                            $141
+1001  cap_4_val(months) = cap_4.l(months);
+****                            $141
+1002  cap_5_val(months) = cap_5.l(months);
+****                            $141
+1003  cap_6_val(months) = cap_6.l(months);
+****                            $141
+1004  Fixed_dem_charge_cost = -sum(months, Fixed_cap.l(months) * Fixed_dem(months));
+****                                                                     $141
+1005  Timed_dem_1_cost = -sum(months, cap_1.l(months) * Timed_dem("1"));
+****                                                            $141
+1006  Timed_dem_2_cost = -sum(months, cap_2.l(months) * Timed_dem("2"));
+1007  Timed_dem_3_cost = -sum(months, cap_3.l(months) * Timed_dem("3"));
+1008  Timed_dem_4_cost = -sum(months, cap_4.l(months) * Timed_dem("4"));
+1009  Timed_dem_5_cost = -sum(months, cap_5.l(months) * Timed_dem("5"));
+1010  Timed_dem_6_cost = -sum(months, cap_6.l(months) * Timed_dem("6"));
+1011  Meter_cost = -(meter_mnth_chg("1") * 12);
+****                              $141
+1012   
+1013  elec_in_MWh  = sum(interval,  (input_power_MW.l(interval) + Load_profile(interval)) * interval_length );
+****                                                                         $141
+1014  elec_output_MWh = sum(interval, output_power_MW.l(interval) * interval_length );
+1015  output_input_ratio = elec_output_MWh / elec_in_MWh;
+1016  input_capacity_factor  =  elec_in_MWh / (  input_capacity_MW * card(interval) * interval_length );
+1017  output_capacity_factor = elec_output_MWh / ( output_capacity_MW * card(interval) * interval_length );
+1018  avg_regup_MW = sum(interval, output_regup_MW.l(interval) + input_regup_MW.l(interval) ) / card(interval);
+1019  avg_regdn_MW = sum(interval, output_regdn_MW.l(interval) + input_regdn_MW.l(interval) ) / card(interval);
+1020  avg_spinres_MW = sum(interval, output_spinres_MW.l(interval) + input_spinres_MW.l(interval) ) / card(interval);
+1021  avg_nonspinres_MW = sum(interval, output_nonspinres_MW.l(interval) + input_nonspinres_MW.l(interval) ) / card(interval);
+1022   
+1023  num_input_starts = sum(interval, input_start.l(interval) );
+1024  num_output_starts = sum(interval, output_start.l(interval) );
+1025   
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 23
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+1026  fuel_cost = sum(interval,- output_heat_rate * NG_price(interval) * output_power_MW.l(interval) * interval_length
+1027                           - input_heat_rate * NG_price(interval) * input_power_MW.l(interval) * interval_length);
+1028  elec_cost = sum(interval,((elec_sale_price(interval) * output_power_MW.l(interval)) - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval))) * interval_length);
+****                                                                                                                                                $141
+1029  VOM_cost_val = sum(interval,- VOM_cost * output_power_MW.l(interval) * interval_length);
+1030  arbitrage_revenue = sum(interval,
+1031                          ((elec_sale_price(interval) * (output_power_MW.l(interval)))
+1032                          - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval))) * interval_length
+1033                          - output_heat_rate * NG_price(interval) * output_power_MW.l(interval) * interval_length
+1034                          - input_heat_rate * NG_price(interval) * input_power_MW.l(interval) * interval_length
+1035                          - VOM_cost * output_power_MW.l(interval) * interval_length
+1036                          );
+1037  * +Renewable_power(interval)-input_power_MW_ren.l(interval)
+1038   
+1039  input_cap_cost2  = -input_cap_cost * input_capacity_MW * (interest_rate+(interest_rate/(power((1+interest_rate),input_lifetime)-1)));
+1040  output_cap_cost2 = -output_cap_cost * output_capacity_MW * (interest_rate+(interest_rate/(power((1+interest_rate),output_lifetime)-1)));
+1041  input_FOM_cost2  = -input_FOM_cost * input_capacity_MW * input_lifetime * (interest_rate+(interest_rate/(power((1+interest_rate),input_lifetime)-1)));
+1042  output_FOM_cost2 = -output_FOM_cost * output_capacity_MW * output_lifetime * (interest_rate+(interest_rate/(power((1+interest_rate),output_lifetime)-1)));
+1043  input_VOM_cost2  = -elec_in_MWh * input_VOM_cost;
+1044  output_VOM_cost2 = -elec_output_MWh * output_VOM_cost;
+1045   
+1046  regup_revenue = sum(interval, ( regup_price(interval) - reg_cost ) * ( output_regup_MW.l(interval) + input_regup_MW.l(interval) ) * interval_length );
+****                                            $141
+1047  regdn_revenue = sum(interval, ( regdn_price(interval) - reg_cost ) * ( output_regdn_MW.l(interval) + input_regdn_MW.l(interval) ) * interval_length );
+****                                            $141
+1048  spinres_revenue = sum(interval, spinres_price(interval) * ( output_spinres_MW.l(interval) + input_spinres_MW.l(interval) ) * interval_length );
+****                                              $141
+1049  nonspinres_revenue = sum(interval, nonspinres_price(interval) * ( output_nonspinres_MW.l(interval) + input_nonspinres_MW.l(interval) ) * interval_length );
+****                                                    $141
+1050  startup_costs = sum(interval, output_startup_cost * output_capacity_MW * output_start.l(interval) + input_startup_cost * input_capacity_MW * input_start.l(interval) );
+1051  H2_revenue = sum(interval, H2_price(interval) * H2_sold.l(interval));
+1052  actual_operating_profit = arbitrage_revenue + regup_revenue + regdn_revenue + spinres_revenue + nonspinres_revenue + H2_revenue - startup_costs
+1053                          + Fixed_dem_charge_cost + Timed_dem_1_cost + Timed_dem_2_cost + Timed_dem_3_cost + Timed_dem_4_cost + Timed_dem_5_cost + Timed_dem_6_cost + Meter_cost
+1054                          + input_cap_cost2 + output_cap_cost2 + input_FOM_cost2 + output_FOM_cost2 + input_VOM_cost2 + output_VOM_cost2;
+1055   
+1056  Hydrogen_fraction_val = Hydrogen_fraction.l*100;
+****                                            $141
+1057   
+1058  Renewable_pen_input = sum(interval,input_power_MW_ren.l(interval) )/sum(interval,input_power_MW.l(interval));
+****                                                        $141
+1059  Renewable_pen_input_net = sum(interval,Renewable_power(interval) )/sum(interval,input_power_MW.l(interval));
+1060  if (Renewable_pen_input_net>1,
+1061           Renewable_pen_input_net=1;
+1062           );
+1063   
+1064   
+1065   
+1066  if (1=1,
+1067  option decimals=8;
+1068  display elec_in_MWh;
+1069  display elec_output_MWh;
+1070  display fuel_cost;
+1071  display elec_cost;
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 24
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+1072  display VOM_cost_val;
+1073  display H2_revenue;
+1074  display regup_revenue;
+1075  display regdn_revenue;
+1076  display spinres_revenue;
+1077  display nonspinres_revenue;
+1078  display arbitrage_revenue;
+1079  display actual_operating_profit;
+1080  * display Fixed_cap_val;
+1081  * display cap_1_val;
+1082  * display cap_2_val;
+1083  * display cap_3_val;
+1084  * display cap_4_val;
+1085  * display cap_5_val;
+1086  * display cap_6_val;
+1087  * display Hydrogen_fraction_val;
+1088  *display current_interval;
+1089  *display next_interval;
+1090  *display current_storage_lvl;
+1091  *display current_monthly_max;
+1092  *display max_interval;
+1093  );
+1094   
+1095  * - - - - write output to files - - - -
+1096  if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_and_AS.modelstat=8),
+1097   
+1098           put input_echo_file;
+1099                   PUT 'Run on a MSNT machine on 04/12/17 11:27:33.' /;
+1100                   put 'Optimal solution found within time limit:,',
+1101                   if ( optimal_solution_reached = 1,
+1102                           put 'Yes' /;
+1103                   else
+1104                           put 'No' /;
+1105                   );
+1106                   put /;
+1107                   put 'zone, NA' /;
+1108                   put 'year, NA' /;
+1109                   put 'interval length (hours), ', interval_length /;
+1110                   put 'operating period length (hours), ' operating_period_length /;
+1111                   put 'additional look-ahead (hours), ' look_ahead_length /;
+1112                   put 'output capacity (MW), ', output_capacity_MW /;
+1113                   put 'input capacity (MW), ', input_capacity_MW   /;
+1114                   put 'storage capacity (hours), ', storage_capacity_hours /;
+1115                   put 'input efficiency (%), ', input_efficiency /;
+1116                   put 'output efficiency (%), ', output_efficiency /;
+1117                   put 'input heat rate (MMBtu/MWh), ', input_heat_rate /;
+1118                   put 'ouptut heat rate (MMBtu/MWh), ', output_heat_rate /;
+1119                   put 'variable O&M cost, ', VOM_cost /;
+1120                   put 'regulation cost, ', reg_cost /;
+1121                   put 'hydrogen use, ', H2_use /;
+1122                   put /;
+1123                   put 'input' /;
+1124                   put 'LSL limit fraction, ', input_LSL_fraction /;
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 25
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+1125                   put 'reg up limit fraction, ', input_regup_limit_fraction /;
+1126                   put 'reg down limit fraction, ', input_regdn_limit_fraction /;
+1127                   put 'spining reserve limit fraction, ', input_spinres_limit_fraction /;
+1128                   put 'startup cost ($/MW-start), ', input_startup_cost:0:10 /;
+1129                   put 'minimum run intervals, ' min_input_on_intervals /;
+1130                   put /;
+1131                   put 'output' /;
+1132                   put 'LSL limit fraction, ', output_LSL_fraction /;
+1133                   put 'reg up limit fraction, ', output_regup_limit_fraction /;
+1134                   put 'reg down limit fraction, ', output_regdn_limit_fraction /;
+1135                   put 'spining reserve limit fraction, ', output_spinres_limit_fraction /;
+1136                   put 'startup cost ($/MW-start), ', output_startup_cost:0:10 /;
+1137                   put 'minimum run intervals, ', min_output_on_intervals /;
+1138                   put /;
+1139                   put 'Int, Elec Purchase ($/MWh), Elec Sale ($/MWh), Reg Up ($/MW), Reg Dn ($/MW), Spin Res ($/MW), Nospin Res ($/MW), Nat Gas ($/MMBTU), H2 ($/kg), Renewable In (MW), Load Profile (MW), Meter ($/mth)' /;
+1140                   loop(interval, put      ord(interval),',',
+1141                                           elec_purchase_price(interval),',',
+1142                                           elec_sale_price(interval),',',
+1143                                           regup_price(interval),',',
+1144                                           regdn_price(interval),',',
+1145                                           spinres_price(interval),',',
+1146                                           nonspinres_price(interval),',',
+1147                                           NG_price(interval),',',
+1148                                           H2_price(interval),',',
+1149                                           Renewable_power(interval),',',
+1150                                           Load_profile(interval),',',
+1151                                           meter_mnth_chg(interval) /;
+1152                   );
+1153   
+1154           put results_file;
+1155                   PUT 'Run on a MSNT machine on 04/12/17 11:27:33.' /;
+1156                   put 'Optimal solution found within time limit:,',
+1157                   if ( optimal_solution_reached = 1,
+1158                           put 'Yes' /;
+1159                   else
+1160                           put 'No' /;
+1161                   );
+1162                   put /;
+1163                   put 'Renewable Capacity (MW), ', Renewable_MW /;
+1164                   put 'Renewable Penetration for Input (%), ', Renewable_pen_input /;
+1165                   put 'hydrogen use, ', H2_use /;
+1166                   put /;
+1167                   put 'actual operating profit, ', actual_operating_profit /;
+1168                   put 'total electricity input (MWh), ', elec_in_MWh /;
+1169                   put 'total electricity output (MWh), ', elec_output_MWh /;
+1170                   put 'output to input ratio, ', output_input_ratio /;
+1171                   put 'input capacity factor, ', input_capacity_factor /;
+1172                   put 'output capacity factor, ', output_capacity_factor /;
+1173                   put 'average regup (MW), ', avg_regup_MW /;
+1174                   put 'average regdn (MW), ', avg_regdn_MW /;
+1175                   put 'average spinres (MW), ', avg_spinres_MW /;
+1176                   put 'average nonspinres (MW), ' avg_nonspinres_MW /;
+1177                   put 'number of input power system starts, ' num_input_starts /;
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 26
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+1178                   put 'number of output power system starts, ' num_output_starts /;
+1179                   put 'arbitrage revenue ($),', arbitrage_revenue /;
+1180                   put 'regup revenue ($), ', regup_revenue /;
+1181                   put 'regdn revenue ($), ', regdn_revenue /;
+1182                   put 'spinres revenue ($), ', spinres_revenue /;
+1183                   put 'nonspinres revenue ($), ', nonspinres_revenue /;
+1184                   put 'hydrogen revenue ($), ', H2_revenue /;
+1185                   put 'startup costs ($), ', startup_costs /;
+1186                   put /;
+1187                   put 'Interval, In Pwr (MW), Out Pwr (MW), Storage Level (MW-h), In Reg Up (MW), Out Reg Up (MW), In Reg Dn (MW), Out Reg Dn (MW), In Spin Res (MW), Out Spin Res (MW), In Nonspin (MW), Out Nonspin (MW), H2 Out (kg), Renewable Input (
+      MW), Nonrenewable Input (MW)'/;
+1188                   loop(interval, put      ord(interval),',',
+1189                                           input_power_MW.l(interval),',',
+1190                                           output_power_MW.l(interval),',',
+1191                                           storage_level_MWh.l(interval),',',
+1192                                           input_regup_MW.l(interval),',',
+1193                                           output_regup_MW.l(interval),',',
+1194                                           input_regdn_MW.l(interval),',',
+1195                                           output_regdn_MW.l(interval),',',
+1196                                           input_spinres_MW.l(interval),',',
+1197                                           output_spinres_MW.l(interval),',',
+1198                                           input_nonspinres_MW.l(interval),',',
+1199                                           output_nonspinres_MW.l(interval),',',
+1200                                           H2_sold.l(interval),',',
+1201                                           input_power_MW_ren.l(interval),',',
+1202                                           input_power_MW_non_ren.l(interval) /;
+1203                   );
+1204   
+1205           put summary_file;
+1206                   PUT 'Run on a MSNT machine on 04/12/17 11:27:33.' /;
+1207                   put 'Optimal solution found within time limit:,',
+1208                   if ( optimal_solution_reached = 1,
+1209                           put 'Yes' /;
+1210                   else
+1211                           put 'No' /;
+1212                   );
+1213                   put /;
+1214                   put 'Renewable Capacity (MW), ', Renewable_MW /;
+1215                   put 'Renewable Penetration for Input (%), ', Renewable_pen_input /;
+1216                   put 'interval length (hours), ', interval_length /;
+1217                   put 'operating period length (hours), ' operating_period_length /;
+1218                   put 'additional look-ahead (hours), ' look_ahead_length /;
+1219                   put 'output capacity (MW), ', output_capacity_MW /;
+1220                   put 'input capacity (MW), ', input_capacity_MW   /;
+1221                   put 'storage capacity (hours), ', storage_capacity_hours /
+1222                   put 'input efficiency (%), ', input_efficiency /;
+1223                   put 'output efficiency (%), ', output_efficiency /;
+1224                   put 'input heat rate (MMBtu/MWh), ', input_heat_rate /;
+1225                   put 'output heat rate (MMBtu/MWh), ', output_heat_rate /;
+1226                   put 'variable O&M cost, ', VOM_cost /;
+1227                   put 'regulation cost, ', reg_cost /;
+1228                   put 'hydrogen use, ', H2_use /;
+1229                   put /;
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 27
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+1230                   put 'input' /;
+1231                   put 'LSL limit fraction, ', input_LSL_fraction /;
+1232                   put 'reg up limit fraction, ', input_regup_limit_fraction /;
+1233                   put 'reg down limit fraction, ', input_regdn_limit_fraction /;
+1234                   put 'spining reserve limit fraction, ', input_spinres_limit_fraction /;
+1235                   put 'startup cost ($/MW-start), ', input_startup_cost:0:10 /;
+1236                   put 'minimum run intervals, ' min_input_on_intervals /;
+1237                   put /;
+1238                   put 'output' /;
+1239                   put 'LSL limit fraction, ', output_LSL_fraction /;
+1240                   put 'reg up limit fraction, ', output_regup_limit_fraction /;
+1241                   put 'reg down limit fraction, ', output_regdn_limit_fraction /;
+1242                   put 'spining reserve limit fraction, ', output_spinres_limit_fraction /;
+1243                   put 'startup cost ($/MW-start), ', output_startup_cost:0:10 /;
+1244                   put 'minimum run intervals, ', min_output_on_intervals /;
+1245                   put /;
+1246                   put 'actual operating profit ($), ', actual_operating_profit /;
+1247                   put 'total electricity input (MWh), ', elec_in_MWh /;
+1248                   put 'total electricity output (MWh), ', elec_output_MWh /;
+1249                   put 'output to input ratio, ', output_input_ratio /;
+1250                   put 'input capacity factor, ', input_capacity_factor /;
+1251                   put 'output capacity factor, ', output_capacity_factor /;
+1252                   put 'average regup (MW), ', avg_regup_MW /;
+1253                   put 'average regdn (MW), ', avg_regdn_MW /;
+1254                   put 'average spinres (MW), ', avg_spinres_MW /;
+1255                   put 'average nonspinres (MW), ' avg_nonspinres_MW /;
+1256                   put 'number of input power system starts, ' num_input_starts /;
+1257                   put 'number of output power system starts, ' num_output_starts /;
+1258                   put 'arbitrage revenue ($),', arbitrage_revenue /;
+1259                   put 'regup revenue ($), ', regup_revenue /;
+1260                   put 'regdn revenue ($), ', regdn_revenue /;
+1261                   put 'spinres revenue ($), ', spinres_revenue /;
+1262                   put 'nonspinres revenue ($), ', nonspinres_revenue /;
+1263                   put 'hydrogen revenue ($), ', H2_revenue /;
+1264                   put 'startup costs ($), ', startup_costs /;
+1265                   put 'Fixed demand charge ($), ',Fixed_dem_charge_cost/;
+1266                   put 'Timed demand charge 1 ($), ',Timed_dem_1_cost/;
+1267                   put 'Timed demand charge 2 ($), ',Timed_dem_2_cost/;
+1268                   put 'Timed demand charge 3 ($), ',Timed_dem_3_cost/;
+1269                   put 'Timed demand charge 4 ($), ',Timed_dem_4_cost/;
+1270                   put 'Timed demand charge 5 ($), ',Timed_dem_5_cost/;
+1271                   put 'Timed demand charge 6 ($), ',Timed_dem_6_cost/;
+1272                   put 'Meter cost ($), ',Meter_cost/;
+1273                   put 'Renewable Penetration net meter (%), ', Renewable_pen_input_net /;
+1274                   put 'Input annualized capital cost ($), ',input_cap_cost2 /;
+1275                   put 'Output annualized capital cost ($), ',output_cap_cost2 /;
+1276                   put 'Input FOM cost ($), ',input_FOM_cost2 /;
+1277                   put 'Output FOM cost ($), ',output_FOM_cost2 /;
+1278                   put 'Input VOM cost ($), ',input_VOM_cost2 /;
+1279                   put 'Output VOM cost ($), ',output_VOM_cost2 /;
+1280                   put /;
+1281   
+1282           if (next_interval>1,
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 28
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+C o m p i l a t i o n
+
+
+1283                 put RT_out_file;
+1284                         put 'Interval, Electrolyzer Setpoint (MW)' /;
+1285                         loop(next_int, put  next_interval,',',
+1286                                             input_power_MW.l(next_int) /;
+1287                         );
+1288           );
+1289   
+1290  else
+1291  *         put input_echo_file;
+1292  *                 put 'Error--solution not found.';
+1293  *         put results_file;
+1294  *                 put 'Error--solution not found.';
+1295           put summary_file;
+1296                   put 'Error--solution not found.';
+1297  *         put RT_out_file;
+1298  *                 put 'Error--soultion not found.';
+1299  );
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 29
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+Error Messages
+
+
+120  Unknown identifier entered as set
+141  Symbol declared but no values have been assigned. Check for missing
+        data definition, assignment, data loading or implicit assignment
+        via a solve statement.
+        A wild shot: You may have spurious commas in the explanatory
+        text of a declaration. Check symbol reference list.
+171  Domain violation for set
+257  Solve statement not checked because of previous errors
+282  Unable to open include file
+
+**** 197 ERROR(S)   0 WARNING(S)
+GAMS 24.8.3  r60202 Released Jan 28, 2017 WEX-WEI x86 64bit/MS Windows                                                                                                                                                                04/12/17 11:27:33 Page 30
+Arbitrage and Ancillary Services for a Price Taking Storage Facility
+Include File Summary
+
+
+   SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
+
+     1        1 INPUT          0       0  C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+     2       30 CALL           1      30  if not exist Output\PGE\nul mkdir Output\PGE
+
+
+COMPILATION TIME     =        0.031 SECONDS      4 MB  24.8.3 r60202 WEX-WEI
+
+
+USER: Large MUD - 20 User License                    G160819:0857CO-GEN
+      National Renewable Energy Laboratory (NREL), Strategic EnerDC3485
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+Output     C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.lst
+
+**** USER ERROR(S) ENCOUNTERED
