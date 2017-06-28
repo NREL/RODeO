@@ -55,13 +55,14 @@ $if not set interest_rate_inst     $set interest_rate_inst     0.07
 
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   8
+$if not set storage_cap_instance   $set storage_cap_instance   4
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
 $if not set ramp_penalty_instance  $set ramp_penalty_instance  0
 
 * Next two values change the resoultion of the optimization
 *    hourly: 8760, 1     15min: 35040, 0.25       5min: 105120, 0.08333333333
+$if not set op_length_instance     $set op_length_instance     8760
 $if not set op_period_instance     $set op_period_instance     8760
 $if not set int_length_instance    $set int_length_instance    1
 
@@ -105,7 +106,7 @@ Files
 ;
 
 Sets
-         interval          hourly time intervals in study period /1 * %op_period_instance%/
+         interval          hourly time intervals in study period /1 * %op_legnth_instance%/
          months            months in study period                /1 * 12/
          days              number of daily periods in study      /1 * 365/
          timed_dem_period  number of timed demand periods        /1 * 6/
@@ -140,8 +141,8 @@ $include /%indir%\%load_prof_instance%.txt
 
 Scalars
          interval_length length of each interval (hours) /%int_length_instance%/
+         optimization_length number of intervals in entire analysis /%op_legnth_instance%/
          operating_period_length number of intervals in each operating period (rolling solution window) /%op_period_instance%/
-*1 week = 168 hourly intervals
 *set operating period length to full year length (8760 or 8784) to do full-year optimization without rolling window
          look_ahead_length number of additional intervals to look past the current operating period /%lookahead_instance%/
 

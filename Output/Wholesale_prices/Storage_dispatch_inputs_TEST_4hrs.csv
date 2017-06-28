@@ -1,10 +1,10 @@
-Run on a MSNT machine on 06/26/17 20:55:49.
+Run on a MSNT machine on 06/28/17 15:07:57.
 Optimal solution found within time limit:,Yes
 
 zone, NA
 year, NA
 interval length (hours),         1.00
-operating period length (hours),      8760.00
+operating period length (hours),       730.00
 additional look-ahead (hours),         0.00
 output capacity (MW),      1000.00
 input capacity (MW),      1000.00
