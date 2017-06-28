@@ -21,12 +21,14 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     574cbd8e5457a37c445e629e_hourly
+$if not set elec_rate_instance     $set elec_rate_instance     Generic_8760
 $if not set add_param_instance     $set add_param_instance     additional_parameters_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_hourly
 $if not set load_prof_instance     $set load_prof_instance     basic_building_0_hourly
-$if not set outdir                 $set outdir                 RODeO\Output\PGE
-$if not set indir                  $set indir                  RODeO\Input_files\Default3\hourly_tariffs
+$if not set energy_price_inst      $set energy_price_inst      574cbd8e5457a37c445e629e_hourly
+$if not set AS_price_inst          $set AS_price_inst          Ancillary_services_hourly
+$if not set outdir                 $set outdir                 RODeO\Output\Wholesale_prices
+$if not set indir                  $set indir                  RODeO\Input_files\Wholesale_prices
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
@@ -34,12 +36,12 @@ $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
 $if not set input_cap_instance     $set input_cap_instance     1000
-$if not set output_cap_instance    $set output_cap_instance    0
+$if not set output_cap_instance    $set output_cap_instance    1000
 $if not set input_LSL_instance     $set input_LSL_instance     0.1
-$if not set output_LSL_instance    $set output_LSL_instance    0
+$if not set output_LSL_instance    $set output_LSL_instance    0.1
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0.00001
-$if not set Output_start_cost_inst $set Output_start_cost_inst 0
-$if not set input_efficiency_inst  $set input_efficiency_inst  0.613668913
+$if not set Output_start_cost_inst $set Output_start_cost_inst 0.00001
+$if not set input_efficiency_inst  $set input_efficiency_inst  0.85
 $if not set output_efficiency_inst $set output_efficiency_inst 1
 $if not set input_cap_cost_inst    $set input_cap_cost_inst    1200000
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
@@ -53,7 +55,7 @@ $if not set interest_rate_inst     $set interest_rate_inst     0.07
 
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   8
+$if not set storage_cap_instance   $set storage_cap_instance   4
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
 $if not set ramp_penalty_instance  $set ramp_penalty_instance  0
@@ -65,14 +67,16 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   0
-$if not set file_name_instance     $set file_name_instance     "PGE_TEST"
+$if not set file_name_instance     $set file_name_instance     "TEST"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
-$if not set H2_use_instance        $set H2_use_instance        1
+$if not set H2_use_instance        $set H2_use_instance        0
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  0
 $if not set CF_opt_instance        $set CF_opt_instance        0
+$if not set run_retail_instance    $set run_retail_instance    0
+$if not set one_active_device_inst $set one_active_device_inst 1
 
 * Next values are used to initialize for real-time operation and shorten the run-time
 *    To turn off set current_int = -1, next_int = 1 and max_int_instance = Inf
@@ -82,6 +86,7 @@ $if not set current_stor_intance   $set current_stor_intance   0.5
 $if not set current_max_instance   $set current_max_instance   0.8
 $if not set max_int_instance       $set max_int_instance       Inf
 $if not set read_MPC_file_instance $set read_MPC_file_instance 0
+
 
 *        energy_only_instance = 0, 1 (0 = Energy only operation, 1 = All ancillary services included)
 *        H2_consume_adj_inst = adjusts the amount of H2 consumed from the uploaded "H2_consumed" file as capacity factor (%)
@@ -104,7 +109,6 @@ Sets
          months            months in study period                /1 * 12/
          days              number of daily periods in study      /1 * 365/
          timed_dem_period  number of timed demand periods        /1 * 6/
-         input_value       single value
 ;
 
 Parameters
@@ -188,6 +192,8 @@ Scalars
          NG_price_adj "Average price of natural gas ($/MMBTU)" /%NG_price_adj_instance%/
          Renewable_MW "Installed renewable capacity (MW)" /%Renewable_MW_instance%/
          CF_opt "Select optimization criteria for system" /%CF_opt_instance%/
+         run_retail "Select to run retail or wholesale analysis (0=wholesale, 1=retail)" /%run_retail_instance%/
+         one_active_device "Enables equation to ensure that charge/discharge do not happen simultaneously" /%one_active_device_inst%/
 
          min_output_on_intervals 'minimum number of intervals the output side of the facility can be on at a time' /%min_runtime_instance%/
          min_input_on_intervals  'minimum number of intervals the input side of the facility can be on at a time' /%min_runtime_instance%/
@@ -205,47 +211,83 @@ Set
          next_int(interval)      Next interval           /%next_int_instance%/
 ;
 
-$ontext
+* Load csv files for wholesale electricity price analysis (energy and AS)
+$call CSV2GDX %indir%\%energy_price_inst%.csv Output=%indir%\%energy_price_inst%.gdx ID=elec_purchase_price_interim UseHeader=y Index=1 Values=2
+parameter elec_purchase_price_interim(interval)   "electricity price in each interval ($/MWh)"
+$GDXIN %indir%\%energy_price_inst%.gdx
+$LOAD elec_purchase_price_interim
+$GDXIN
+$call CSV2GDX %indir%\%AS_price_inst%.csv Output=%indir%\%AS_price_inst%.gdx ID=regup_price_interim UseHeader=y Index=1 Values=2
+parameter regup_price_interim(interval)
+$GDXIN %indir%\%AS_price_inst%.gdx
+$LOAD regup_price_interim
+$GDXIN
+$call CSV2GDX %indir%\%AS_price_inst%.csv Output=%indir%\%AS_price_inst%.gdx ID=regdn_price_interim UseHeader=y Index=1 Values=3
+parameter regdn_price_interim(interval)
+$GDXIN %indir%\%AS_price_inst%.gdx
+$LOAD regdn_price_interim
+$GDXIN
+$call CSV2GDX %indir%\%AS_price_inst%.csv Output=%indir%\%AS_price_inst%.gdx ID=spinres_price_interim UseHeader=y Index=1 Values=4
+parameter spinres_price_interim(interval)
+$GDXIN %indir%\%AS_price_inst%.gdx
+$LOAD spinres_price_interim
+$GDXIN
+$call CSV2GDX %indir%\%AS_price_inst%.csv Output=%indir%\%AS_price_inst%.gdx ID=nonspinres_price_interim UseHeader=y Index=1 Values=5
+parameter nonspinres_price_interim(interval)
+$GDXIN %indir%\%AS_price_inst%.gdx
+$LOAD nonspinres_price_interim
+$GDXIN
+
+if (run_retail=0,
+         elec_purchase_price(interval) = elec_purchase_price_interim(interval);
+         elec_sale_price(interval)     = elec_purchase_price(interval);
+         regup_price(interval)         = regup_price_interim(interval);
+         regdn_price(interval)         = regdn_price_interim(interval);
+         spinres_price(interval)       = spinres_price_interim(interval);
+         nonspinres_price(interval)    = nonspinres_price_interim(interval);
+);
+
+
 * Loads predictive controller values from excel file
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_interval2 rng=A2 Dim=0
+$call CSV2GDX %indir%\controller_input_values.csv Output=%indir%\controller_input_values.gdx ID=current_interval2 UseHeader=y Values=1
 scalar current_interval2
 $GDXIN %indir%\controller_input_values.gdx
 $LOAD current_interval2
 $GDXIN
 
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=next_interval2 rng=B2 Dim=0
+$call CSV2GDX %indir%\controller_input_values.csv Output=%indir%\controller_input_values.gdx ID=next_interval2 UseHeader=y Values=2
 scalar next_interval2
 $GDXIN %indir%\controller_input_values.gdx
 $LOAD next_interval2
 $GDXIN
 
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_storage_lvl2 rng=C2 Dim=0
+$call CSV2GDX %indir%\controller_input_values.csv Output=%indir%\controller_input_values.gdx ID=current_storage_lvl2 UseHeader=y Values=3
 scalar current_storage_lvl2
 $GDXIN %indir%\controller_input_values.gdx
 $LOAD current_storage_lvl2
 $GDXIN
 
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=current_monthly_max2 rng=D2 Dim=0
+$call CSV2GDX %indir%\controller_input_values.csv Output=%indir%\controller_input_values.gdx ID=current_monthly_max2 UseHeader=y Values=4
 scalar current_monthly_max2
 $GDXIN %indir%\controller_input_values.gdx
 $LOAD current_monthly_max2
 $GDXIN
 
-$call GDXXRW.exe I=%indir%\controller_input_values.xlsx O=%indir%\controller_input_values.gdx par=max_interval2 rng=E2 Dim=0
+$call CSV2GDX %indir%\controller_input_values.csv Output=%indir%\controller_input_values.gdx ID=max_interval2 UseHeader=y Values=5
 scalar max_interval2
 $GDXIN %indir%\controller_input_values.gdx
 $LOAD max_interval2
 $GDXIN
 
 if (read_MPC_file=1,
-         current_interval = current_interval2;
-         next_interval = next_interval2;
+         current_interval    = current_interval2;
+         next_interval       = next_interval2;
          current_storage_lvl = current_storage_lvl2;
          current_monthly_max = current_monthly_max2;
-         max_interval = max_interval2;
+         max_interval        = max_interval2;
 else
 );
-$offtext
+
 
 *reseed the random number generator
 execseed = 1 + gmillisec(jnow);
@@ -501,7 +543,7 @@ Equations
          output_ramp_eqn(interval)       equation to limit ramping with penalty price
          input_ramp_eqn(interval)        equation to limit ramping with penalty price
 
-**         one_active_device_eqn(interval) equation to ensure that both generator and pump cannot be simultaneously active
+         one_active_device_eqn(interval) equation to ensure that both generator and pump cannot be simultaneously active
 ;
 
 * Adjusts the price of natural gas to the selected value "NG_price_adj"
@@ -762,8 +804,8 @@ RT_eqn3(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) 
 RT_eqn4(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>=max_interval and current_storage_lvl>=0)..
          storage_level_MWh(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
 
-*one_active_device_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
-*         input_active(interval) + output_active(interval) =l= 1;
+one_active_device_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and one_active_device=1)..
+         input_active(interval) + output_active(interval) =l= 1;
 
 
 alias (interval, interval_alias);

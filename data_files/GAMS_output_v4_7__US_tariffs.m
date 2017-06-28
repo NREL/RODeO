@@ -4,8 +4,8 @@ clear all, close all, clc
 % dir0 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\'];
 % dir1 = [dir0,'data\'];
 
-dir0 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\TXT_files\'];    % Output folder
-dir1 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\CSV_data\'];     % Input folder
+dir0 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\TXT_files\Generic_file\'];    % Output folder
+dir1 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\CSV_data\Generic_file\'];     % Input folder
 cd(dir1);
 
 % Prompt for which files to output
@@ -322,7 +322,7 @@ if strcmp(write_regular_files,'yes')
     init_val = 1;  % Used to adjust initial for loop value and for progress tracking
     for i5=init_val:length(Scenarios1)
         filename2_short = filename2{i5};        
-        fileID = fopen([dir0,'Regular_tariffs\',char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
+        fileID = fopen([dir0,char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
         data_most2 = [data11,data11B,data22];    % Combine energy price, AS price and other components listed in 'Inputs1'
         % data_most2(:,3:6,:) = 0;                        % AS     Remove AS prices
         % data_most2(:,[3,6],:) = 0;                      % REG    Remove SP NS prices
@@ -374,7 +374,7 @@ if strcmp(write_regular_files,'yes')
     clear data_most2
     
     %%% Create file with additional parameters
-    fileID = fopen([dir0,'Regular_tariffs\additional_parameters',add_txt1,'.txt'],'wt');        
+    fileID = fopen([dir0,'additional_parameters',add_txt1,'.txt'],'wt');        
     for i7=1:length(Inputs2)
         fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs2{i7},'/');
         for i8=1:Year_length*interval_length
@@ -386,7 +386,7 @@ if strcmp(write_regular_files,'yes')
     fclose(fileID);
     
     %%% Create file with no renewable profiles
-    fileID = fopen([dir0,'Regular_tariffs\renewable_profiles_none',add_txt1,'.txt'],'wt');    
+    fileID = fopen([dir0,'renewable_profiles_none',add_txt1,'.txt'],'wt');    
     fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs3{1},'/');
     for i7=1:length(Inputs3)
         for i8=1:Year_length*interval_length
@@ -398,7 +398,7 @@ if strcmp(write_regular_files,'yes')
     fclose(fileID);
     
     %%% Create file with renewable profiles
-    fileID = fopen([dir0,'Regular_tariffs\renewable_profiles_PV',add_txt1,'.txt'],'wt');    
+    fileID = fopen([dir0,'renewable_profiles_PV',add_txt1,'.txt'],'wt');    
     fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs3{1},'/');
     for i7=1:length(Inputs3)
         for i8=1:Year_length*interval_length
@@ -409,7 +409,7 @@ if strcmp(write_regular_files,'yes')
     end
     fclose(fileID);
     
-    fileID = fopen([dir0,'Regular_tariffs\renewable_profiles_WIND',add_txt1,'.txt'],'wt');    
+    fileID = fopen([dir0,'renewable_profiles_WIND',add_txt1,'.txt'],'wt');    
     fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs3{1},'/');
     for i7=1:length(Inputs3)
         for i8=1:Year_length*interval_length
