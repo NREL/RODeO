@@ -21,14 +21,14 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     Generic_8760
+$if not set elec_rate_instance     $set elec_rate_instance     574cbd8e5457a37c445e629e_hourly
 $if not set add_param_instance     $set add_param_instance     additional_parameters_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_hourly
 $if not set load_prof_instance     $set load_prof_instance     basic_building_0_hourly
-$if not set energy_price_inst      $set energy_price_inst      574cbd8e5457a37c445e629e_hourly
+$if not set energy_price_inst      $set energy_price_inst      Empty_hourly
 $if not set AS_price_inst          $set AS_price_inst          Ancillary_services_hourly
-$if not set outdir                 $set outdir                 RODeO\Output\Wholesale_prices
-$if not set indir                  $set indir                  RODeO\Input_files\Wholesale_prices
+$if not set outdir                 $set outdir                 RODeO\Output\PGE
+$if not set indir                  $set indir                  RODeO\Input_files\Default3\hourly_tariffs
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
@@ -36,12 +36,12 @@ $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
 $if not set input_cap_instance     $set input_cap_instance     1000
-$if not set output_cap_instance    $set output_cap_instance    1000
+$if not set output_cap_instance    $set output_cap_instance    0
 $if not set input_LSL_instance     $set input_LSL_instance     0.1
-$if not set output_LSL_instance    $set output_LSL_instance    0.1
+$if not set output_LSL_instance    $set output_LSL_instance    0
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0.00001
-$if not set Output_start_cost_inst $set Output_start_cost_inst 0.00001
-$if not set input_efficiency_inst  $set input_efficiency_inst  0.85
+$if not set Output_start_cost_inst $set Output_start_cost_inst 0
+$if not set input_efficiency_inst  $set input_efficiency_inst  0.613668913
 $if not set output_efficiency_inst $set output_efficiency_inst 1
 $if not set input_cap_cost_inst    $set input_cap_cost_inst    1200000
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
@@ -71,13 +71,13 @@ $if not set energy_only_instance   $set energy_only_instance   0
 $if not set file_name_instance     $set file_name_instance     "TEST"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
-$if not set H2_use_instance        $set H2_use_instance        0
+$if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  0
 $if not set CF_opt_instance        $set CF_opt_instance        0
-$if not set run_retail_instance    $set run_retail_instance    0
-$if not set one_active_device_inst $set one_active_device_inst 1
+$if not set run_retail_instance    $set run_retail_instance    1
+$if not set one_active_device_inst $set one_active_device_inst 0
 
 * Next values are used to initialize for real-time operation and shorten the run-time
 *    To turn off set current_int = -1, next_int = 1 and max_int_instance = Inf
@@ -106,7 +106,7 @@ Files
 ;
 
 Sets
-         interval          hourly time intervals in study period /1 * %op_legnth_instance%/
+         interval          hourly time intervals in study period /1 * %op_length_instance%/
          months            months in study period                /1 * 12/
          days              number of daily periods in study      /1 * 365/
          timed_dem_period  number of timed demand periods        /1 * 6/
@@ -141,7 +141,7 @@ $include /%indir%\%load_prof_instance%.txt
 
 Scalars
          interval_length length of each interval (hours) /%int_length_instance%/
-         optimization_length number of intervals in entire analysis /%op_legnth_instance%/
+         optimization_length number of intervals in entire analysis /%op_length_instance%/
          operating_period_length number of intervals in each operating period (rolling solution window) /%op_period_instance%/
 *set operating period length to full year length (8760 or 8784) to do full-year optimization without rolling window
          look_ahead_length number of additional intervals to look past the current operating period /%lookahead_instance%/
