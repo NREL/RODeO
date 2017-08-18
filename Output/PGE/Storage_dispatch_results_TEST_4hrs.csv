@@ -1,11 +1,11 @@
-Run on a MSNT machine on 06/28/17 16:48:43.
+Run on a MSNT machine on 08/18/17 16:24:11.
 Optimal solution found within time limit:,Yes
 
 Renewable Capacity (MW),         0.00
 Renewable Penetration for Input (%),         0.00
 hydrogen use,         1.00
 
-actual operating profit, -9.563067E+8
+actual operating profit, -9.563065E+8
 total electricity input (MWh),   7884006.31
 total electricity output (MWh),         0.00
 output to input ratio,         0.00
@@ -23,7 +23,7 @@ regdn revenue ($),         0.00
 spinres revenue ($),         0.00
 nonspinres revenue ($),         0.00
 hydrogen revenue ($), 871160917.29
-startup costs ($),        87.50
+startup costs ($),       -87.50
 
 Interval, In Pwr (MW), Out Pwr (MW), Storage Level (MW-h), In Reg Up (MW), Out Reg Up (MW), In Reg Dn (MW), Out Reg Dn (MW), In Spin Res (MW), Out Spin Res (MW), In Nonspin (MW), Out Nonspin (MW), H2 Out (kg), Renewable Input (MW), Nonrenewable Input (MW)
         1.00,     1000.00,        0.00,       61.37,        0.00,        0.00,        0.00,        0.00,        0.00,        0.00,        0.00,        0.00,    16574.60,        0.00,     1000.00
