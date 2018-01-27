@@ -1,17 +1,23 @@
 %% Collect, configure and output data into text files for use with GAMS
 clear all, close all, clc
 
-% dir0 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\'];
-% dir1 = [dir0,'data\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage_UK_Prices\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Redispatch_hourly\'];
+dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Central_vs_distributed\Output\'];
 
-dir0 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\TXT_files\Generic_file\'];    % Output folder
-dir1 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\CSV_data\Generic_file\'];     % Input folder
+dir1 = [dir2,'CSV_data\'];   % Input folder
+dir0 = [dir2,'TXT_files\'];  % Output folder
 cd(dir1);
+
+% dir0 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\TXT_files\Generic_file\'];    % Output folder
+% dir1 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\CSV_data\Generic_file\'];     % Input folder
+% cd(dir1);
 
 % Prompt for which files to output
 write_regular_files = 'yes'; %input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
-Year_select = 2017;     % select year to be analyzed
-Year_length = 8760;     % length of year in hours
+Year_select = 2018;     % select year to be analyzed
+Year_length = ceil((datenum(Year_select,12,31,23,59,59)-datenum(Year_select,1,1,0,0,0))*24);   %8784;     % length of year in hours
 interval_length = 1;    % used to create sub-hourly data files (1, 4, or 12)
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
 % DST_year_end = datenum([2015,11,1,2,0,0]);  %Daylight savings time
@@ -32,18 +38,18 @@ end
 num1 = interpolate_matrix(num1int2,Year_length,interval_length,2);
 
 [num1Bint,txt1B,raw1B] = xlsread('GAMS_Energy_Sale');          % ($/kWh)
-num1B = interpolate_matrix(num1Bint,Year_length,interval_length,1);
+num1B = interpolate_matrix(num1Bint,Year_length,interval_length,2);
 clear num1int num1int2 num1Bint
 
 % Reserve price data (input a set of AS prices (NS, RD, RU, SP (in that order)))
 [num2int2,txt2,raw2] = xlsread('GAMS_AS');                  % ($/MWh)
 num2int2(:,1)=[];   % Remove first column of AS values
-num2 = interpolate_matrix(num2int2,Year_length,interval_length,1); 
+num2 = interpolate_matrix(num2int2,Year_length,interval_length,2); 
 clear num2int2
 
 % Fuel price data (input the fuel price and select the desired region from the inputted data)
 [num3int,txt3,raw3] = xlsread('GAMS_FUEL');                 % ($/MMBTU)  
-num3 = interpolate_matrix(num3int,Year_length,interval_length,1);  
+num3 = interpolate_matrix(num3int,Year_length,interval_length,2);  
 clear num3int
 
 % Normalized Reneawble data (input the normalized hourly renewable profile (one column for each region/node))
@@ -279,17 +285,27 @@ Inputs2 = {'NG_price(interval)','H2_consumed(interval)','H2_price(interval)','in
 Inputs3 = {'renewable_signal(interval)'};
     
 % Energy price: Utility tariffs (OASIS data added later)                   ($/MWh) 
-data11 = reshape(num11,[],1,length(Scenarios1))*1000;                       % Separate energy purchase price data by number of scenarios and categories
-data11B = zeros(size(data11)); %%% reshape(num11B,[],1,length(Scenarios1))*1000; % Separate energy sale price data by number of scenarios and categories
+    data11 = reshape(num11,[],1,length(Scenarios1))*1000;                       % Separate energy purchase price data by number of scenarios and categories
+    data11B = zeros(size(data11)); %%% reshape(num11B,[],1,length(Scenarios1))*1000; % Separate energy sale price data by number of scenarios and categories
     % % data11B= data11;    % Repeat for sale price
+
 % AS Data: NS,RegD,RegU,Spin                                               ($/MWh)
-data22 = zeros(size(data11,1),4,size(data11,3));  %%% data2; 
+    data22 = zeros(size(data11,1),4,size(data11,3));  %%% data2; 
+
 % Data: PRC_FUEL (drawn from CAISO OASIS)
 %       H2 consumed (0.04166666666667 normalized per hour),                
 %       H2_Price (set to 1, is scaled in GAMS), 
 %       input_power_base (set to 1, scaled in GAMS)
-data_other = [zeros(Year_length*interval_length,1),ones(Year_length*interval_length,1)*0.04166666666667,ones(Year_length*interval_length,2)];
+%     [data_H2_consumption] = xlsread('hydrogen_demand_profile_central.csv');             % (kg/hour)
+    [data_H2_consumption] = xlsread('hydrogen_demand_profile_distributed.csv');         % (kg/hour)
+%     [data_H2_consumption] = ones(24,2)*0.04166666666667;                                % (kg/hour)
+    data_H2_consumption_vals = data_H2_consumption(:,2)/sum(data_H2_consumption(:,2));  % Normalize production
+    data_other = [zeros(Year_length*interval_length,1),...
+                  repmat(data_H2_consumption_vals,Year_length/24,1),...       % ones(Year_length*interval_length,1)*0.04166666666667,...
+                  ones(Year_length*interval_length,1),...
+                  ones(Year_length*interval_length,1)];
 % % % data_other = repmat(data_other,1,1,length(Scenarios1));
+                  
 % Data: Renewable signal (normalized to max of 1)
 %       Facility demand charge
 %       Timed demand charge
