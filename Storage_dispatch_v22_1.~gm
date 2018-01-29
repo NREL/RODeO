@@ -21,14 +21,14 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     586fd4265457a306691c9607_hourly
-$if not set add_param_instance     $set add_param_instance     additional_parameters_central_hourly
+$if not set elec_rate_instance     $set elec_rate_instance     58efa7405457a3013708f4b5_hourly
+$if not set add_param_instance     $set add_param_instance     additional_parameters_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_hourly
 $if not set load_prof_instance     $set load_prof_instance     basic_building_0_hourly
 $if not set energy_price_inst      $set energy_price_inst      Energy_prices_hourly
 $if not set AS_price_inst          $set AS_price_inst          Ancillary_services_hourly
-$if not set outdir                 $set outdir                 RODeO\Output\Central_vs_distributed
-$if not set indir                  $set indir                  RODeO\data_files\Central_vs_distributed\Output\TXT_files
+$if not set outdir                 $set outdir                 Output\Example
+$if not set indir                  $set indir                  data_files\Example\Output\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
@@ -68,9 +68,10 @@ $if not set interest_rate_inst     $set interest_rate_inst     0
 
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   24
-$if not set storage_init_instance  $set storage_init_instance  0.75
-$if not set storage_final_instance $set storage_final_instance 0.75
+$if not set storage_cap_instance   $set storage_cap_instance   6
+$if not set storage_set_instance   $set storage_set_instance   1
+$if not set storage_init_instance  $set storage_init_instance  0.5
+$if not set storage_final_instance $set storage_final_instance 0.5
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
 $if not set ramp_penalty_instance  $set ramp_penalty_instance  0
@@ -83,7 +84,7 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set file_name_instance     $set file_name_instance     "Test_central"
+$if not set file_name_instance     $set file_name_instance     "Test_test_batch"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
@@ -171,6 +172,7 @@ Scalars
          Apply_output_cap   Apply output capacity of storage facility (MW) /%Apply_output_cap_inst%/
          max_sys_output_cap output capacity of entire system (MW)/%max_output_cap_inst%/
          storage_capacity_hours storage capacity of storage facility (hours at rated INPUT capacity) /%storage_cap_instance%/
+         storage_set_final  Turns on or off storage final value /%storage_set_instance%/
          storage_init       Storage level at beginning of simluation (interval = 1) /%storage_init_instance%/
          storage_final      Storage level at end of simluation (interval = operating_period_length) /%storage_final_instance%/
 
@@ -232,7 +234,7 @@ Scalars
          ramp_penalty            'set ramp penalty for input and output devices'                                 /%ramp_penalty_instance%/
          allow_import            'Allows or restricts imports 0=no imports, 1=allows imports'                    /%allow_import_instance%/
          nominal_penalty         'Used to add penalty price that is not considered in the results'               /0.000001/
-         price_cap               'Set price cap'                                                                 /%price_cap_instance%/
+         price_cap               'Set price cap for input prices'                                                /%price_cap_instance%/
 ;
 
 Set
@@ -818,14 +820,14 @@ input_nonspinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval)
          input_nonspinres_MW(interval) =l= Max_input_cap(interval) * input_capacity_MW * input_nonspinres_limit_fraction;
 *         input_nonspinres_MW(interval) =l= input_capacity_MW * input_nonspinres_limit_fraction;
 
-storage_level_accounting_init_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and baseload_operation=0 and ord(interval)=1 )..
+storage_level_accounting_init_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and baseload_operation=0 and ord(interval)=1)..
          storage_level_MWh(interval) =e= storage_init*storage_capacity_hours*input_capacity_MW
          + input_power_MW(interval) * interval_length * input_efficiency
          - output_power_MW(interval) * interval_length / output_efficiency
          - H2_sold(interval) * H2_LHV;
 * LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
-storage_level_accounting_final_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and baseload_operation=0 and ord(interval)=operating_period_length )..
+storage_level_accounting_final_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and baseload_operation=0 and ord(interval)=operating_period_length and storage_set_final=1)..
          storage_level_MWh(interval) =g= storage_final*storage_capacity_hours*input_capacity_MW;
 * LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 

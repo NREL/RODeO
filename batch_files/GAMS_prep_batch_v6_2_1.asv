@@ -34,78 +34,78 @@ end
 files_tariff2=files_tariff2(load_file1);    clear load_file1 files_tariff
 
 Batch_header = struct;
-if strcmp(fields1{i0},'elec_rate_instance')
-if strcmp(fields1{i0},'add_param_instance')
-if strcmp(fields1{i0},'ren_prof_instance')
-if strcmp(fields1{i0},'load_prof_instance')
-if strcmp(fields1{i0},'energy_price_inst')
-if strcmp(fields1{i0},'AS_price_inst')
-if strcmp(fields1{i0},'outdir')
-if strcmp(fields1{i0},'indir')
+Batch_header.elec_rate_instance = {};
+Batch_header.add_param_instance = {};
+Batch_header.ren_prof_instance = {};
+Batch_header.load_prof_instance = {};
+Batch_header.energy_price_inst = {};
+Batch_header.AS_price_inst = {};
+Batch_header.outdir = {};
+Batch_header.indir = {};
 
-if strcmp(fields1{i0},'gas_price_instance')
-if strcmp(fields1{i0},'zone_instance')
-if strcmp(fields1{i0},'year_instance')
+Batch_header.gas_price_instance = {};
+Batch_header.zone_instance = {};
+Batch_header.year_instance = {};
 
-if strcmp(fields1{i0},'input_cap_instance')
-if strcmp(fields1{i0},'output_cap_instance')
-if strcmp(fields1{i0},'price_cap_instance')
+Batch_header.input_cap_instance = {};
+Batch_header.output_cap_instance = {};
+Batch_header.price_cap_instance = {};
 
-if strcmp(fields1{i0},'Apply_input_cap_inst')
-if strcmp(fields1{i0},'Apply_output_cap_inst')
-if strcmp(fields1{i0},'max_output_cap_inst')
-if strcmp(fields1{i0},'allow_import_instance')
+Batch_header.Apply_input_cap_inst = {};
+Batch_header.Apply_output_cap_inst = {};
+Batch_header.max_output_cap_inst = {};
+Batch_header.allow_import_instance = {};
 
-if strcmp(fields1{i0},'input_LSL_instance')
-if strcmp(fields1{i0},'output_LSL_instance')
-if strcmp(fields1{i0},'Input_start_cost_inst')
-if strcmp(fields1{i0},'Output_start_cost_inst')
-if strcmp(fields1{i0},'input_efficiency_inst')
-if strcmp(fields1{i0},'output_efficiency_inst')
+Batch_header.input_LSL_instance = {};
+Batch_header.output_LSL_instance = {};
+Batch_header.Input_start_cost_inst = {};
+Batch_header.Output_start_cost_inst = {};
+Batch_header.input_efficiency_inst = {};
+Batch_header.output_efficiency_inst = {};
 
-if strcmp(fields1{i0},'input_cap_cost_inst')
-if strcmp(fields1{i0},'output_cap_cost_inst')
-if strcmp(fields1{i0},'input_FOM_cost_inst')
-if strcmp(fields1{i0},'output_FOM_cost_inst')
-if strcmp(fields1{i0},'input_VOM_cost_inst')
-if strcmp(fields1{i0},'output_VOM_cost_inst')
-if strcmp(fields1{i0},'input_lifetime_inst')
-if strcmp(fields1{i0},'output_lifetime_inst')
-if strcmp(fields1{i0},'interest_rate_inst')
+Batch_header.input_cap_cost_inst = {};
+Batch_header.output_cap_cost_inst = {};
+Batch_header.input_FOM_cost_inst = {};
+Batch_header.output_FOM_cost_inst = {};
+Batch_header.input_VOM_cost_inst = {};
+Batch_header.output_VOM_cost_inst = {};
+Batch_header.input_lifetime_inst = {};
+Batch_header.output_lifetime_inst = {};
+Batch_header.interest_rate_inst = {};
 
-if strcmp(fields1{i0},'in_heat_rate_instance')
-if strcmp(fields1{i0},'out_heat_rate_instance')
-if strcmp(fields1{i0},'storage_cap_instance')
-if strcmp(fields1{i0},'storage_init_instance')
-if strcmp(fields1{i0},'storage_final_instance')
-if strcmp(fields1{i0},'reg_cost_instance')
-if strcmp(fields1{i0},'min_runtime_instance')
-if strcmp(fields1{i0},'ramp_penalty_instance')
+Batch_header.in_heat_rate_instance = {};
+Batch_header.out_heat_rate_instance = {};
+Batch_header.storage_cap_instance = {};
+Batch_header.storage_init_instance = {};
+Batch_header.storage_final_instance = {};
+Batch_header.reg_cost_instance = {};
+Batch_header.min_runtime_instance = {};
+Batch_header.ramp_penalty_instance = {};
 
-if strcmp(fields1{i0},'op_length_instance')
-if strcmp(fields1{i0},'op_period_instance')
-if strcmp(fields1{i0},'int_length_instance')
+Batch_header.op_length_instance = {};
+Batch_header.op_period_instance = {};
+Batch_header.int_length_instance = {};
 
-if strcmp(fields1{i0},'lookahead_instance')
-if strcmp(fields1{i0},'energy_only_instance')
-if strcmp(fields1{i0},'file_name_instance')
-if strcmp(fields1{i0},'H2_consume_adj_inst')
-if strcmp(fields1{i0},'H2_price_instance')
-if strcmp(fields1{i0},'H2_use_instance')
-if strcmp(fields1{i0},'base_op_instance')
-if strcmp(fields1{i0},'NG_price_adj_instance')
-if strcmp(fields1{i0},'Renewable_MW_instance')
+Batch_header.lookahead_instance = {};
+Batch_header.energy_only_instance = {};
+Batch_header.file_name_instance = {};
+Batch_header.H2_consume_adj_inst = {};
+Batch_header.H2_price_instance = {};
+Batch_header.H2_use_instance = {};
+Batch_header.base_op_instance = {};
+Batch_header.NG_price_adj_instance = {};
+Batch_header.Renewable_MW_instance = {};
 
-if strcmp(fields1{i0},'CF_opt_instance')
-if strcmp(fields1{i0},'run_retail_instance')
-if strcmp(fields1{i0},'one_active_device_inst')
+Batch_header.CF_opt_instance = {};
+Batch_header.run_retail_instance = {};
+Batch_header.one_active_device_inst = {};
 
-if strcmp(fields1{i0},'current_int_instance')
-if strcmp(fields1{i0},'next_int_instance')
-if strcmp(fields1{i0},'current_stor_intance')
-if strcmp(fields1{i0},'current_max_instance')
-if strcmp(fields1{i0},'max_int_instance')
-if strcmp(fields1{i0},'read_MPC_file_instance')
+Batch_header.current_int_instance = {};
+Batch_header.next_int_instance = {};
+Batch_header.current_stor_intance = {};
+Batch_header.current_max_instance = {};
+Batch_header.max_int_instance = {};
+Batch_header.read_MPC_file_instance = {};
 
 fields1 = fieldnames(Batch_header);
 
@@ -125,146 +125,316 @@ fields1 = fieldnames(Batch_header);
 % % %                 'next_int_instance','current_stor_intance','current_max_instance','max_int_instance','outdir','indir','Load_prof_instance','read_MPC_file_instance'};
 
 
-%% Set values to vary
+%% Set values to vary 
+relationship_length = zeros(numel(fields1),1);      % Create matrix to track size of variations for each variable
 for i0 = 1:numel(fields1)
     if strcmp(fields1{i0},'elec_rate_instance')
+        Batch_header.elec_rate_instance.val = files_tariff2;
     end   
-    if strcmp(fields1{i0},'elec_rate_instance')
-    end
     if strcmp(fields1{i0},'add_param_instance')
+        Batch_header.add_param_instance.val = {'additional_parameters_hourly'};        
     end
     if strcmp(fields1{i0},'ren_prof_instance')
+        Batch_header.ren_prof_instance.val = {'renewable_profiles_none_hourly'};
     end
     if strcmp(fields1{i0},'load_prof_instance')
+        Batch_header.load_prof_instance.val = {'basic_building_0_hourly'};
     end
     if strcmp(fields1{i0},'energy_price_inst')
+        Batch_header.energy_price_inst.val = {'Energy_prices_hourly'};
     end
     if strcmp(fields1{i0},'AS_price_inst')
+        Batch_header.AS_price_inst.val = {'Ancillary_services_hourly'};
     end
     if strcmp(fields1{i0},'outdir')
+        outdir_val = 'Output\Example';
+        [status,msg] = mkdir(outdir_val);               % Create output file if it doesn't exist yet  
+        Batch_header.outdir.val = {['RODeO\',outdir_val]};  % Must include reference from the gamsdir file (i.e., include 'RODeO\' in the filename for batch runs
     end
     if strcmp(fields1{i0},'indir')
+        Batch_header.indir.val = {['RODeO\',indir]};        % Must include reference from the gamsdir file (i.e., include 'RODeO\' in the filename for batch runs
     end
     
     if strcmp(fields1{i0},'gas_price_instance')
+        Batch_header.gas_price_instance.val = {'NA'};
     end
     if strcmp(fields1{i0},'zone_instance')
+        Batch_header.zone_instance.val = {'NA'};
     end
     if strcmp(fields1{i0},'year_instance')
+        Batch_header.year_instance.val = {'NA'};
     end
     
     if strcmp(fields1{i0},'input_cap_instance')
+        Batch_header.input_cap_instance.val = {'900','1000'};
     end
     if strcmp(fields1{i0},'output_cap_instance')
+        Batch_header.output_cap_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'price_cap_instance')
+        Batch_header.price_cap_instance.val = {'10000'};
     end
     
     if strcmp(fields1{i0},'Apply_input_cap_inst')
+        Batch_header.Apply_input_cap_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'Apply_output_cap_inst')
+        Batch_header.Apply_output_cap_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'max_output_cap_inst')
+        Batch_header.max_output_cap_inst.val = {'inf'};
     end
     if strcmp(fields1{i0},'allow_import_instance')
+        Batch_header.allow_import_instance.val = {'1'};
     end
     
     if strcmp(fields1{i0},'input_LSL_instance')
+        Batch_header.input_LSL_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'output_LSL_instance')
+        Batch_header.output_LSL_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'Input_start_cost_inst')
+        Batch_header.Input_start_cost_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'Output_start_cost_inst')
+        Batch_header.Output_start_cost_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'input_efficiency_inst')
+        Batch_header.input_efficiency_inst.val = {'0.613668913'};
     end
     if strcmp(fields1{i0},'output_efficiency_inst')
+        Batch_header.output_efficiency_inst.val = {'1'};
     end
     
     if strcmp(fields1{i0},'input_cap_cost_inst')
+        Batch_header.input_cap_cost_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'output_cap_cost_inst')
+        Batch_header.output_cap_cost_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'input_FOM_cost_inst')
+        Batch_header.input_FOM_cost_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'output_FOM_cost_inst')
+        Batch_header.output_FOM_cost_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'input_VOM_cost_inst')
+        Batch_header.input_VOM_cost_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'output_VOM_cost_inst')
+        Batch_header.output_VOM_cost_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'input_lifetime_inst')
+        Batch_header.input_lifetime_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'output_lifetime_inst')
+        Batch_header.output_lifetime_inst.val = {'0'};
     end
     if strcmp(fields1{i0},'interest_rate_inst')
+        Batch_header.interest_rate_inst.val = {'0'};
     end
     
     if strcmp(fields1{i0},'in_heat_rate_instance')
+        Batch_header.in_heat_rate_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'out_heat_rate_instance')
+        Batch_header.out_heat_rate_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'storage_cap_instance')
+        Batch_header.storage_cap_instance.val = {'6','24'};
     end
     if strcmp(fields1{i0},'storage_init_instance')
+        Batch_header.storage_init_instance.val = {'0.5'};
     end
     if strcmp(fields1{i0},'storage_final_instance')
+        Batch_header.storage_final_instance.val = {'0.5'};
     end
     if strcmp(fields1{i0},'reg_cost_instance')
+        Batch_header.reg_cost_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'min_runtime_instance')
+        Batch_header.min_runtime_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'ramp_penalty_instance')
+        Batch_header.ramp_penalty_instance.val = {'0'};
     end
     
     if strcmp(fields1{i0},'op_length_instance')
+        Batch_header.op_length_instance.val = {'8760'};
     end
     if strcmp(fields1{i0},'op_period_instance')
+        Batch_header.op_period_instance.val = {'8760'};
     end
     if strcmp(fields1{i0},'int_length_instance')
+        Batch_header.int_length_instance.val = {'1'};
     end
     
     if strcmp(fields1{i0},'lookahead_instance')
+        Batch_header.lookahead_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'energy_only_instance')
+        Batch_header.energy_only_instance.val = {'1'};
     end
     if strcmp(fields1{i0},'file_name_instance')
+        % 'file_name_instance' created in the next section (default value of 0)
+        Batch_header.file_name_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'H2_consume_adj_inst')
+        Batch_header.H2_consume_adj_inst.val = {'0.9'};
     end
     if strcmp(fields1{i0},'H2_price_instance')
+        Batch_header.H2_price_instance.val = {'6'};
     end
     if strcmp(fields1{i0},'H2_use_instance')
+        Batch_header.H2_use_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'base_op_instance')
+        Batch_header.base_op_instance.val = {'0','1'};
     end
     if strcmp(fields1{i0},'NG_price_adj_instance')
+        Batch_header.NG_price_adj_instance.val = {'1'};
     end
     if strcmp(fields1{i0},'Renewable_MW_instance')
+        Batch_header.Renewable_MW_instance.val = {'0'};
     end
     
     if strcmp(fields1{i0},'CF_opt_instance')
+        Batch_header.CF_opt_instance.val = {'0'};
     end
     if strcmp(fields1{i0},'run_retail_instance')
+        Batch_header.run_retail_instance.val = {'1'};
     end
     if strcmp(fields1{i0},'one_active_device_inst')
+        Batch_header.one_active_device_inst.val = {'1'};
     end
     
     if strcmp(fields1{i0},'current_int_instance')
+        Batch_header.current_int_instance.val = {'-1'};
     end
     if strcmp(fields1{i0},'next_int_instance')
+        Batch_header.next_int_instance.val = {'1'};
     end
     if strcmp(fields1{i0},'current_stor_intance')
+        Batch_header.current_stor_intance.val = {'0.5'};
     end
     if strcmp(fields1{i0},'current_max_instance')
+        Batch_header.current_max_instance.val = {'0.8'};
     end
     if strcmp(fields1{i0},'max_int_instance')
+        Batch_header.max_int_instance.val = {'Inf'};
     end
     if strcmp(fields1{i0},'read_MPC_file_instance')
+        Batch_header.read_MPC_file_instance.val = {'0'};
     end
+    relationship_length(i0) = length(Batch_header.(fields1{i0}).val);
 end
 
+% Create 2D matrix of all possible combinations
+relationship_matrix = [];
+for i0=1:3 %numel(fields1)
+    num_items = numel(Batch_header.(fields1{i0}).val);
+    if i0==1,
+        relationship_matrix = Batch_header.(fields1{i0}).val;
+    else
+        [M0,N0] = size(relationship_matrix);               
+        relationship_matrix_interim = relationship_matrix;  % Copy matrix to repeat
+        fields1_val = Batch_header.(fields1{i0}).val;       % Capture all values for selected field        
+        for i1=1:num_items
+            add_column = cell(M0,1);                        % Create empty matrix to add to existing matrix
+            [add_column{:}] = deal([fields1_val{i1}]);      % Populate matrix with repeated cell item
+            relationship_matrix_interim([(i1-1)*num_items*M0+1:i1*num_items*M0],[1:(N0+1)]) = horzcat(relationship_matrix,add_column); 
+%             relationship_matrix_interim((i1-1)*num_items+1:i1*num_items) = {relationship_matrix(1+mod((1:M0)-1,M0)),cell()
+        end
+        relationship_matrix = relationship_matrix_interim;  % Overwrite matrix with completed 
+    end
+   
+end
+    
+    
+    
+
+% relationship_matrix = cell(prod(relationship_length),numel(fields1));   % Initalize matrix of all possible combinations of properties from above
+% relationship_matrix_toggle = ones(prod(relationship_length),1);         % Used to determine which rows of relationship_matrix to delete and which to keep
+% c0 = 1;     % Initialize counter to keep track of appropraite row
+
+% % % % % T1 = {'r';'b';'g';'b'};
+% % % % % T1(1+mod((1:length(T1)*2)-1,length(T1)))
+
+
+%% Define how values are varied between fields
+%  Not defining how a field1 is varied over field2 causes the code to default to making the same values for field1 across every field2 
+%  Example: F1 = {'0','1'}, F2 = {'10','100'}. Without defining a specific relationship between F1 and F2, four runs will be created (i.e., [F1=0,F2=10], [F1=0,F2=100], [F1=1,F2=10], [F0=1,F1=100])
+
+
+% Create 2D matrix of all possible combinations
+% add NaN values for items to remove
+% once loop is done remove rows with NaNs
+
+
+
+
+
+relationship_matrix = ones(relationship_length');    % Create full matrix to track relationships
+
+    Batch_header.input_cap_instance.base_op_instance = [0 1;1 0];
+%       C1        C2
+% R1    [900,0]   [900,1]
+% R2    [1000,0]  [1000,1]
+
+    Batch_header.(fields1{12})
+    Batch_header.(fields1{51})
+
+    test3 = relationship_matrix(:,:,:,:,:,:,:,:,:,:, :,:,:,:,:,:,:,:,:,:, :,:,:,:,:,:,:,:,:,:, :,:,:,:,:,:,:,:,:,:, :,:,:,:,:,:,:,:,:,:, :,:,:,:,:,:,:,:,:,:, :,:,:,:,:,:,:,:,:,:, :,:);
+    test4 = relationship_matrix(1,1,1,1,1,1,1,1,1,1, 1,:,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1, :,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1, 1,1);
+
+
+fields2 = fieldnames(Batch_header.input_cap_instance);
+for i2=1:numel(fields2)
+    if strcmp(fields2{i2},'val')
+        continue
+    else
+        Batch_header.input_cap_instance.(fields2{i2})
+    
+    end
+end
+    
+   
+
+    Batch_header.base_op_instance.(Batch_header.base_op_instance{i2}) = Batch_header.input_cap_instance
+end
+
+
+
+
+for i3=1:numel(fields1)
+    relationship_matrix
+end
+
+
+ones(length(Batch_header.base_op_instance),length(Batch_header.input_cap_instance));
+
+
+relationship_matrix = zeros(prod(relationship_length),numel(fields1));    % Create matrix to track relationships
+
+
+fprintf(fileID,'%s\n','$onempty');
+        
+
+eval(sprintf('test2=%s',test{:}))
+
+test = {'[1,1;0,1]'};
+eval(['test2=char(test{:}]')
+
+
+    if strcmp(fields1{i0},'file_name_instance')
+        files_tariff2_short = cell(numel(files_tariff2),1);
+        for i1=1:numel(files_tariff2)
+            files_tariff2_val = files_tariff2{i1};
+            files_tariff2_short(i1) = {files_tariff2_val(1:strfind(files_tariff2_val,'_')-1)};
+        end
+        Batch_header.file_name_instance = files_tariff2_short;
+    end
 
 
 

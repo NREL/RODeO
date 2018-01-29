@@ -4,10 +4,13 @@ clear all, close all, clc
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage_UK_Prices\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Redispatch_hourly\'];
-dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Central_vs_distributed\Output\'];
+%dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Central_vs_distributed\Output\'];
+dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Example\Output\'];
 
-dir1 = [dir2,'CSV_data\'];   % Input folder
-dir0 = [dir2,'TXT_files\'];  % Output folder
+dir1 = [dir2,'CSV_data\'];      % Input folder
+[status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
+dir0 = [dir2,'TXT_files\'];     % Output folder
+[status0,msg0] = mkdir(dir0);   % Create directory if it doesn't exist
 cd(dir1);
 
 % dir0 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\TXT_files\Generic_file\'];    % Output folder
@@ -297,8 +300,8 @@ Inputs3 = {'renewable_signal(interval)'};
 %       H2_Price (set to 1, is scaled in GAMS), 
 %       input_power_base (set to 1, scaled in GAMS)
 %     [data_H2_consumption] = xlsread('hydrogen_demand_profile_central.csv');             % (kg/hour)
-    [data_H2_consumption] = xlsread('hydrogen_demand_profile_distributed.csv');         % (kg/hour)
-%     [data_H2_consumption] = ones(24,2)*0.04166666666667;                                % (kg/hour)
+%     [data_H2_consumption] = xlsread('hydrogen_demand_profile_distributed.csv');         % (kg/hour)
+    [data_H2_consumption] = ones(24,2)*0.04166666666667;                                % (kg/hour)
     data_H2_consumption_vals = data_H2_consumption(:,2)/sum(data_H2_consumption(:,2));  % Normalize production
     data_other = [zeros(Year_length*interval_length,1),...
                   repmat(data_H2_consumption_vals,Year_length/24,1),...       % ones(Year_length*interval_length,1)*0.04166666666667,...
