@@ -18,9 +18,9 @@ cd(dir1);
 GAMS_loc = 'C:\GAMS\win64\24.8\gams.exe';
 GAMS_file= {'Storage_dispatch_v22_1'};      % Define below for each utility (3 file options)
 GAMS_lic = 'license=C:\GAMS\win64\24.8\gamslice.txt';
-items_per_batch = 100;  % Select the number of items per batch file created
+files_to_create = 6;  % Select the number of batch files to create
 
-outdir = 'Output\Example';
+outdir = 'data_files\Example\Output\batch_files';
 indir  = 'data_files\Example\Output\TXT_files';
 
 % Load filenames
@@ -155,7 +155,7 @@ for i0 = 1:numel(fields1)
     end
     
     if strcmp(fields1{i0},'input_cap_instance')
-        Batch_header.input_cap_instance.val = {'900','1000'};
+        Batch_header.input_cap_instance.val = {'1000'};
     end
     if strcmp(fields1{i0},'output_cap_instance')
         Batch_header.output_cap_instance.val = {'0'};
@@ -358,7 +358,8 @@ clear i0 M0 N0
 % Define relationships between fields 
 %   (only define one relationship per field)
 %   (Do not define the reciprocal relationship... if -> Batch_header.A.B then do not define Batch_header.B.A)
-Batch_header.input_cap_instance.base_op_instance = [0 1;1 0];
+
+% % Batch_header.input_cap_instance.base_op_instance = [0 1;1 0];
 
 % Adjust relationship matrix based on definitions above
 relationship_toggle = ones(prod(relationship_length),1);            % Matrix to turn on and off specific runs (1=include, 0=exclude) (default, before applying exceptions, is to include all runs)
@@ -444,8 +445,8 @@ GAMS_batch_init = ['"',GAMS_loc,'" "',GAMS_file,'" ',GAMS_lic];
     for i1=1:N0
         GAMS_batch{i1,1} = horzcat([' --',fields1{i1},'="',relationship_matrix_final{i0,i1},'"']);        
     end
-    fprintf(fileID,'%s\n',[[GAMS_batch_init{:}],[GAMS_batch{:}]]);
-    if mod(i0,items_per_batch)==0
+    fprintf(fileID,'%s\n\n',[[GAMS_batch_init{:}],[GAMS_batch{:}]]);
+    if mod(i0,ceil(M0/files_to_create))==0
         fclose(fileID);
         c2=c2+1;            
         fileID = fopen([dir2,['RODeO_batch',num2str(c2),'.bat']],'wt');
@@ -455,7 +456,7 @@ GAMS_batch_init = ['"',GAMS_loc,'" "',GAMS_file,'" ',GAMS_lic];
     end    
 end
 fclose(fileID);
-disp([num2str(M0),' model runs created']);
+disp([num2str(c2),' batch files created for ',num2str(M0),' model runs (~',num2str(ceil(M0/files_to_create)),' each)']);
 
 
 
