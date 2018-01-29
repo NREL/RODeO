@@ -21,14 +21,17 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     58efa7405457a3013708f4b5_hourly
-$if not set add_param_instance     $set add_param_instance     additional_parameters_hourly
+$if not set elec_rate_instance     $set elec_rate_instance     5a32fe535457a380445c48a3_hourly
+$if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_hourly
+$if not set H2_consumed_instance   $set H2_consumed_instance   Hydrogen_consumed_hourly
+$if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_hourly
+$if not set NG_price_instance      $set NG_price_instance      NG_price_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_hourly
 $if not set load_prof_instance     $set load_prof_instance     basic_building_0_hourly
 $if not set energy_price_inst      $set energy_price_inst      Energy_prices_hourly
 $if not set AS_price_inst          $set AS_price_inst          Ancillary_services_hourly
-$if not set outdir                 $set outdir                 RODeO\Output\Example
-$if not set indir                  $set indir                  RODeO\data_files\Example\Output\TXT_files
+$if not set outdir                 $set outdir                 RODeO\Projects\Example\Output
+$if not set indir                  $set indir                  RODeO\Projects\Example\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
@@ -84,7 +87,7 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set file_name_instance     $set file_name_instance     "Test_test_batch"
+$if not set file_name_instance     $set file_name_instance     "Test_load_files"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
@@ -118,7 +121,7 @@ Files
          input_echo_file /%outdir%\Storage_dispatch_inputs_%file_name_instance%_%storage_cap_instance%hrs.csv/
          results_file    /%outdir%\Storage_dispatch_results_%file_name_instance%_%storage_cap_instance%hrs.csv/
          summary_file    /%outdir%\Storage_dispatch_summary_%file_name_instance%_%storage_cap_instance%hrs.csv/
-         RT_out_file    /%outdir%\Real_time_output_values.csv/
+         RT_out_file     /%outdir%\Real_time_output_values.csv/
 ;
 
 Sets
@@ -154,9 +157,9 @@ Parameters
 
 * Adjust the files that are loaded
 $include /%indir%\%elec_rate_instance%.txt
-$include /%indir%\%add_param_instance%.txt
-$include /%indir%\%ren_prof_instance%.txt
-$include /%indir%\%load_prof_instance%.txt
+*$include /%indir%\%add_param_instance%.txt
+*$include /%indir%\%ren_prof_instance%.txt
+*$include /%indir%\%load_prof_instance%.txt
 *$include /%indir%\%IO_cap_instance%.txt
 
 Scalars
@@ -247,6 +250,37 @@ parameter elec_purchase_price_interim(interval)   "electricity price in each int
 $GDXIN %indir%\%energy_price_inst%.gdx
 $LOAD elec_purchase_price_interim
 $GDXIN
+$call CSV2GDX %indir%\%H2_price_prof_instance%.csv Output=%indir%\%H2_price_prof_instance%.gdx ID=H2_price UseHeader=y Index=1 Values=2
+parameter H2_price(interval)   "Hydrogen sale price in each interval ($/kg)"
+$GDXIN %indir%\%H2_price_prof_instance%.gdx
+$LOAD H2_price
+$GDXIN
+$call CSV2GDX %indir%\%H2_consumed_instance%.csv Output=%indir%\%H2_consumed_instance%.gdx ID=H2_consumed UseHeader=y Index=1 Values=2
+parameter H2_consumed(interval)   "Profile of hydrogen consumption for each interval (kg)"
+$GDXIN %indir%\%H2_consumed_instance%.gdx
+$LOAD H2_consumed
+$GDXIN
+$call CSV2GDX %indir%\%baseload_pwr_instance%.csv Output=%indir%\%baseload_pwr_instance%.gdx ID=input_power_baseload UseHeader=y Index=1 Values=2
+parameter input_power_baseload(interval)   "Profile of baseload consumption"
+$GDXIN %indir%\%baseload_pwr_instance%.gdx
+$LOAD input_power_baseload
+$GDXIN
+$call CSV2GDX %indir%\%NG_price_instance%.csv Output=%indir%\%NG_price_instance%.gdx ID=NG_price UseHeader=y Index=1 Values=2
+parameter NG_price(interval)   "Natural gas price in each interval ($/MMBtu)"
+$GDXIN %indir%\%NG_price_instance%.gdx
+$LOAD NG_price
+$GDXIN
+$call CSV2GDX %indir%\%load_prof_instance%.csv Output=%indir%\%load_prof_instance%.gdx ID=Load_profile UseHeader=y Index=1 Values=2
+parameter Load_profile(interval)   "additional load profile (MW)"
+$GDXIN %indir%\%load_prof_instance%.gdx
+$LOAD Load_profile
+$GDXIN
+$call CSV2GDX %indir%\%ren_prof_instance%.csv Output=%indir%\%ren_prof_instance%.gdx ID=renewable_signal UseHeader=y Index=1 Values=2
+parameter renewable_signal(interval)   "normalized renewable production profile (MW)"
+$GDXIN %indir%\%ren_prof_instance%.gdx
+$LOAD renewable_signal
+$GDXIN
+
 $call CSV2GDX %indir%\%AS_price_inst%.csv Output=%indir%\%AS_price_inst%.gdx ID=regup_price_interim UseHeader=y Index=1 Values=2
 parameter regup_price_interim(interval)
 $GDXIN %indir%\%AS_price_inst%.gdx
@@ -276,7 +310,6 @@ if (run_retail=0,
          spinres_price(interval)       = spinres_price_interim(interval);
          nonspinres_price(interval)    = nonspinres_price_interim(interval);
 );
-
 
 * Loads predictive controller values from excel file
 $call CSV2GDX %indir%\controller_input_values.csv Output=%indir%\controller_input_values.gdx ID=current_interval2 UseHeader=y Values=1

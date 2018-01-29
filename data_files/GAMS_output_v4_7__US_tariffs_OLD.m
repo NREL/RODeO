@@ -52,14 +52,24 @@ num3 = interpolate_matrix(num3int,Year_length,interval_length,2);
 clear num3int
 
 % Normalized Reneawble data (input the normalized hourly renewable profile (one column for each region/node))
-[num4int,txt4,raw4] = xlsread('GAMS_renewables');      
-[m1,n1] = size(num4int);
+[num4Aint,txt4A,raw4A] = xlsread('GAMS_renewables');      
+[m1,n1] = size(num4Aint);
 for i0=2:n1
-    num4int2(:,i0) = num4int(:,i0)/max(num4int(:,i0));
+    num4Aint2(:,i0) = num4Aint(:,i0)/max(num4Aint(:,i0));
 end
-num4int2(:,1)=[];   % Remove first column of AS values
-num4 = interpolate_matrix(num4int2,Year_length,interval_length,1);
-clear num4int num4int2
+num4Aint2(:,1)=[];   % Remove first column of AS values
+num4A = interpolate_matrix(num4Aint2,Year_length,interval_length,1);
+% % % [num4Bint,txt4B,raw4B] = xlsread('GAMS_renewable_WIND');    % (normalized)
+% % %  num4Bint(:,1)=[];   % Remove first column of AS values
+% % %  num4B = interpolate_matrix(num4Bint,Year_length,interval_length,1);
+% % % [num4Cint,txt4C,raw4C] = xlsread('GAMS_renewable_33curt');  % (normalized)
+% % %  num4Cint(:,1)=[];   % Remove first column of AS values
+% % %  num4C = interpolate_matrix(num4Cint,Year_length,interval_length,1);
+% % % [num4Dint,txt4D,raw4D] = xlsread('GAMS_renewable_40curt');  % (normalized)
+% % %  num4Dint(:,1)=[];   % Remove first column of AS values
+% % %  num4D = interpolate_matrix(num4Dint,Year_length,interval_length,1);
+clear num4Aint num4Aint2
+% % % num4Bint num4Cint num4Dint
 
 % Fixed demand charge data (input the fixed demand charge price (one column for each region/node))
 [num5] = xlsread('d_flat_prices.csv');                      % ($/kW)
@@ -105,7 +115,10 @@ num11B(isnan(num11B)) = 0;    % Remove NaN values
 
 num21 = num2;  num21(isnan(num21)) = 0;    % Remove NaN values
 num31 = num3;  num31(isnan(num31)) = 0;    % Remove NaN values
-num41 = num4;  num41(isnan(num41)) = 0;    % Remove NaN values
+num41A= num4A; num41A(isnan(num41A)) = 0;  % Remove NaN values
+% % % num41B= num4B; num41B(isnan(num41B)) = 0;  % Remove NaN values
+% % % num41C= num4C; num41C(isnan(num41C)) = 0;  % Remove NaN values
+% % % num41D= num4D; num41D(isnan(num41D)) = 0;  % Remove NaN values
 num51 = num5;  num51(isnan(num51)) = 0;    % Remove NaN values
 num61 = num6;  num61(isnan(num61)) = 0;    % Remove NaN values
 % % num71 = num7; num71(isnan(num71)) = 0;    % Remove NaN values
@@ -117,8 +130,7 @@ num81 = num8;  num81(isnan(num81)) = 0;    % Remove NaN values
 txt11 = rawA(2:(n0+1),2);       % URDB Tariff_id column
 txt12 = rawA(2:(n0+1),6);       % Utility column
 txt11(:,find(isnan(sum(num1)))) = [];  
-txt12(:,find(isnan(sum(num1)))) = [];
-txt41 = txt4(2,3:end); 
+txt12(:,find(isnan(sum(num1)))) = [];  
 Scenarios1 = txt11(~cellfun('isempty',txt11));
 Category1 = unique(txt12);  % List of utilities
 
@@ -274,6 +286,8 @@ disp('Populate data rows...')
 Inputs1 = {'elec_purchase_price(interval)','elec_sale_price(interval)',...
            'nonspinres_price(interval)','regdn_price(interval)','regup_price(interval)','spinres_price(interval)',...
            'meter_mnth_chg(interval)','Fixed_dem(months)','Timed_dem(timed_dem_period)'};    
+Inputs2 = {'NG_price(interval)','H2_consumed(interval)','H2_price(interval)','input_power_baseload(interval)'};
+Inputs3 = {'renewable_signal(interval)'};
     
 % Energy price: Utility tariffs (OASIS data added later)                   ($/MWh) 
     data11 = reshape(num11,[],1,length(Scenarios1))*1000;                       % Separate energy purchase price data by number of scenarios and categories
@@ -287,20 +301,33 @@ Inputs1 = {'elec_purchase_price(interval)','elec_sale_price(interval)',...
 %       H2 consumed (0.04166666666667 normalized per hour),                
 %       H2_Price (set to 1, is scaled in GAMS), 
 %       input_power_base (set to 1, scaled in GAMS)
+%     [data_H2_consumption] = xlsread('hydrogen_demand_profile_central.csv');             % (kg/hour)
+%     [data_H2_consumption] = xlsread('hydrogen_demand_profile_distributed.csv');         % (kg/hour)
+    [data_H2_consumption] = ones(24,2)*0.04166666666667;                                % (kg/hour)
+    data_H2_consumption_vals = data_H2_consumption(:,2)/sum(data_H2_consumption(:,2));  % Normalize production
     data_other = [zeros(Year_length*interval_length,1),...
-                  ones(Year_length*interval_length,1)*0.04166666666667,...
+                  repmat(data_H2_consumption_vals,Year_length/24,1),...       % ones(Year_length*interval_length,1)*0.04166666666667,...
                   ones(Year_length*interval_length,1),...
                   ones(Year_length*interval_length,1)];
+% % % data_other = repmat(data_other,1,1,length(Scenarios1));
                   
 % Data: Renewable signal (normalized to max of 1)
 %       Facility demand charge
 %       Timed demand charge
 %       TOU bucket
 %       Meter Monthly charge
-    data44 = num41;    % All renewable signals
-    data55 = reshape(num51,[],1,length(Scenarios1))*1000;                    % ($/MW-month)
-    data66 = reshape(num6A(1:Num_demand_tranches,:),Num_demand_tranches,1,length(Scenarios1))*1000;   % ($/MW-month) 
-    data88 = reshape(num81,[],1,length(Scenarios1));                         % ($/month/meter)
+data44A = num41A;      %%% reshape(num41A,[],1,length(Scenarios1));                       % (N/A) Renewable signal PV
+data44B = num41B;      %%% reshape(num41B,[],1,length(Scenarios1));                       % (N/A) Renewable signal WIND
+% % % data44C = repmat(num41C,1,1,length(Scenarios1));      %%% reshape(num41C,[],1,length(Scenarios1));                       % (N/A) Renewable signal 33curt
+% % % data44D = repmat(num41D,1,1,length(Scenarios1));      %%% reshape(num41D,[],1,length(Scenarios1));                       % (N/A) Renewable signal 40curt
+data55 = reshape(num51,[],1,length(Scenarios1))*1000;                    % ($/MW-month)
+data66 = reshape(num6A(1:Num_demand_tranches,:),Num_demand_tranches,1,length(Scenarios1))*1000;   % ($/MW-month) 
+% % % data77 = reshape(num71,[],1,length(Scenarios1));                         % (N/A) TOU
+data88 = reshape(num81,[],1,length(Scenarios1));                         % ($/month/meter)
+% % % data_most_PV = [data11,data11B,data22,data33,data_other,data44A];      % Combine energy price, AS price and other components listed in 'Inputs1'
+% % % data_most_WND = [data11,data11B,data22,data33,data_other,data44B];     % Combine energy price, AS price and other components listed in 'Inputs1'
+% % % data_most_33curt = [data11,data11B,data22,data33,data_other,data44C];  % Combine energy price, AS price and other components listed in 'Inputs1'
+% % % data_most_40curt = [data11,data11B,data22,data33,data_other,data44D];  % Combine energy price, AS price and other components listed in 'Inputs1'
 
 
 %% Write regular tariff text files
@@ -367,21 +394,52 @@ if strcmp(write_regular_files,'yes')
     end
     clear data_most2
     
-    %%% Create files with renewable profiles
-    for i0=1:length(txt41)
-            cHeader = {'Interval','renewable_signal(interval)'};    % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
-
-            %write header to file
-            fid = fopen([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
-
-            %write data to end of file
-            dlmwrite([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[data44(:,i0)]],'-append');
+    %%% Create file with additional parameters
+    fileID = fopen([dir0,'additional_parameters',add_txt1,'.txt'],'wt');        
+    for i7=1:length(Inputs2)
+        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs2{i7},'/');
+        for i8=1:Year_length*interval_length
+            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data_other(i8,i7),'/;');
+            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data_other(i8,i7),'');
+            end
+        end
     end
+    fclose(fileID);
+    
+    %%% Create file with no renewable profiles
+    fileID = fopen([dir0,'renewable_profiles_none',add_txt1,'.txt'],'wt');    
+    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs3{1},'/');
+    for i7=1:length(Inputs3)
+        for i8=1:Year_length*interval_length
+            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,0,'/;');
+            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,0,'');
+            end
+        end
+    end
+    fclose(fileID);
+    
+    %%% Create file with renewable profiles
+    fileID = fopen([dir0,'renewable_profiles_PV',add_txt1,'.txt'],'wt');    
+    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs3{1},'/');
+    for i7=1:length(Inputs3)
+        for i8=1:Year_length*interval_length
+            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data44A(i8,i7),'/;');
+            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data44A(i8,i7),'');
+            end
+        end
+    end
+    fclose(fileID);
+    
+    fileID = fopen([dir0,'renewable_profiles_WIND',add_txt1,'.txt'],'wt');    
+    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs3{1},'/');
+    for i7=1:length(Inputs3)
+        for i8=1:Year_length*interval_length
+            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data44B(i8,i7),'/;');
+            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data44B(i8,i7),'');
+            end
+        end
+    end
+    fclose(fileID);
 end
 
 
