@@ -4,18 +4,14 @@ clear all, close all, clc
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage_UK_Prices\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Redispatch_hourly\'];
-%dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Central_vs_distributed\Output\'];
-dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Example\Output\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Project\Central_vs_distributed\Data_files\'];
+dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Example\Data_files\'];
 
 dir1 = [dir2,'CSV_data\'];      % Input folder
 [status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
 dir0 = [dir2,'TXT_files\'];     % Output folder
 [status0,msg0] = mkdir(dir0);   % Create directory if it doesn't exist
 cd(dir1);
-
-% dir0 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\TXT_files\Generic_file\'];    % Output folder
-% dir1 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\CSV_data\Generic_file\'];     % Input folder
-% cd(dir1);
 
 % Prompt for which files to output
 write_regular_files = 'yes'; %input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
