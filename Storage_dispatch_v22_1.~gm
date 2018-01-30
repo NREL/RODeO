@@ -21,17 +21,17 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     5a4fca635457a3d834fc3f66_hourly
-$if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_Price1_hourly
-$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_distributed_hourly
+$if not set elec_rate_instance     $set elec_rate_instance     5a32fe535457a380445c48a3_hourly
+$if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_hourly
+$if not set H2_consumed_instance   $set H2_consumed_instance   Hydrogen_consumed_hourly
 $if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_hourly
-$if not set NG_price_instance      $set NG_price_instance      NG_price_Price1_hourly
+$if not set NG_price_instance      $set NG_price_instance      NG_price_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_hourly
-$if not set load_prof_instance     $set load_prof_instance     Additional_load_Load1_hourly
-$if not set energy_price_inst      $set energy_price_inst      Energy_prices_empty_hourly
+$if not set load_prof_instance     $set load_prof_instance     basic_building_0_hourly
+$if not set energy_price_inst      $set energy_price_inst      Energy_prices_hourly
 $if not set AS_price_inst          $set AS_price_inst          Ancillary_services_hourly
-$if not set outdir                 $set outdir                 RODeO\Projects\Central_vs_distributed\Output
-$if not set indir                  $set indir                  RODeO\Projects\Central_vs_distributed\Data_files\TXT_files
+$if not set outdir                 $set outdir                 RODeO\Projects\Example\Output
+$if not set indir                  $set indir                  RODeO\Projects\Example\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA

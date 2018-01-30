@@ -16,7 +16,8 @@ warnings.simplefilter("ignore",UserWarning)
 #dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Output/'  # Location to put database files
 #dir0 = 'C:/Users/jeichman/Documents/Publications/INL-NREL Electrolyzer project/Operation_Profiles_to_INL/'  # Location to put database files
 #dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Output/Redispatch_hourly_rnd1/'  # Location to put database files
-dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/Example/Output/'  # Location to put database files
+dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/Central_vs_distributed/Output/'  # Location to put database files
+#dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/Example/Output/'  # Location to put database files
 
 #dir1 = dir0+'Default/'                                              # Location of csv files
 #dir1 = dir0+'Test/'                                                 # Location of csv files
@@ -83,7 +84,8 @@ for files2load in os.listdir(dir1):
             int1 = int1[3:]
             int1[2] = int1[2].replace('hrs.csv', '')
             files2load_summary_title[c0[2]] = int1
-    elif 1==1:
+    elif 1==0:
+        # For Projects\Example
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
             c0[0]=c0[0]+1
             files2load_input[c0[0]] = files2load
@@ -108,7 +110,32 @@ for files2load in os.listdir(dir1):
             int1[2] = int1[2].replace('CF', '')
             int1[3] = int1[3].replace('hrs.csv', '')
             files2load_summary_title[c0[2]] = int1
-
+    elif 1==1:
+        # For Projects\Central_vs_distritubed
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
+            c0[0]=c0[0]+1
+            files2load_input[c0[0]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+            int1[2] = int1[2].replace('CF', '')            
+            int1[4] = int1[4].replace('hrs.csv', '')
+            files2load_input_title[c0[0]] = int1
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_results*'):
+            c0[1]=c0[1]+1
+            files2load_results[c0[1]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+            int1[2] = int1[2].replace('CF', '')
+            int1[4] = int1[4].replace('hrs.csv', '')
+            files2load_results_title[c0[1]] = int1
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_summary*'):
+            c0[2]=c0[2]+1
+            files2load_summary[c0[2]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+            int1[2] = int1[2].replace('CF', '')
+            int1[4] = int1[4].replace('hrs.csv', '')
+            files2load_summary_title[c0[2]] = int1
 
 
 # Connecting to the database file
@@ -162,7 +189,8 @@ if 1==1:            # This section captures the scenario table from summary file
             print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
         c.executemany(sql, params)
         conn.commit()
-    elif 1==1:
+    elif 1==0:
+        # For Projects\Example
         c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
                                              'Tariff' text,                                             
                                              'Operating Strategy' text,
@@ -176,7 +204,22 @@ if 1==1:            # This section captures the scenario table from summary file
             print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
         c.executemany(sql, params)
         conn.commit()   
-        
+    elif 1==1:
+        # For Projects\Central_vs_distributed
+        c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
+                                             'Tariff' text,                                             
+                                             'Operating Strategy' text,
+                                             'Capacity Factor (%)' real,
+                                             'Configuration' text,
+                                             'Storage duration (hours)' real)''')
+    
+        sql = "INSERT INTO Scenarios VALUES (?,?,?,?,?,?)"
+        params=list()
+        for i0 in range(len(files2load_summary)):    
+            params.insert(i0,tuple(list([str(i0+1)])+files2load_summary_title[i0+1]))
+            print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
+        c.executemany(sql, params)
+        conn.commit()         
         
 if 1==1:            # This section captures the summary files         
     # Creating Summary Table

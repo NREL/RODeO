@@ -10,7 +10,9 @@
 
 %% Prepare data to populate batch file.
 clear all, close all, clc
-Project_name = 'Example';
+Project_name = 'Central_vs_distributed'; 
+% Project_name = 'Example';
+
 dir1 = 'C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\';   % Set directory to send files
 dir2 = [dir1,'Projects\',Project_name,'\Batch_files\'];
 cd(dir1); 
@@ -40,7 +42,10 @@ files_tariff2=files_tariff2(load_file1);    clear load_file1 files_tariff
 
 Batch_header = struct;
 Batch_header.elec_rate_instance = {};
-Batch_header.add_param_instance = {};
+Batch_header.H2_price_hourly = {};
+Batch_header.Hydrogen_consumed_hourly = {};
+Batch_header.Input_power_baseload_hourly = {};
+Batch_header.NG_price_hourly = {};
 Batch_header.ren_prof_instance = {};
 Batch_header.load_prof_instance = {};
 Batch_header.energy_price_inst = {};
@@ -121,25 +126,33 @@ for i0 = 1:numel(fields1)
     if strcmp(fields1{i0},'elec_rate_instance')
         Batch_header.elec_rate_instance.val = strrep(files_tariff2,'.txt','');
     end   
-    if strcmp(fields1{i0},'add_param_instance')
-        Batch_header.add_param_instance.val = {'additional_parameters_hourly'};        
+    if strcmp(fields1{i0},'H2_price_hourly')
+        Batch_header.H2_price_hourly.val = {'additional_parameters_hourly'};        
+    end
+    if strcmp(fields1{i0},'Hydrogen_consumed_hourly')
+        Batch_header.Hydrogen_consumed_hourly.val = {'H2_consumption_central_hourly','H2_consumption_distributed_hourly'};        
+    end
+    if strcmp(fields1{i0},'Input_power_baseload_hourly')
+        Batch_header.Input_power_baseload_hourly.val = {'Input_power_baseload_hourly'};        
+    end
+    if strcmp(fields1{i0},'NG_price_hourly')
+        Batch_header.NG_price_hourly.val = {'NG_price_Price1_hourly'};        
     end
     if strcmp(fields1{i0},'ren_prof_instance')
         Batch_header.ren_prof_instance.val = {'renewable_profiles_none_hourly'};
     end
     if strcmp(fields1{i0},'load_prof_instance')
-        Batch_header.load_prof_instance.val = {'basic_building_0_hourly'};
+        Batch_header.load_prof_instance.val = {'Additional_load_Load1_hourly'};
     end
     if strcmp(fields1{i0},'energy_price_inst')
-        Batch_header.energy_price_inst.val = {'Energy_prices_hourly'};
+        Batch_header.energy_price_inst.val = {'Energy_prices_empty_hourly'};
     end
     if strcmp(fields1{i0},'AS_price_inst')
         Batch_header.AS_price_inst.val = {'Ancillary_services_hourly'};
     end
     if strcmp(fields1{i0},'outdir')
-        outdir_val = 'Projects\Example\Output';
-        [status,msg] = mkdir(outdir_val);       % Create output file if it doesn't exist yet  
-        Batch_header.outdir.val = {outdir_val}; % Reference is dynamic from location of batch file (i.e., exclue 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
+        [status,msg] = mkdir(outdir);       % Create output file if it doesn't exist yet  
+        Batch_header.outdir.val = {outdir}; % Reference is dynamic from location of batch file (i.e., exclue 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
     end
     if strcmp(fields1{i0},'indir')
         Batch_header.indir.val = {indir};       % Reference is dynamic from location of batch file (i.e., exclue 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
@@ -414,10 +427,13 @@ Index_elec_rate = strfind(fields1,'elec_rate_instance');
 Index_elec_rate = find(not(cellfun('isempty',Index_elec_rate)));
 
 Index_base = strfind(fields1,'base_op_instance');
-Index_base= find(not(cellfun('isempty',Index_base)));
+Index_base = find(not(cellfun('isempty',Index_base)));
 
 Index_CF = strfind(fields1,'H2_consume_adj_inst');
-Index_CF= find(not(cellfun('isempty',Index_CF)));
+Index_CF = find(not(cellfun('isempty',Index_CF)));
+
+Index_H2_cons = strfind(fields1,'Hydrogen_consumed_hourly');
+Index_H2_cons = find(not(cellfun('isempty',Index_H2_cons)));
 
 for i0=1:M0    
     interim1 = relationship_matrix_final{i0,Index_elec_rate};
@@ -432,7 +448,12 @@ for i0=1:M0
     interim3 = relationship_matrix_final{i0,Index_CF};
     interim3 = ['CF',num2str(round(str2num(interim3)*100,0))];
 
-    relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3);
+    interim4 = relationship_matrix_final{i0,Index_H2_cons};
+    if strcmp(interim4,'H2_consumption_central_hourly'),     interim4='Central';
+    elseif strcmp(interim4,'H2_consumption_distributed_hourly'), interim4='Distributed';
+    end
+    
+    relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3,'_',interim4);
 end
 
 
