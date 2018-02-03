@@ -1,4 +1,4 @@
-Interval,input_power_baseload(interval)
+Interval,baseload,
 1,1
 2,1
 3,1

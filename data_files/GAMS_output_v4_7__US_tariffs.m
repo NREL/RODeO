@@ -4,8 +4,8 @@ clear all, close all, clc
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage_UK_Prices\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Redispatch_hourly\'];
-dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_distributed\Data_files\'];
-% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Example\Data_files\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_distributed\Data_files\'];
+dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Example\Data_files\'];
 
 dir1 = [dir2,'CSV_data\'];      % Input folder
 [status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
@@ -15,7 +15,7 @@ cd(dir1);
 
 % Prompt for which files to output
 write_regular_files = 'yes'; %input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
-Year_select = 2018;     % select year to be analyzed
+Year_select = 2017;     % select year to be analyzed
 Year_length = ceil((datenum(Year_select,12,31,23,59,59)-datenum(Year_select,1,1,0,0,0))*24);   %8784;     % length of year in hours
 interval_length = 1;    % used to create sub-hourly data files (1, 4, or 12)
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
