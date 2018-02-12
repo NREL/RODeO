@@ -4,8 +4,8 @@ clear all, close all, clc
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage_UK_Prices\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Redispatch_hourly\'];
-% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_distributed\Data_files\'];
-dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Example\Data_files\'];
+dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_distributed\Data_files\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Example\Data_files\'];
 
 dir1 = [dir2,'CSV_data\'];      % Input folder
 [status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
@@ -14,7 +14,6 @@ dir0 = [dir2,'TXT_files\'];     % Output folder
 cd(dir1);
 
 % Prompt for which files to output
-write_regular_files = 'yes'; %input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
 Year_select = 2017;     % select year to be analyzed
 Year_length = ceil((datenum(Year_select,12,31,23,59,59)-datenum(Year_select,1,1,0,0,0))*24);   %8784;     % length of year in hours
 interval_length = 1;    % used to create sub-hourly data files (1, 4, or 12)
@@ -333,211 +332,210 @@ Inputs1 = {'elec_purchase_price(interval)','elec_sale_price(interval)',...
 
 %% Write regular tariff text files
 tic;
-if strcmp(write_regular_files,'yes')
-    [m1 n1 o1] = size(GAMS_string2);
-    % Add additional text to specify the resolution of the file being used
-    if     interval_length == 1;  add_txt1 = ['_hourly'];
-    elseif interval_length == 4;  add_txt1 = ['_15min'];
-    elseif interval_length == 12; add_txt1 = ['_5min'];
-    else                          error('Need to define interval length')
+
+[m1 n1 o1] = size(GAMS_string2);
+% Add additional text to specify the resolution of the file being used
+if     interval_length == 1;  add_txt1 = ['_hourly'];
+elseif interval_length == 4;  add_txt1 = ['_15min'];
+elseif interval_length == 12; add_txt1 = ['_5min'];
+else                          error('Need to define interval length')
+end
+init_val = 1;  % Used to adjust initial for loop value and for progress tracking
+for i5=init_val:length(Scenarios1)
+    filename2_short = filename2{i5};        
+    fileID = fopen([dir0,char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
+    data_most2 = [data11,data11B,data22];    % Combine energy price, AS price and other components listed in 'Inputs1'
+    % data_most2(:,3:6,:) = 0;                        % AS     Remove AS prices
+    % data_most2(:,[3,6],:) = 0;                      % REG    Remove SP NS prices
+    % data_most2(:,[4:6],:) = 0;                      % NS     Remove SP Reg prices
+    % data_most2(:,[4,5],:) = 0;                      % SP NS  Remove Reg prices
+
+    % Add demand charge times
+    fprintf(fileID,'%s\n','$onempty');
+    fprintf(fileID,'%s\n','Set');
+    for i6=1:m1
+        fprintf(fileID,'\t%s\t%s\t%s\n',['Month_',month_vec{i6},'(interval)'],'hours',GAMS_stringA{i6,i5});
     end
-    init_val = 1;  % Used to adjust initial for loop value and for progress tracking
-    for i5=init_val:length(Scenarios1)
-        filename2_short = filename2{i5};        
-        fileID = fopen([dir0,char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
-        data_most2 = [data11,data11B,data22];    % Combine energy price, AS price and other components listed in 'Inputs1'
-        % data_most2(:,3:6,:) = 0;                        % AS     Remove AS prices
-        % data_most2(:,[3,6],:) = 0;                      % REG    Remove SP NS prices
-        % data_most2(:,[4:6],:) = 0;                      % NS     Remove SP Reg prices
-        % data_most2(:,[4,5],:) = 0;                      % SP NS  Remove Reg prices
-        
-        % Add demand charge times
-        fprintf(fileID,'%s\n','$onempty');
-        fprintf(fileID,'%s\n','Set');
-        for i6=1:m1
-            fprintf(fileID,'\t%s\t%s\t%s\n',['Month_',month_vec{i6},'(interval)'],'hours',GAMS_stringA{i6,i5});
+    fprintf(fileID,'\n');
+    for i6=1:m1
+        for i66=1:n1
+        fprintf(fileID,'\t%s\t%s\t%s\n',[month_vec{i6},'_',num2str(i66),'(interval)'],'hours',GAMS_string2{i6,i66,i5});
         end
-        fprintf(fileID,'\n');
-        for i6=1:m1
-            for i66=1:n1
-            fprintf(fileID,'\t%s\t%s\t%s\n',[month_vec{i6},'_',num2str(i66),'(interval)'],'hours',GAMS_string2{i6,i66,i5});
-            end
-        end                
-        % Add yearly inputs
-        yearly_inputs = length(Inputs1)-3;
-        for i7=1:yearly_inputs
-            fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{i7},'/');
-            for i8=1:Year_length*interval_length
-                if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data_most2(i8,i7,i5),'/;');
-                else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data_most2(i8,i7,i5),'');
-                end
-            end
-        end
-        % Add meter charge
-        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+1},'/');
-        fprintf(fileID,'%i\t%g\t%s\n',1,data88(1,1,i5),'/;');
-        % Add fixed demand inputs
-        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+2},'/');
-        for i8=1:12
-            if i8==12, fprintf(fileID,'%i\t%g\t%s\n',i8,data55(i8,1,i5),'/;');
-            else       fprintf(fileID,'%i\t%g\t%s\n',i8,data55(i8,1,i5),'');
+    end                
+    % Add yearly inputs
+    yearly_inputs = length(Inputs1)-3;
+    for i7=1:yearly_inputs
+        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{i7},'/');
+        for i8=1:Year_length*interval_length
+            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data_most2(i8,i7,i5),'/;');
+            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data_most2(i8,i7,i5),'');
             end
         end
-        % Add timed demand inputs
-        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+3},'/');
-        for i8=1:size(data66,1)
-            if i8==size(data66,1), fprintf(fileID,'%i\t%g\t%s\n',i8,data66(i8,1,i5),'/;');
-            else                   fprintf(fileID,'%i\t%g\t%s\n',i8,data66(i8,1,i5),'');
-            end
+    end
+    % Add meter charge
+    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+1},'/');
+    fprintf(fileID,'%i\t%g\t%s\n',1,data88(1,1,i5),'/;');
+    % Add fixed demand inputs
+    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+2},'/');
+    for i8=1:12
+        if i8==12, fprintf(fileID,'%i\t%g\t%s\n',i8,data55(i8,1,i5),'/;');
+        else       fprintf(fileID,'%i\t%g\t%s\n',i8,data55(i8,1,i5),'');
         end
-        fclose(fileID); 
-        disp([num2str(i5),' of ',num2str(length(Scenarios1)),' - ',num2str(round(toc/abs(i5-init_val)*(length(Scenarios1)-i5)/60)),' min. remain - ',char(filename2(i5))])   
     end
-    clear data_most2
-
-    %%% Create files for energy prices
-    for i0=1:length(txt1C)
-            cHeader = {'Interval','Energy Price'};          % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
-
-            %write header to file
-            fid = fopen([dir0,'Energy_prices_',txt1C{i0},add_txt1,'.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
-
-            %write data to end of file
-            dlmwrite([dir0,'Energy_prices_',txt1C{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num1C(:,i0+1)]],'-append');
+    % Add timed demand inputs
+    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+3},'/');
+    for i8=1:size(data66,1)
+        if i8==size(data66,1), fprintf(fileID,'%i\t%g\t%s\n',i8,data66(i8,1,i5),'/;');
+        else                   fprintf(fileID,'%i\t%g\t%s\n',i8,data66(i8,1,i5),'');
+        end
     end
-    
-    %%% Create files with Ancillary_services
-    for i0=1
-            cHeader = {'Interval','Regulation Up','Regulation Down','Spinning Reserve','Nonspinning reserve'};    % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+    fclose(fileID); 
+    disp([num2str(i5),' of ',num2str(length(Scenarios1)),' - ',num2str(round(toc/abs(i5-init_val)*(length(Scenarios1)-i5)/60)),' min. remain - ',char(filename2(i5))])   
+end
+clear data_most2
 
-            %write header to file
-            fid = fopen([dir0,'Ancillary_services',add_txt1,'.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
+%%% Create files for energy prices
+for i0=1:length(txt1C)
+        cHeader = {'Interval','Energy Price'};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
 
-            %write data to end of file
-            dlmwrite([dir0,'Ancillary_services',add_txt1,'.csv'],num21,'-append');
-    end
-    
-    %%% Create files with renewable profiles
-    for i0=1:length(txt31)
-            cHeader = {'Interval',txt31{i0}};                       % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+        %write header to file
+        fid = fopen([dir0,'Energy_prices_',txt1C{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
 
-            %write header to file
-            fid = fopen([dir0,'NG_price_',txt31{i0},add_txt1,'.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
+        %write data to end of file
+        dlmwrite([dir0,'Energy_prices_',txt1C{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num1C(:,i0+1)]],'-append');
+end
 
-            %write data to end of file
-            dlmwrite([dir0,'NG_price_',txt31{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num31(:,i0+1)]],'-append');
-    end 
-    
-    %%% Create files with renewable profiles
-    for i0=1:length(txt41)
-            cHeader = {'Interval',txt41{i0}};                       % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+%%% Create files with Ancillary_services
+for i0=1
+        cHeader = {'Interval','Regulation Up','Regulation Down','Spinning Reserve','Nonspinning reserve'};    % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
 
-            %write header to file
-            fid = fopen([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
+        %write header to file
+        fid = fopen([dir0,'Ancillary_services',add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
 
-            %write data to end of file
-            dlmwrite([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num41(:,i0+1)]],'-append');
-    end   
-    
-    %%% Create files with baseload mode profiles
-    for i0=1:length(txt71)
-            cHeader = {'Interval',txt71{i0}};          % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+        %write data to end of file
+        dlmwrite([dir0,'Ancillary_services',add_txt1,'.csv'],num21,'-append');
+end
 
-            %write header to file
-            fid = fopen([dir0,'Input_power_',txt71{i0},add_txt1,'.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
+%%% Create files with renewable profiles
+for i0=1:length(txt31)
+        cHeader = {'Interval',txt31{i0}};                       % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
 
-            %write data to end of file
-            dlmwrite([dir0,'Input_power_',txt71{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num71(:,i0+1)]],'-append');
-    end
-    
-    %%% Create files with additional load profiles
-    for i0=1:length(txt91)
-            cHeader = {'Interval',txt91{i0}};          % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+        %write header to file
+        fid = fopen([dir0,'NG_price_',txt31{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
 
-            %write header to file
-            fid = fopen([dir0,'Additional_load_',txt91{i0},add_txt1,'.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
+        %write data to end of file
+        dlmwrite([dir0,'NG_price_',txt31{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num31(:,i0+1)]],'-append');
+end 
 
-            %write data to end of file
-            dlmwrite([dir0,'Additional_load_',txt91{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num91(:,i0+1)]],'-append');
-    end
-    
-    %%% Create files with H2 price profiles
-    for i0=1:length(txt10B)
-            cHeader = {'Interval',txt10B{i0}};          % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+%%% Create files with renewable profiles
+for i0=1:length(txt41)
+        cHeader = {'Interval',txt41{i0}};                       % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
 
-            %write header to file
-            fid = fopen([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
+        %write header to file
+        fid = fopen([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
 
-            %write data to end of file
-            dlmwrite([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num10B(:,i0+1)]],'-append');
-    end
-    
-    %%% Create files with H2 consumption profiles
-    for i0=1:length(txt11B)
-            cHeader = {'Interval',txt11B{i0}};          % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+        %write data to end of file
+        dlmwrite([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num41(:,i0+1)]],'-append');
+end   
 
-            %write header to file
-            fid = fopen([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
+%%% Create files with baseload mode profiles
+for i0=1:length(txt71)
+        cHeader = {'Interval',txt71{i0}};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
 
-            %write data to end of file
-            dlmwrite([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num11B(:,i0+1)]],'-append');
-    end
-    
-    %%% Create controller input file
-    for i0=1
-            cHeader = {'current_interval','next_interval','current_storage_lvl','current_monthly_max','max_interval'};  % header
-            commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-            commaHeader = commaHeader(:)';
-            textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+        %write header to file
+        fid = fopen([dir0,'Input_power_',txt71{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
 
-            %write header to file
-            fid = fopen([dir0,'controller_input_values.csv'],'w'); 
-            fprintf(fid,'%s\n',textHeader);
-            fclose(fid);
+        %write data to end of file
+        dlmwrite([dir0,'Input_power_',txt71{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num71(:,i0+1)]],'-append');
+end
 
-            %write data to end of file
-            dlmwrite([dir0,'controller_input_values.csv'],[-1,1,0.5,0.8],'-append');
-    end
+%%% Create files with additional load profiles
+for i0=1:length(txt91)
+        cHeader = {'Interval',txt91{i0}};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'Additional_load_',txt91{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'Additional_load_',txt91{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num91(:,i0+1)]],'-append');
+end
+
+%%% Create files with H2 price profiles
+for i0=1:length(txt10B)
+        cHeader = {'Interval',txt10B{i0}};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num10B(:,i0+1)]],'-append');
+end
+
+%%% Create files with H2 consumption profiles
+for i0=1:length(txt11B)
+        cHeader = {'Interval',txt11B{i0}};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num11B(:,i0+1)]],'-append');
+end
+
+%%% Create controller input file
+for i0=1
+        cHeader = {'current_interval','next_interval','current_storage_lvl','current_monthly_max','max_interval'};  % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'controller_input_values.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'controller_input_values.csv'],[-1,1,0.5,0.8],'-append');
 end
 
 
