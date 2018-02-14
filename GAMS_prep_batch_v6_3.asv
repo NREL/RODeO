@@ -566,8 +566,7 @@ if strcmp(Project_name,'Central_vs_distributed')
     Index_H2_cons = strfind(fields1,'H2_consumed_instance');    Index_H2_cons = find(not(cellfun('isempty',Index_H2_cons)));
     Index_load = strfind(fields1,'load_prof_instance');         Index_load = find(not(cellfun('isempty',Index_load)));
     Index_input_cap = strfind(fields1,'input_cap_instance');    Index_input_cap = find(not(cellfun('isempty',Index_input_cap)));
-    Index_capcost = strfind(fields1,'input_cap_cost_inst');     Index_capcost = find(not(cellfun('isempty',Index_capcost)));
-    
+
     
     % Select timeframe  (used for interim5)      
     [~,~,timeframe1] = xlsread([indir,'\','Match_inputcap_capcost']);       % Load file(s) 
@@ -576,7 +575,7 @@ if strcmp(Project_name,'Central_vs_distributed')
     [M1,~] = size(timeframe1);
     timeframe2 = cell(M1,1);        
     for i1=1:M1, timeframe2{i1} = strjoin(timeframe1(i1,:)); end            % Concatenate cell array
-    [~,idxTime]=unique(timeframe2);                                         % Find unique rows in concatenated cell array
+    [CTime,idxTime]=unique(timeframe2);                                         % Find unique rows in concatenated cell array
 
     for i0=1:M0    
         interim1 = relationship_matrix_final{i0,Index_elec_rate};
@@ -599,12 +598,12 @@ if strcmp(Project_name,'Central_vs_distributed')
 
         interim4 = relationship_matrix_final{i0,Index_H2_cons};
         
-        interim5 = timeframe1{[idxTime(strcmp(timeframe1(idxTime,1),relationship_matrix_final(i0,Index_capcost)))],2};
+        interim5 = timeframe1(:,idxTime(strcmp(timeframe1(idxTime,1),relationship_matrix_final(i0,Index_input_cap))),1);
 
         if strcmp(interim4,'H2_consumption_central_hourly'),     interim4='Central';
         elseif strcmp(interim4,'H2_consumption_distributed_hourly'), interim4='Distributed';
         end
-        relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3,'_',interim4,'_',interim5);
+        relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3,'_',interim4);
     end
 elseif strcmp(Project_name,'Example')
 % Example
@@ -659,7 +658,7 @@ GAMS_batch_init = ['"',GAMS_loc,'" "',GAMS_file,'" ',GAMS_lic];
     end    
 end
 fclose(fileID);
-disp([num2str(c2),' batch files for ',num2str(M0),' runs (~',num2str(ceil(M0/files_to_create)),' each)']);
+disp([num2str(c2),' batch files created for ',num2str(M0),' model runs (~',num2str(ceil(M0/files_to_create)),' each)']);
 
 
 %% Function file

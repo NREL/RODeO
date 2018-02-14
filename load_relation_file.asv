@@ -13,22 +13,9 @@ function Batch_header = load_relation_file(load_files1,indir,Batch_header)
             V2 = length(Batch_header.(header1{2}).val);    
 
             %%% Check to make sure all values are defined to avoid inadvertantly deleting scenarios
-            V1_int = unique(raw1(:,1));         % Find length of unique non-'NaN' array
-            V1_int(strcmp(V1_int,'NaN')) = [];            
-            V1_check = length(V1_int);
+            raw1_1 =
             
-            V2_int = unique(raw1(:,2));         % Find length of unique non-'NaN' array
-            V2_int(strcmp(V2_int,'NaN')) = [];            
-            V2_check = length(V2_int);
             
-            % Warnings below do not necessarily mean an error. Ignore if this is intentional (e.g., have more electricity rate files than are used)
-            % V1_check or V2_check can be larger than V1 or V2
-            if (V1_check~=V1)
-               warning([header1{1},' from ',load_files1{i0},'.xlsx has fewer values than initially defined (',num2str(V1_check),' out of ',num2str(V1),')']);
-            end
-            if (V2_check~=V2)
-               warning([header1{2},' from ',load_files1{i0},'.xlsx has fewer values than initially defined (',num2str(V2_check),' out of ',num2str(V2),')']);
-            end
 %           %%% Changed technique from making 0,1 matrix of values to carrying data directly           
 %             Int1 = zeros(V1,V2);                                    % Initialize matrix
 %             for i1=1:V1
