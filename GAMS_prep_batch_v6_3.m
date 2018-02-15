@@ -3,12 +3,16 @@
 %     Creates batch file by quickly assembling different sets of runs and 
 %       can create multiple batch files for parallel processing
 %
-%     Steps to add new fields
-%       1. Add entry into Batch_header (Second section)
-%       2. Add value(s) for new fields (Third section)
+%     Steps to run
+%       1. Select Project_name
+%       2. Adjust any other properties in Section 1
+%       3. Setup values in Batch_header in Section 2
+%       4. Add relationships between fields by loading files in Section 3
+%            (Make sure that you appropraitely define the relationships between properties)
+%       5. Adjust filename creatino in Section 6 as necessary
+% 
 
-
-%% Prepare data to populate batch file.
+%% SECTION 1: Prepare data to populate batch file.
 clear all, close all, clc
 disp(['Prepare data...'])
 
@@ -54,7 +58,7 @@ end
 files_add_load2=files_add_load2(find(load_file1));    clear load_file1 files_add_load
 
 
-%% Set values to vary by scenario
+%% SECTION 2: Set values to vary by scenario
 disp(['Set batch file values...'])
 if strcmp(Project_name,'Central_vs_distributed')
 %%% Central_vs_distributed
@@ -301,25 +305,12 @@ else
 end
 fields1 = fieldnames(Batch_header);
 
-%% Define how values are varied between fields
-%  Not defining how a field1 is varied over field2 causes the code to default to making the same values for field1 across every field2 
-%  Example: F1 = {'0','1'}, F2 = {'10','100'}. Without defining a specific relationship between F1 and F2, four runs will be created (i.e., [F1=0,F2=10], [F1=0,F2=100], [F1=1,F2=10], [F0=1,F1=100])
-%  Definition of relationship should be arranged as e.g., input_cap_instance.base_op_instance. 
-%  The first item is the row and the second is the column.
-%  Example: input_cap_instance = {'900','1000'}; base_op_instance = {'0','1'};
-%  Exapmle: The resulting matrix would be         C1        C2
-%                                           R1    [900,0]   [900,1]
-%                                           R2    [1000,0]  [1000,1]
-%  Example: Create matrix to express the items that you want (1=include, 0 = exclude) 
-%  Example: Batch_header.input_cap_instance.base_op_instance = [0 1;1 0]; 
-%  Setup to work for multiple relationships per field
-
-% Define relationships between fields 
-%   (only define one relationship per field the function will define the reciprocal relationship... if -> Batch_header.A.B then function will add Batch_header.B.A)
+%% SECTION 3: Define how values are varied between fields
+%  Load excel files that contain relationships between values. 
+%  The load_relation_file.m function will process the files and adjust Batch_header appropriately
 disp(['Define relationship between fields...'])
-
 if strcmp(Project_name,'Central_vs_distributed')
-% Central_vs_distributed
+%%% Central_vs_distributed
     V1 = length(Batch_header.input_cap_instance.val);
     V2 = length(Batch_header.H2_consume_adj_inst.val);
     V3 = length(Batch_header.load_prof_instance.val);
@@ -331,29 +322,18 @@ if strcmp(Project_name,'Central_vs_distributed')
                    'Match_inputcap_H2Cons','Match_load_rates','Match_load_storagecap',...
                    'Match_inputcap_capcost','Match_inputcap_FOM','Match_capcost_FOM','Match_inputcap_lifetime'};    
     Batch_header = load_relation_file(load_files1,indir,Batch_header);  % Run function file load_relation_file
-% %     load([indir,'\Batch_header.m'])
 elseif strcmp(Project_name,'Example')
-% Example
+%%% Example
     Batch_header.input_cap_instance.H2_consume_adj_inst = [1,0,0,0;1,1,1,1;1,1,1,1;1,1,1,1];
 else   
-% Default
+%%% Default
 end
+fprintf('\n') 
 
-%% Remove this section (instead of making full matrix and then parsing down, build up matrix from values
-
-% % % % % relationship_length = zeros(numel(fields1),1);      % Create matrix to track size of variations for each variable
-% % % % % for i0=1:numel(fields1)
-% % % % %     relationship_length(i0) = length(Batch_header.(fields1{i0}).val);
-% % % % % end
-
-%% Create 2D matrix and reduce based on relationships
+%% SECTION 4: Create 2D matrix and reduce based on relationships
 relationship_matrix = [];
 fields1_length = numel(fields1);
 for i0=1:fields1_length        
-% % %     if i0==66
-% % %         fields1{i0-1}
-% % %         error('stop here')
-% % %     end
     num_items = numel(Batch_header.(fields1{i0}).val);
     if i0==1,
         relationship_matrix = [1:num_items]';
@@ -364,9 +344,6 @@ for i0=1:fields1_length
         fields2_val = Batch_header.(fields1{i0}).val;       % Capture all values for selected field        
         for i1=1:num_items
             add_column = ones(M0,1)*i1;                     % Create empty matrix to add to existing matrix
-% % %             [add_column{:}] = deal([fields1_val{i1}]);      % Populate matrix with repeated cell item
-% % %             add_column2 = cell(M0,1);                       % Create empty matrix to add to existing matrix
-% % %             [add_column2{:}] = deal([fields2_val{i1}]);     % Populate matrix with repeated cell item
             relationship_matrix_interim([(i1-1)*M0+1:i1*M0],[1:(N0+1)]) = [relationship_matrix,add_column]; 
         end
         relationship_matrix = relationship_matrix_interim;  % Overwrite matrix with completed 
@@ -385,13 +362,10 @@ for i0=1:fields1_length
             if find_index2>i0
                 continue            % Skip applying relationships for columns that have not been added yet as the matrix expands
             end
-% % % %             error('stop')        
             find_val1 = Batch_header.(fields1{find_index1}).val;    % Find values in row
             find_val2 = Batch_header.(fields1{find_index2}).val;    % Find values in column
             find_rel1 = Batch_header.(fields1{find_index1}).(fields1{find_index2});  % Find relationship between items
 
-% % %             [M2,~] = size(find_rel1);     
-            test1 = relationship_matrix(:,[find_index1,find_index2]);
             relationship_toggle = zeros(M0,1);
             for i2=1:M0
                 [~,~,ib] = intersect(relationship_matrix(i2,[find_index1,find_index2]),find_rel1,'rows');
@@ -401,17 +375,18 @@ for i0=1:fields1_length
             end            
             relationship_matrix(find(relationship_toggle(:)),:)=[];           
         end
+    end 
+    if i0==1
+        fprintf('Completed %3d of %3d',i0,fields1_length)
+    else
+        fprintf('%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%cCompleted %3d of %3d',8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,i0,fields1_length)
     end
-    
-    [M0,N0] = size(relationship_matrix); 
-    disp([num2str(i0),',',num2str(M0),',',num2str(N0)])
-    
-%     fprintf('%c%c%c%c%c%c%c%c%c%cCompleted %3d of %3d',8,8,8,8,8,8,8,8,8,8,i0,fields1_length)
-%     disp(['Completed ',num2str(i0),' of ',num2str(fields1_length)])
 end
-clear i0 M0 N0 add_column
+clear i0 M0 N0 add_column relationship_matrix_interim relationship_toggle
+fprintf('\n'), fprintf('\n') 
 
-%% Convert integer matrix to cell array
+
+%% SECTION 5: Convert integer matrix to cell array
 [~,N0] = size(relationship_matrix); 
 relationship_matrix_final = cell(size(relationship_matrix));
 for i0=1:N0
@@ -420,145 +395,11 @@ for i0=1:N0
      relationship_matrix_final(:,i0) = find_val1(relationship_matrix(:,i0));    
 end
 
-
-
-%% REMOVE: Create relationship matrix based on definitions above
-% relationship_matrix = cell(1,numel(fields1));   % Initialize relationship matrix
-% fields1_length = numel(fields1);                % Find number of fields to iterate over
-% Used_fields = zeros(fields1_length,1);          % Keeps track of the items that have already been loaded (0=unused, 1=used)
-% for i0=1:fields1_length
-%     [i0,size(relationship_matrix)]
-%     if i0==14
-%         error('stop here')
-%     end
-%     fields2 = fieldnames(Batch_header.(fields1{i0}));
-%     [M0,~] = size(fields2);
-%     if (M0==1 && Used_fields(i0)~=1)
-%         [M1,~] = size(relationship_matrix);               
-%         relationship_matrix_interim = relationship_matrix;  % Copy matrix to repeat
-%         find_val1 = Batch_header.(fields1{i0}).val;         % Find values in row
-%         for i1=1:length(find_val1)
-%             add_column = cell(M1,1);                        % Create empty matrix to add to existing matrix
-%             [add_column{:}] = deal([find_val1{i1}]);        % Populate matrix with repeated cell item
-%             if i1==1
-%                 relationship_matrix(:,i0) = add_column;
-%             else
-%                 relationship_matrix_interim(:,i0) = add_column;  
-%                 relationship_matrix = [relationship_matrix;relationship_matrix_interim];
-%             end
-%         end
-%         Used_fields(i0) = 1;
-% %         if i0==1, fprintf('Completed %3d of %3d',i0,fields1_length)
-% %         else      fprintf('%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%cCompleted %3d of %3d',8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,i0,fields1_length)
-% %         end
-%         clear M1 relationship_matrix_interim find_val1 add_column
-%     elseif M0>1
-%         for i1=2:M0
-%             find_index1 = i0;                                       % Repeat value for i0
-%             find_index2 = strfind(fields1,fields2(i1));             % Find string in cell array 
-%             find_index2 = find(not(cellfun('isempty',find_index2)));% Find string in cell array 
-%             
-%             find_val1 = Batch_header.(fields1{find_index1}).val;    % Find values in row
-%             find_val2 = Batch_header.(fields1{find_index2}).val;    % Find values in column
-%             
-%             find_rel1 = Batch_header.(fields1{find_index1}).(fields1{find_index2});  % Find relationship between items
-%             [M1,N1] = size(find_rel1);
-%             c1 = 1;
-%             for i2 = 1:M1
-%                 for i3 = 1:N1
-%                     if find_rel1(i2,i3)==1
-%                         relationship_matrix(c1,[find_index1,find_index2]) = {find_val1(i2),find_val2(i3)};
-%                         c1 = c1+1;
-%                     else
-%                     end
-%                 end
-%             end
-%             Used_fields(find_index1) = 1;
-%             Used_fields(find_index2) = 1;
-% %             if i0==1, fprintf('Completed %3d of %3d',i0,fields1_length)
-% %             else      fprintf('%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%cCompleted %3d of %3d',8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,i0,fields1_length)
-% %             end
-%             clear find_index1 find_index2 find_val1 find_val2 find_rel M1 N1 c1 i1 i2 i3
-%         end
-%     end
-% end
-
-%% Remove this section (instead of making full matrix and then parsing down, build up matrix from values
-
-% relationship_length = zeros(numel(fields1),1);      % Create matrix to track size of variations for each variable
-% for i0=1:numel(fields1)
-%     relationship_length(i0) = length(Batch_header.(fields1{i0}).val);
-% end
-% 
-% % Create 2D matrix of all possible combinations
-% relationship_matrix = [];
-% fields1_length = numel(fields1);
-% for i0=1:fields1_length
-%     num_items = numel(Batch_header.(fields1{i0}).val);
-%     if i0==1,
-%         relationship_matrix = Batch_header.(fields1{i0}).val;
-%     else
-%         [M0,N0] = size(relationship_matrix);               
-%         relationship_matrix_interim = relationship_matrix;  % Copy matrix to repeat
-%         fields1_val = Batch_header.(fields1{i0}).val;       % Capture all values for selected field        
-%         for i1=1:num_items
-%             add_column = cell(M0,1);                        % Create empty matrix to add to existing matrix
-%             [add_column{:}] = deal([fields1_val{i1}]);      % Populate matrix with repeated cell item
-%             relationship_matrix_interim([(i1-1)*M0+1:i1*M0],[1:(N0+1)]) = horzcat(relationship_matrix,add_column); 
-%         end
-%         relationship_matrix = relationship_matrix_interim;  % Overwrite matrix with completed 
-%     end  
-%     fprintf('%c%c%c%c%c%c%c%c%c%cCompleted %3d of %3d',8,8,8,8,8,8,8,8,8,8,i0,fields1_length)
-% %     disp(['Completed ',num2str(i0),' of ',num2str(fields1_length)])
-% end
-% clear i0 M0 N0 add_column
-
-%% Adjust relationship matrix based on definitions above
-% relationship_toggle = ones(prod(relationship_length),1);            % Matrix to turn on and off specific runs (1=include, 0=exclude) (default, before applying exceptions, is to include all runs)
-% for i0=1:numel(fields1)
-%     fields2 = fieldnames(Batch_header.(fields1{i0}));
-%     [M0,N0] = size(fields2);
-%     if M0==1, continue
-%     else
-%         for i1=2:M0
-%             find_index1 = i0;                                       % Repeat value for i0
-%             find_index2 = strfind(fields1,fields2(i1));             % Find string in cell array 
-%             find_index2 = find(not(cellfun('isempty',find_index2)));% Find string in cell array 
-%             
-%             find_val1 = Batch_header.(fields1{find_index1}).val;    % Find values in row
-%             find_val2 = Batch_header.(fields1{find_index2}).val;    % Find values in column
-%             
-%             find_rel1 = Batch_header.(fields1{find_index1}).(fields1{find_index2});  % Find relationship between items
-%             [M1,N1] = size(find_rel1);
-%           
-%             for i2=1:M1
-%                 for i3=1:N1
-%                     find_rel1_val = find_rel1(i2,i3);
-%                     if find_rel1_val==0
-%                         find_val3 = {find_val1{i2},find_val2{i3}};
-%                         compare_fields1 = horzcat(relationship_matrix(:,find_index1),relationship_matrix(:,find_index2));
-%                         find_row1 = strcmp(relationship_matrix(:,find_index1),find_val1{i2});  % Find rows that match omitted items
-% 
-%                         find_row2 = strcmp(relationship_matrix(:,find_index2),find_val2{i3});  % Find rows that match omitted items
-%                         
-%                         remove_items = (find_row1+find_row2)>=2;
-%                         relationship_toggle(remove_items) = 0;
-%                     end                    
-%                 end
-%             end            
-%         end
-%     end
-% end
-% clear i0 i1 i2 i3 M0 N0 M1 N1 compare_fields1 find_row1 find_row2
-% relationship_matrix_final = relationship_matrix;
-% relationship_matrix_final(find(relationship_toggle==0),:)=[];
-% [M0,N0] = size(relationship_matrix_final);
-
-%% Create file names
+%% SECTION 6: Create file names
 disp(['Create file names...'])
 [M0,~] = size(relationship_matrix); 
 if strcmp(Project_name,'Central_vs_distributed')
-% Central_vs_distributed
+%%% Central_vs_distributed
     Index_file_name = strfind(fields1,'file_name_instance');    Index_file_name = find(not(cellfun('isempty',Index_file_name)));
     Index_elec_rate = strfind(fields1,'elec_rate_instance');    Index_elec_rate = find(not(cellfun('isempty',Index_elec_rate)));
     Index_base = strfind(fields1,'base_op_instance');           Index_base = find(not(cellfun('isempty',Index_base)));
@@ -607,7 +448,7 @@ if strcmp(Project_name,'Central_vs_distributed')
         relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3,'_',interim4,'_',interim5);
     end
 elseif strcmp(Project_name,'Example')
-% Example
+%%% Example
     Index_file_name = strfind(fields1,'file_name_instance');    Index_file_name = find(not(cellfun('isempty',Index_file_name)));
     Index_elec_rate = strfind(fields1,'elec_rate_instance');    Index_elec_rate = find(not(cellfun('isempty',Index_elec_rate)));
     Index_base = strfind(fields1,'base_op_instance');           Index_base = find(not(cellfun('isempty',Index_base)));
@@ -630,11 +471,11 @@ elseif strcmp(Project_name,'Example')
         relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3);
     end
 else   
-% Default
+%%% Default
 end
 
 
-%% Create batch file names for tariffs
+%% SECTION 7: Create batch file names for tariffs
 disp(['Create batch files...'])
 c2=1;   % Initialize batch file number
 fileID = fopen([dir2,['RODeO_batch',num2str(c2),'.bat']],'wt');
@@ -655,11 +496,11 @@ GAMS_batch_init = ['"',GAMS_loc,'" "',GAMS_file,'" ',GAMS_lic];
         end
     end 
     if mod(i0,100)==0
-        disp(['File ',num2str(c2),' : ',num2str(i0),' of ',num2str(M0)]);   % Display progress    
+        disp(['  File ',num2str(c2),' : ',num2str(i0),' of ',num2str(M0)]);   % Display progress    
     end    
 end
 fclose(fileID);
-disp([num2str(c2),' batch files for ',num2str(M0),' runs (~',num2str(ceil(M0/files_to_create)),' each)']);
+disp([num2str(c2),' batch file(s) for ',num2str(M0),' runs (~',num2str(ceil(M0/files_to_create)),' each)']);
 
 
 %% Function file
@@ -673,18 +514,37 @@ disp([num2str(c2),' batch files for ',num2str(M0),' runs (~',num2str(ceil(M0/fil
 % 
 %             V1 = length(Batch_header.(header1{1}).val);
 %             V2 = length(Batch_header.(header1{2}).val);    
-%             Int1 = zeros(V1,V2);                                    % Initialize matrix
-%             for i1=1:V1
-%                 for i2=1:V2
-%                     for i3=1:M0
-%                         eval(sprintf('if (strcmp(Batch_header.%s.val{%d},raw1{%d,1}) && strcmp(Batch_header.%s.val{%d},raw1{%d,2}) ), Int1(%d,%d) = 1; end',header1{1},i1,i3,header1{2},i2,i3,i1,i2))
-%         % LEGACY                      if (strcmp(Batch_header.elec_rate_instance.val{i0},raw1{i2,1}) && strcmp(Batch_header.load_prof_instance.val{i1},raw1{i2,2}) ), Int1(i0,i1) = 1; end
-%                     end
-%                 end
+% 
+%             %%% Check to make sure all values are defined to avoid inadvertantly deleting scenarios
+%             V1_int = unique(raw1(:,1));         % Find length of unique non-'NaN' array
+%             V1_int(strcmp(V1_int,'NaN')) = [];            
+%             V1_check = length(V1_int);
+%             
+%             V2_int = unique(raw1(:,2));         % Find length of unique non-'NaN' array
+%             V2_int(strcmp(V2_int,'NaN')) = [];            
+%             V2_check = length(V2_int);
+%             
+%             % Warnings below do not necessarily mean an error. Ignore if this is intentional (e.g., have more electricity rate files than are used)
+%             % V1_check or V2_check can be larger than V1 or V2
+%             if (V1_check~=V1)
+%                warning([header1{1},' from ',load_files1{i0},'.xlsx has fewer values than initially defined (',num2str(V1_check),' out of ',num2str(V1),')']);
 %             end
-%             eval(sprintf('Batch_header.%s.%s = Int1;',header1{1},header1{2}))
-%         % LEGACY          Batch_header.elec_rate_instance.load_prof_instance = Int1;
-%         disp([load_files1{i0},'.xlsx Completed'])
-%         clear header1 raw1 Int1 M0 V1 V2
+%             if (V2_check~=V2)
+%                warning([header1{2},' from ',load_files1{i0},'.xlsx has fewer values than initially defined (',num2str(V2_check),' out of ',num2str(V2),')']);
+%             end
+%           
+%             Col1 = zeros(M0,1); % Initialize
+%             for i1=1:V1         % Convert text to values based on order from Batch_header
+%                 Col1(strcmp(raw1(:,1),Batch_header.(header1{1}).val{i1}))=i1;
+%             end
+%             Col2 = zeros(M0,1); % Initialize
+%             for i2=1:V2         % Convert text to values based on order from Batch_header
+%                 Col2(strcmp(raw1(:,2),Batch_header.(header1{2}).val{i2}))=i2;
+%             end
+% 
+%             Batch_header.(header1{1}).(header1{2}) = [Col1,Col2];   % Include field relationship
+%             Batch_header.(header1{2}).(header1{1}) = [Col2,Col1];   % Include reciprocal field relationship
+%          disp(['  ',load_files1{i0},'.xlsx Completed'])
+%         clear header1 raw1 Int1 M0 V1 V2 i1 i2 i3
 %         end
 % end
