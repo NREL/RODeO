@@ -109,7 +109,7 @@ for files2load in os.listdir(dir1):
             int1 = files2load.split("_")
             int1 = int1[3:]
             int1[2] = int1[2].replace('CF', '')            
-            int1[4] = int1[4].replace('hrs.csv', '')
+            int1[5] = int1[5].replace('hrs.csv', '')
             files2load_input_title[c0[0]] = int1
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_results*'):
             c0[1]=c0[1]+1
@@ -117,7 +117,7 @@ for files2load in os.listdir(dir1):
             int1 = files2load.split("_")
             int1 = int1[3:]
             int1[2] = int1[2].replace('CF', '')
-            int1[4] = int1[4].replace('hrs.csv', '')
+            int1[5] = int1[5].replace('hrs.csv', '')
             files2load_results_title[c0[1]] = int1
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_summary*'):
             c0[2]=c0[2]+1
@@ -125,7 +125,7 @@ for files2load in os.listdir(dir1):
             int1 = files2load.split("_")
             int1 = int1[3:]
             int1[2] = int1[2].replace('CF', '')
-            int1[4] = int1[4].replace('hrs.csv', '')
+            int1[5] = int1[5].replace('hrs.csv', '')
             files2load_summary_title[c0[2]] = int1
 
 
@@ -200,9 +200,10 @@ if 1==1:            # This section captures the scenario table from summary file
                                              'Operating Strategy' text,
                                              'Capacity Factor (%)' real,
                                              'Configuration' text,
+                                             'Timeframe' text,
                                              'Storage duration (hours)' real)''')
     
-        sql = "INSERT INTO Scenarios VALUES (?,?,?,?,?,?)"
+        sql = "INSERT INTO Scenarios VALUES (?,?,?,?,?,?,?)"
         params=list()
         for i0 in range(len(files2load_summary)):    
             params.insert(i0,tuple(list([str(i0+1)])+files2load_summary_title[i0+1]))

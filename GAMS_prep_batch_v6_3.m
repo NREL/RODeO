@@ -27,7 +27,7 @@ cd(dir1);
 GAMS_loc = 'C:\GAMS\win64\24.8\gams.exe';
 GAMS_file= {'Storage_dispatch_v22_1'};      % Define below for each utility (3 file options)
 GAMS_lic = 'license=C:\GAMS\win64\24.8\gamslice.txt';
-files_to_create = 1;  % Select the number of batch files to create
+files_to_create = 2;  % Select the number of batch files to create
 
 outdir = ['Projects\',Project_name,'\Output'];
 indir  = ['Projects\',Project_name,'\Data_files\TXT_files'];
@@ -84,6 +84,7 @@ if strcmp(Project_name,'Central_vs_distributed')
     raw0 = raw0(2:end,:);                                   % Remove first row
     raw0 = cellfun(@num2str,raw0,'UniformOutput',false);    % Convert any numbers to strings
     input_cap_instance_values = unique(raw0(:,1));          % Find unique capacity values
+    input_cap_instance_values(strcmp(input_cap_instance_values,'NaN')) = [];    % Removes NaNs                        
     
     Batch_header.input_cap_instance.val = input_cap_instance_values';
     Batch_header.output_cap_instance.val = {'0'};
@@ -101,9 +102,17 @@ if strcmp(Project_name,'Central_vs_distributed')
     Batch_header.input_efficiency_inst.val = {'0.613668913'};
     Batch_header.output_efficiency_inst.val = {'1'};
 
-    Batch_header.input_cap_cost_inst.val = {'0','1281','1298','560','623'};     % Current (Central, Forecourt)  Future (Central, Forecourt) 
+    % Input capacity and location relationship
+    [~,~,raw1]=xlsread([indir,'\Match_capcost_FOM']);       % Load file(s) 
+    header1 = raw1(1,:);                                    % Pull out header file
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    input_cap_cost_inst_values = unique(raw1(:,1));         % Find unique capacity values
+    input_FOM_cost_inst_values = unique(raw1(:,2));         % Find unique capacity values
+    
+    Batch_header.input_cap_cost_inst.val = input_cap_cost_inst_values;
     Batch_header.output_cap_cost_inst.val = {'0'};
-    Batch_header.input_FOM_cost_inst.val = {'0','63','58','34','26'};        % Current (Central, Forecourt), Future (Central, Forecourt)  ($/kW-year)     
+    Batch_header.input_FOM_cost_inst.val = input_FOM_cost_inst_values;
     Batch_header.output_FOM_cost_inst.val = {'0'};
     Batch_header.input_VOM_cost_inst.val = {'0'};
     Batch_header.output_VOM_cost_inst.val = {'0'};
@@ -113,7 +122,7 @@ if strcmp(Project_name,'Central_vs_distributed')
 
     Batch_header.in_heat_rate_instance.val = {'0'};
     Batch_header.out_heat_rate_instance.val = {'0'};
-    Batch_header.storage_cap_instance.val = {'0','6','24'};
+    Batch_header.storage_cap_instance.val = {'0','8','24'};
     Batch_header.storage_set_instance.val = {'1'};
     Batch_header.storage_init_instance.val = {'0.5'};
     Batch_header.storage_final_instance.val = {'0.5'};
@@ -127,7 +136,7 @@ if strcmp(Project_name,'Central_vs_distributed')
 
     Batch_header.lookahead_instance.val = {'0'};
     Batch_header.energy_only_instance.val = {'1'};        
-    Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in the next section (default value of 0)
+    Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
     Batch_header.H2_consume_adj_inst.val = {'1','0.9'};
     Batch_header.H2_price_instance.val = {'0'};
     Batch_header.H2_use_instance.val = {'1'};
@@ -205,7 +214,7 @@ elseif strcmp(Project_name,'Example')
 
     Batch_header.lookahead_instance.val         = {'0'};
     Batch_header.energy_only_instance.val       = {'1'};        
-    Batch_header.file_name_instance.val         = {'0'};    % 'file_name_instance' created in the next section (default value of 0)
+    Batch_header.file_name_instance.val         = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
     Batch_header.H2_consume_adj_inst.val        = {'0.97','0.95','0.9','0.8'};
     Batch_header.H2_price_instance.val          = {'6'};
     Batch_header.H2_use_instance.val            = {'1'};
@@ -284,7 +293,7 @@ else
 
     Batch_header.lookahead_instance.val = {'0'};
     Batch_header.energy_only_instance.val = {'1'};        
-    Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in the next section (default value of 0)
+    Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
     Batch_header.H2_consume_adj_inst.val = {'0.9'};
     Batch_header.H2_price_instance.val = {'6'};
     Batch_header.H2_use_instance.val = {'1'};
@@ -478,6 +487,7 @@ end
 %% SECTION 7: Create batch file names for tariffs
 disp(['Create batch files...'])
 c2=1;   % Initialize batch file number
+[M0,N0] = size(relationship_matrix_final); 
 fileID = fopen([dir2,['RODeO_batch',num2str(c2),'.bat']],'wt');
 
 % Create GAMS run command and write to text file
@@ -490,8 +500,29 @@ GAMS_batch_init = ['"',GAMS_loc,'" "',GAMS_file,'" ',GAMS_lic];
     if mod(i0,ceil(M0/files_to_create))==0
         if i0==M0
         else
+            %%% Create new file and copy contents
             fclose(fileID);
-            c2=c2+1;            
+            c2=c2+1;
+            if exist(horzcat(indir,num2str(c2)))>0            
+            else
+                if size(dir(indir),1)>1000
+                    disp(['Folder to copy has many files'])
+                    prompt1 = 'Would you like to continue (Y/N)? ';
+                    promptA = input(prompt1,'s');
+                    if (strcmp(promptA,'Y') || strcmp(promptA,'y')) 
+                         copyfile(indir,horzcat(indir,num2str(c2)))
+                    else
+                        error('Folder''s not copied. Exiting program.')
+                    end
+                else
+                    copyfile(indir,horzcat(indir,num2str(c2)))            
+                end                
+            end
+            
+            Index_indir = strfind(fields1,'indir');     Index_indir = find(not(cellfun('isempty',Index_indir)));    % Find index of 'indir'
+            for i1=1:M0
+                relationship_matrix_final(i1,Index_indir) = {horzcat(relationship_matrix_final{i1,Index_indir},num2str(c2))};
+            end            
             fileID = fopen([dir2,['RODeO_batch',num2str(c2),'.bat']],'wt');
         end
     end 
