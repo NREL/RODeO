@@ -304,21 +304,21 @@ if 1==1:            # This section captures the summary files
 conn.commit()
 
    
-if 1==0:            # This section captures a subset of the results files 
+if 1==1:            # This section captures a subset of the results files 
     # Print Results data   
     c.execute('''CREATE TABLE Results ('Scenario' integer,
                                        'Interval' integer,
                                        'In Pwr (MW)' real,
                                        'Storage Level (MW-h)' real,                                  
                                        'H2 Out (kg)' real,
-                                       'Renewable Input (MW)' real)''')
+                                       'Non-Renwable Input (MW)' real)''')
     
     sql = "INSERT INTO Results VALUES (?,?,?,?,?,?)"
     for i0 in range(len(files2load_results)):
         #if (i0==1):
         #    results_data_headers = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(str), delimiter=",",invalid_raise = False,skip_header=27, max_rows=1)   
         results_data0 = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(float), delimiter=",",invalid_raise = False,skip_header=28)
-        results_data = np.delete(results_data0, np.s_[2,4,5,6,7,8,9,10,11,14], axis=1)
+        results_data = np.delete(results_data0, np.s_[2,4,5,6,7,8,9,10,11,14,15,16], axis=1)
         results_data_size = results_data.shape
         results_data2 = np.zeros((results_data_size[0],results_data_size[1]+1))
         results_data2[:,1:] = results_data

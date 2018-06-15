@@ -9,12 +9,12 @@ dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_d
 
 dir1 = [dir2,'CSV_data\'];      % Input folder
 [status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
-dir0 = [dir2,'TXT_files\'];     % Output folder
+dir0 = [dir2,'TXT_files_HighEarly\'];     % Output folder
 [status0,msg0] = mkdir(dir0);   % Create directory if it doesn't exist
 cd(dir1);
 
 % Prompt for which files to output
-Year_select = 2017;     % select year to be analyzed
+Year_select = 2018;     % select year to be analyzed
 Year_length = ceil((datenum(Year_select,12,31,23,59,59)-datenum(Year_select,1,1,0,0,0))*24);   %8784;     % length of year in hours
 interval_length = 1;    % used to create sub-hourly data files (1, 4, or 12)
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time

@@ -9,7 +9,7 @@
 %       3. Setup values in Batch_header in Section 2
 %       4. Add relationships between fields by loading files in Section 3
 %            (Make sure that you appropraitely define the relationships between properties)
-%       5. Adjust filename creatino in Section 6 as necessary
+%       5. Adjust filename creation in Section 6 as necessary
 % 
 
 %% SECTION 1: Prepare data to populate batch file.
@@ -30,7 +30,7 @@ GAMS_lic = 'license=C:\GAMS\win64\24.8\gamslice.txt';
 files_to_create = 2;  % Select the number of batch files to create
 
 outdir = ['Projects\',Project_name,'\Output'];
-indir  = ['Projects\',Project_name,'\Data_files\TXT_files'];
+indir  = ['Projects\',Project_name,'\Data_files\TXT_files_HighEarly'];
 
 % Load filenames
 files_tariff = dir([dir1,indir]);
@@ -63,7 +63,7 @@ disp(['Set batch file values...'])
 if strcmp(Project_name,'Central_vs_distributed')
 %%% Central_vs_distributed
     Batch_header.elec_rate_instance.val = strrep(files_tariff2,'.txt','');
-    Batch_header.H2_consumed_instance.val = {'H2_consumption_central_hourly','H2_consumption_distributed_hourly'};        
+    Batch_header.H2_consumed_instance.val = {'H2_consumption_central_hourly','H2_consumption_centralEarly_hourly','H2_consumption_distributed_hourly','H2_consumption_distributedEarly_hourly'};        
     Batch_header.baseload_pwr_instance.val = {'Input_power_baseload_hourly'};        
     Batch_header.NG_price_instance.val = {'NG_price_Price1_hourly'};        
     Batch_header.ren_prof_instance.val = {'renewable_profiles_none_hourly'};
@@ -104,7 +104,6 @@ if strcmp(Project_name,'Central_vs_distributed')
 
     % Input capacity and location relationship
     [~,~,raw1]=xlsread([indir,'\Match_capcost_FOM']);       % Load file(s) 
-    header1 = raw1(1,:);                                    % Pull out header file
     raw1 = raw1(2:end,:);                                   % Remove first row
     raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
     input_cap_cost_inst_values = unique(raw1(:,1));         % Find unique capacity values
@@ -116,13 +115,27 @@ if strcmp(Project_name,'Central_vs_distributed')
     Batch_header.output_FOM_cost_inst.val = {'0'};
     Batch_header.input_VOM_cost_inst.val = {'0'};
     Batch_header.output_VOM_cost_inst.val = {'0'};
-    Batch_header.input_lifetime_inst.val = {'0','20','40'};      % Central, Forecourt
+    
+    % Input capacity and location relationship
+    [~,~,raw1]=xlsread([indir,'\Match_inputcap_lifetime']); % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    input_lifetime_inst_values = unique(raw1(:,2));         % Find unique capacity values
+    
+    Batch_header.input_lifetime_inst.val = input_lifetime_inst_values;      % Blank, Central, Forecourt
     Batch_header.output_lifetime_inst.val = {'0'};
     Batch_header.interest_rate_inst.val = {'0.07'};
 
     Batch_header.in_heat_rate_instance.val = {'0'};
     Batch_header.out_heat_rate_instance.val = {'0'};
-    Batch_header.storage_cap_instance.val = {'0','8','24'};
+
+    % Storage capacity matrix
+    [~,~,raw1]=xlsread([indir,'\Match_load_storagecap']);   % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    storage_cap_instance_values = unique(raw1(:,2));        % Find unique storage capacity values
+        
+    Batch_header.storage_cap_instance.val = storage_cap_instance_values;
     Batch_header.storage_set_instance.val = {'1'};
     Batch_header.storage_init_instance.val = {'0.5'};
     Batch_header.storage_final_instance.val = {'0.5'};
@@ -137,7 +150,14 @@ if strcmp(Project_name,'Central_vs_distributed')
     Batch_header.lookahead_instance.val = {'0'};
     Batch_header.energy_only_instance.val = {'1'};        
     Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
-    Batch_header.H2_consume_adj_inst.val = {'1','0.9'};
+    
+    % Capacity Factor
+    [~,~,raw1]=xlsread([indir,'\Match_inputcap_CF']);       % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    H2_consume_adj_inst_values = unique(raw1(:,2));         % Find unique CF values
+
+    Batch_header.H2_consume_adj_inst.val = H2_consume_adj_inst_values;
     Batch_header.H2_price_instance.val = {'0'};
     Batch_header.H2_use_instance.val = {'1'};
     Batch_header.base_op_instance.val = {'0'};
@@ -161,7 +181,7 @@ elseif strcmp(Project_name,'Example')
     Batch_header.baseload_pwr_instance.val      = {'Input_power_baseload_hourly'};        
     Batch_header.NG_price_instance.val          = {'NG_price_Price1_hourly'};        
     Batch_header.ren_prof_instance.val          = {'renewable_profiles_none_hourly'};
-    Batch_header.load_prof_instance.val         = {'Additional_load_Station1_hourly'};
+    Batch_header.load_prof_instance.val         = {'Additional_load_none_hourly'}; %,'Additional_load_Station1_hourly'};
     Batch_header.energy_price_inst.val          = {'Energy_prices_empty_hourly'};
     Batch_header.AS_price_inst.val              = {'Ancillary_services_hourly'};
     [status,msg] = mkdir(outdir);       % Create output file if it doesn't exist yet  
@@ -172,7 +192,7 @@ elseif strcmp(Project_name,'Example')
     Batch_header.zone_instance.val              = {'NA'};
     Batch_header.year_instance.val              = {'NA'};
 
-    Batch_header.input_cap_instance.val         = {'0','1300','2600','3900'};
+    Batch_header.input_cap_instance.val         = {'1300'}; %{'0','1300','2600','3900'};
     Batch_header.output_cap_instance.val        = {'0'};
     Batch_header.price_cap_instance.val         = {'10000'};
 
@@ -181,7 +201,7 @@ elseif strcmp(Project_name,'Example')
     Batch_header.max_output_cap_inst.val        = {'inf'};
     Batch_header.allow_import_instance.val      = {'1'};
 
-    Batch_header.input_LSL_instance.val         = {'0.1'};
+    Batch_header.input_LSL_instance.val         = {'0'};
     Batch_header.output_LSL_instance.val        = {'0'};
     Batch_header.Input_start_cost_inst.val      = {'0'};
     Batch_header.Output_start_cost_inst.val     = {'0'};
@@ -215,8 +235,8 @@ elseif strcmp(Project_name,'Example')
     Batch_header.lookahead_instance.val         = {'0'};
     Batch_header.energy_only_instance.val       = {'1'};        
     Batch_header.file_name_instance.val         = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
-    Batch_header.H2_consume_adj_inst.val        = {'0.97','0.95','0.9','0.8'};
-    Batch_header.H2_price_instance.val          = {'6'};
+    Batch_header.H2_consume_adj_inst.val        = {'1','0.97','0.95','0.9','0.8'};
+    Batch_header.H2_price_instance.val          = {'0'};
     Batch_header.H2_use_instance.val            = {'1'};
     Batch_header.base_op_instance.val           = {'0'};
     Batch_header.NG_price_adj_instance.val      = {'1'};
@@ -329,11 +349,11 @@ if strcmp(Project_name,'Central_vs_distributed')
     % Each file constructs relationship between two fields (field names should be in first row)
     load_files1 = {'Match_inputcap_CF','Match_inputcap_load','Match_inputcap_rates',...
                    'Match_inputcap_H2Cons','Match_load_rates','Match_load_storagecap',...
-                   'Match_inputcap_capcost','Match_inputcap_FOM','Match_capcost_FOM','Match_inputcap_lifetime'};    
+                   'Match_inputcap_capcost','Match_inputcap_FOM','Match_capcost_FOM',...,
+                   'Match_inputcap_lifetime','Match_H2Cons_load'};    
     Batch_header = load_relation_file(load_files1,indir,Batch_header);  % Run function file load_relation_file
 elseif strcmp(Project_name,'Example')
 %%% Example
-    Batch_header.input_cap_instance.H2_consume_adj_inst = [1,0,0,0;1,1,1,1;1,1,1,1;1,1,1,1];
 else   
 %%% Default
 end
@@ -438,6 +458,7 @@ if strcmp(Project_name,'Central_vs_distributed')
         interim2 = strrep(interim2,'_hourly','');
         interim2 = strrep(interim2,'Central','');
         interim2 = strrep(interim2,'Dist','');
+        interim2 = strrep(interim2,'Early','');
         if strcmp(interim2,'none')==1               % If value is none then change
             Index_location = strfind(raw0(:,1),relationship_matrix_final{i0,Index_input_cap});
             Index_location = find(not(cellfun('isempty',Index_location)));
@@ -451,8 +472,10 @@ if strcmp(Project_name,'Central_vs_distributed')
         
         interim5 = timeframe1{[idxTime(strcmp(timeframe1(idxTime,1),relationship_matrix_final(i0,Index_capcost)))],2};
 
-        if strcmp(interim4,'H2_consumption_central_hourly'),     interim4='Central';
-        elseif strcmp(interim4,'H2_consumption_distributed_hourly'), interim4='Distributed';
+        if (strfind(interim4,'central_')>0),                interim4='Central';
+        elseif (strfind(interim4,'centralEarly_')>0),       interim4='CentralEarly';
+        elseif (strfind(interim4,'distributed_')>0),        interim4='Distributed';
+        elseif (strfind(interim4,'distributedEarly_')>0),   interim4='DistributedEarly';
         end
         relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3,'_',interim4,'_',interim5);
     end
@@ -533,6 +556,15 @@ end
 fclose(fileID);
 disp([num2str(c2),' batch file(s) for ',num2str(M0),' runs (~',num2str(ceil(M0/files_to_create)),' each)']);
 
+% Check to make sure that all files have a unique name
+if length(relationship_matrix_final(:,Index_file_name))==length(unique(relationship_matrix_final(:,Index_file_name)))
+else
+    [~,ia1,ic1] = unique(relationship_matrix_final(:,Index_file_name));
+    [n1,bin1] = histc(sort(ic1),sort(ia1));
+    multiple1 = find(n1 > 1);
+    filename_repeats = relationship_matrix_final(multiple1,Index_file_name);
+    error(['There are ',num2str(length(relationship_matrix_final(:,Index_file_name))-length(unique(relationship_matrix_final(:,Index_file_name)))),' duplicate filenames. Make sure all filenames are unique and run again'])
+end
 
 %% Function file
 % function Batch_header = load_relation_file(load_files1,indir,Batch_header)
