@@ -1,18 +1,22 @@
 %% Collect, configure and output data into text files for use with GAMS
 clear all, close all, clc
 
-% dir0 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\'];
-% dir1 = [dir0,'data\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage_UK_Prices\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Redispatch_hourly\'];
+dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_distributed\Data_files\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Example\Data_files\'];
 
-dir0 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\TXT_files\'];    % Output folder
-dir1 = ['C:\Users\jeichman\Documents\Tariff_analysis\Output\CSV_data\'];     % Input folder
+dir1 = [dir2,'CSV_data\'];      % Input folder
+[status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
+dir0 = [dir2,'TXT_files_HighEarly\'];     % Output folder
+[status0,msg0] = mkdir(dir0);   % Create directory if it doesn't exist
 cd(dir1);
 
 % Prompt for which files to output
-write_regular_files = input('Write regular tariff files? (yes or no)... ','s');             % Prompt about which files to write to text
-Year_select = 2017;     % select year to be analyzed
-Year_length = 8760;     % length of year in hours
-interval_length = 1;    % used to create sub-hourly data files
+Year_select = 2018;     % select year to be analyzed
+Year_length = ceil((datenum(Year_select,12,31,23,59,59)-datenum(Year_select,1,1,0,0,0))*24);   %8784;     % length of year in hours
+interval_length = 1;    % used to create sub-hourly data files (1, 4, or 12)
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
 % DST_year_end = datenum([2015,11,1,2,0,0]);  %Daylight savings time
 month_vec = {'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'};
@@ -20,7 +24,9 @@ month_vec = {'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','
 disp('Loading Files...')
 % Electricity price data (input any number of regions/nodes)
 [num1int] = xlsread('e_tou_8760.csv');                      % ($/kWh)
+num1int = num1int(2:end,:);                                 % Remove first row which contains the scenario number
 [num1A] = xlsread('e_prices.csv');                          % ($/kWh)
+num1A = num1A(2:end,:);                                     % Remove first row which contains the scenario number
 [m0,n0] = size(num1int); [m00,n00] = size(num1A);
 num1int2 = zeros(size(num1int));
 for i1=1:n0     % Convert integer values to price values from URDB 
@@ -30,42 +36,38 @@ end
 num1 = interpolate_matrix(num1int2,Year_length,interval_length,2);
 
 [num1Bint,txt1B,raw1B] = xlsread('GAMS_Energy_Sale');          % ($/kWh)
-num1B = interpolate_matrix(num1Bint,Year_length,interval_length,1);
+num1B = interpolate_matrix(num1Bint,Year_length,interval_length,2);
 clear num1int num1int2 num1Bint
 
 % Reserve price data (input a set of AS prices (NS, RD, RU, SP (in that order)))
 [num2int2,txt2,raw2] = xlsread('GAMS_AS');                  % ($/MWh)
-num2int2(:,1)=[];   % Remove first column of AS values
-num2 = interpolate_matrix(num2int2,Year_length,interval_length,1); 
+num2 = interpolate_matrix(num2int2,Year_length,interval_length,2); 
 clear num2int2
 
 % Fuel price data (input the fuel price and select the desired region from the inputted data)
 [num3int,txt3,raw3] = xlsread('GAMS_FUEL');                 % ($/MMBTU)  
-num3 = interpolate_matrix(num3int,Year_length,interval_length,1);  
+num3 = interpolate_matrix(num3int,Year_length,interval_length,2);  
 clear num3int
 
 % Normalized Reneawble data (input the normalized hourly renewable profile (one column for each region/node))
-[num4Aint,txt4A,raw4A] = xlsread('GAMS_renewable_PV');      % (normalized)
- num4Aint(:,1)=[];   % Remove first column of AS values
- num4A = interpolate_matrix(num4Aint,Year_length,interval_length,1);
-[num4Bint,txt4B,raw4B] = xlsread('GAMS_renewable_WIND');    % (normalized)
- num4Bint(:,1)=[];   % Remove first column of AS values
- num4B = interpolate_matrix(num4Bint,Year_length,interval_length,1);
-[num4Cint,txt4C,raw4C] = xlsread('GAMS_renewable_33curt');  % (normalized)
- num4Cint(:,1)=[];   % Remove first column of AS values
- num4C = interpolate_matrix(num4Cint,Year_length,interval_length,1);
-[num4Dint,txt4D,raw4D] = xlsread('GAMS_renewable_40curt');  % (normalized)
- num4Dint(:,1)=[];   % Remove first column of AS values
- num4D = interpolate_matrix(num4Dint,Year_length,interval_length,1);
-clear num4Aint num4Bint num4Cint num4Dint
+[num4int,txt4,raw4] = xlsread('GAMS_renewables');      
+[m1,n1] = size(num4int);
+num4int2 = num4int;     % Initialize num4
+for i0=2:n1
+    num4int2(:,i0) = num4int(:,i0)/max(num4int(:,i0));
+end
+num4 = interpolate_matrix(num4int2,Year_length,interval_length,1);
+clear num4int num4int2
 
 % Fixed demand charge data (input the fixed demand charge price (one column for each region/node))
 [num5] = xlsread('d_flat_prices.csv');                      % ($/kW)
-[num5t,txt5t,raw5t] = xlsread('GAMS_Fix_dem_chg_times');    % Create structure for hours in each month
+num5 = num5(2:end,:);                                       % Remove first row which contains the scenario number
 
 % Timed demand charge data (input the timed demand charge price (one column for each region/node))
 [num6int] = xlsread('d_tou_8760.csv');
+num6int = num6int(2:end,:);                                 % Remove first row which contains the scenario number
 [num6A] = xlsread('d_tou_prices.csv');
+num6A = num6A(2:end,:);                                     % Remove first row which contains the scenario number
 [m01,n01] = size(num6int);
 [m02,n02] = size(num6A);
 num6int2 = zeros(size(num6int));
@@ -77,49 +79,79 @@ num6 = interpolate_matrix(num6int2,Year_length,interval_length,2);
 num6B= interpolate_matrix(num6int,Year_length,interval_length,2);
 clear num6int num6int2
 
-% % % TOU tariff breakdown (input the TOU buckets for each region (one column for each region/node) (1=peak, 2=mid-peak, 3=off-peak))
-% % [num7,txt7,raw7] = xlsread('GAMS_TOU_bucket');        % (N/A)
+% Load file with input baseload profiles
+[num7int,txt7,raw7] = xlsread('GAMS_input_baseload_power');
+num7 = interpolate_matrix(num7int,Year_length,interval_length,2);  
+clear num7int
 
 % Meter cost (cost per month for SCE and SDGE and cost per day for PGE)
 [num8] = xlsread('fixed_charge.csv');                       % ($/month/meter)
+num8 = num8(2:end,:);                                       % Remove first row which contains the scenario number
 
-% % % Load file describing the nodal data to be analyzed
-% % [num9,txt9,raw9] = xlsread('GAMS_nodes_caliso_v4_data');
+% Load file with additional load profiles
+[num9int,txt9,raw9] = xlsread('GAMS_additional_load_profiles');
+num9 = interpolate_matrix(num9int,Year_length,interval_length,2);
+clear num9int
+
+% Load file with hydrogen price profiles
+[num10int,txt10A,raw10A] = xlsread('GAMS_H2_price');
+num10A = interpolate_matrix(num10int,Year_length,interval_length,2);  
+clear num10int
+
+% Load file with hydrogen consumption profiles
+[num11int,txt11A,raw11A] = xlsread('GAMS_hydrogen_consumed');
+[m11,n11] = size(num11int);
+num11int2 = num11int;     % Initialize num4
+for i0=2:n11
+    num11int2(:,i0) = num11int(:,i0)/sum(num11int(:,i0))*Year_length/24;
+end
+num11A = interpolate_matrix(num11int2,Year_length,interval_length,2);
+clear num11int num11int2 m11 n11
 
 % Load tariff file names
-[numA,txtA,rawA] = xlsread('Tariffs_com_ind_20170216.xlsx');   
+[numA,txtA,rawA] = xlsread('tariff_property_list.csv');   
 
 %% Clean number matrix
 disp('Clean and prepare matrices...')
-num11 = num1;
-num11(:,find(isnan(sum(num1)))) = [];  % Remove incomplete energy price nodes
-num11(isnan(num11)) = 0;    % Remove NaN values
-num11B = num1B;
-num11B(:,find(isnan(sum(num1B)))) = [];  % Remove incomplete energy price nodes
-num11B(isnan(num11B)) = 0;    % Remove NaN values
+num1A1 = num1;
+num1A1(:,find(isnan(sum(num1)))) = [];          % Remove incomplete energy price nodes
+num1A1(isnan(num1A1)) = 0;                      % Remove NaN values
+num1C = num1B;
+num1C(:,find(isnan(sum(num1B)))) = [];         % Remove incomplete energy price nodes
+num1C(isnan(num1C)) = 0;                       % Energy price
 
-num21 = num2;  num21(isnan(num21)) = 0;    % Remove NaN values
-num31 = num3;  num31(isnan(num31)) = 0;    % Remove NaN values
-num41A= num4A; num41A(isnan(num41A)) = 0;  % Remove NaN values
-num41B= num4B; num41B(isnan(num41B)) = 0;  % Remove NaN values
-num41C= num4C; num41C(isnan(num41C)) = 0;  % Remove NaN values
-num41D= num4D; num41D(isnan(num41D)) = 0;  % Remove NaN values
-num51 = num5;  num51(isnan(num51)) = 0;    % Remove NaN values
-num61 = num6;  num61(isnan(num61)) = 0;    % Remove NaN values
-% % num71 = num7; num71(isnan(num71)) = 0;    % Remove NaN values
-num81 = num8;  num81(isnan(num81)) = 0;    % Remove NaN values
+num21 = num2;  num21(isnan(num21)) = 0;         % AS
+num31 = num3;  num31(isnan(num31)) = 0;         % Fuel price
+num41 = num4;  num41(isnan(num41)) = 0;         % Renewables
+num51 = num5;  num51(isnan(num51)) = 0;         % fixed demand
+num61 = num6;  num61(isnan(num61)) = 0;         % timed demand
+num71 = num7;  num71(isnan(num71)) = 0;         % baseload mode profile
+num81 = num8;  num81(isnan(num81)) = 0;         % fixed charge
+num91 = num9;  num91(isnan(num91)) = 0;         % Load profile
+num10B = num10A;  num10B(isnan(num10B)) = 0;    % H2 price
+num11B = num11A;  num11B(isnan(num11B)) = 0;    % H2 consumed
 
 
 %% Clean and prepare text
 % Remove incomplete energy price node names
-txt11 = rawA(2:(n0+1),2);   
-txt12 = rawA(2:(n0+1),7);
+txt11 = rawA(2:(n0+1),2);       % URDB Tariff_id column
+txt12 = rawA(2:(n0+1),6);       % Utility column
 txt11(:,find(isnan(sum(num1)))) = [];  
-txt12(:,find(isnan(sum(num1)))) = [];  
+txt12(:,find(isnan(sum(num1)))) = [];
+
+txt1C = txt1B(2,3:end);         % Energy Price
+txt21 = txt2(2,3:end);          % AS
+txt31 = txt3(2,3:end);          % Fuel price
+txt41 = txt4(2,3:end);          % Renewables
+txt71 = txt7(2,3:end);          % Baseload mode profile
+txt91 = txt9(2,3:end);          % Load profile
+txt10B = txt10A(2,3:end);       % Hydrogen price
+txt11B = txt11A(2,3:end);       % Hydrogen consumption
+
 Scenarios1 = txt11(~cellfun('isempty',txt11));
 Category1 = unique(txt12);  % List of utilities
 
-clear num1 num1B num2 num3 num4A num4B num4C num4D num5 num6 num8
+clear num1 num1B num2 num3 num4A num5 num6 num8 num9
 
 
 %% Create filenames for each txt file to be created
@@ -226,182 +258,284 @@ GAMS_string2 = reshape(GAMS_string1,12,oo1,[]);
 clear i4 i5 i6 i7 Y1 M1 D1 H1 MN1 S1 c1 c2 interim1 interim2 col1
 
 %%% Create monthly time vector
-GAMS_stringA = {};  % Initialize
+GAMS_stringA = cell(12,length(Scenarios1));  % Initialize
 date_vector1 = datevec(date_values(:));
-for i5=1:12
-    col1 = find(date_vector1(:,2)==i5); 
-    col2(i5) = max(date_vector1(col1,3));
-    i4=1;
-    while i4<=length(col1)  % Hours
-        % Create string for breakdown by TOU bins, months and utilities in GAMS                
-        if isempty(col1)    % Check if entry is empty and skip
-            break
-        end
-        interim1=col1(i4); interim2=1; c2=0;                
-        if i4==1
-            GAMS_stringA(i5,1)={'/'};   % Begin entry
-        end
-        GAMS_stringA(i5,1)={[GAMS_stringA{i5,1},num2str(interim1),'*']}; % Add first item to current entry
-        while interim2==1   % Loop and find the number of continuous items
-            if i4==length(col1) c2=1;  break
+for i6=1:length(Scenarios1)
+    for i5=1:12
+        col1 = find(date_vector1(:,2)==i5);
+        i4=1;
+        
+%         if (sum(num51(:,i6))+sum(num6A(:,i6)) == 0),  % Used to remove fixed demand intervals if there is no timed or fixed demand charge (encourages smooth operation profiles) 
+%             if i5==1, col1 = (1:Year_length)';
+%             else      GAMS_stringA(i5,i6)={'//'};
+%                       continue
+%             end
+%         else
+%             col1 = find(date_vector1(:,2)==i5);
+%         end
+
+        while i4<=length(col1)  % Hours
+            % Create string for breakdown by TOU bins, months and utilities in GAMS                
+            if isempty(col1)    % Check if entry is empty and skip
+                break
             end
-            i4=i4+1; interim2=col1(i4)-col1(i4-1);
-        end
-        if c2==1, GAMS_stringA(i5,1)={[GAMS_stringA{i5,1},num2str(col1(i4)),'/']}; break % Final entry
-        else      GAMS_stringA(i5,1)={[GAMS_stringA{i5,1},num2str(col1(i4-1)),',']};     % Make interim entry an continue looping
+            interim1=col1(i4); interim2=1; c2=0;                
+            if i4==1
+                GAMS_stringA(i5,i6)={'/'};   % Begin entry
+            end
+            GAMS_stringA(i5,i6)={[GAMS_stringA{i5,i6},num2str(interim1),'*']}; % Add first item to current entry
+            while interim2==1   % Loop and find the number of continuous items
+                if i4==length(col1) c2=1;  break
+                end
+                i4=i4+1; interim2=col1(i4)-col1(i4-1);
+            end
+            if c2==1, GAMS_stringA(i5,i6)={[GAMS_stringA{i5,i6},num2str(col1(i4)),'/']}; break % Final entry
+            else      GAMS_stringA(i5,i6)={[GAMS_stringA{i5,i6},num2str(col1(i4-1)),',']};     % Make interim entry an continue looping
+            end
         end
     end
-end, clear i4 i5 col1 intermi1 intermi2
+    if mod(i6,1000)==0, display([num2str(i6),' of ',num2str(length(Scenarios1))]), end  % Display progress each 1000 intervals
+end, clear i4 i5 i6 col1 intermi1 intermi2
 
 %% Populate each data row with basic information and utility data
 disp('Populate data rows...')
 Inputs1 = {'elec_purchase_price(interval)','elec_sale_price(interval)',...
            'nonspinres_price(interval)','regdn_price(interval)','regup_price(interval)','spinres_price(interval)',...
            'meter_mnth_chg(interval)','Fixed_dem(months)','Timed_dem(timed_dem_period)'};    
-Inputs2 = {'NG_price(interval)','H2_consumed(interval)','H2_price(interval)','input_power_baseload(interval)'};
-Inputs3 = {'renewable_signal(interval)'};
     
 % Energy price: Utility tariffs (OASIS data added later)                   ($/MWh) 
-data11 = reshape(num11,[],1,length(Scenarios1))*1000;                       % Separate energy price data by number of scenarios and categories
-data11B = zeros(size(data11)); %%% reshape(num11B,[],1,length(Scenarios1))*1000; % Separate energy price data by number of scenarios and categories
+    data11 = reshape(num1A1,[],1,length(Scenarios1))*1000;                      % Separate energy purchase price data by number of scenarios and categories
+    data11B = zeros(size(data11));                                              % Separate energy sale price data by number of scenarios and categories
     % % data11B= data11;    % Repeat for sale price
+
 % AS Data: NS,RegD,RegU,Spin                                               ($/MWh)
-data22 = zeros(size(data11,1),4,size(data11,3));  %%% data2; 
+    data22 = zeros(size(data11,1),4,size(data11,3));  %%% data2; 
+
 % Data: PRC_FUEL (drawn from CAISO OASIS)
 %       H2 consumed (0.04166666666667 normalized per hour),                
 %       H2_Price (set to 1, is scaled in GAMS), 
 %       input_power_base (set to 1, scaled in GAMS)
-data_other = [zeros(Year_length*interval_length,1),ones(Year_length*interval_length,1)*0.04166666666667,ones(Year_length*interval_length,2)];
-% % % data_other = repmat(data_other,1,1,length(Scenarios1));
+% % %     data_other = [zeros(Year_length*interval_length,1),...
+% % %                   ones(Year_length*interval_length,1)*0.04166666666667,...
+% % %                   ones(Year_length*interval_length,1),...
+% % %                   ones(Year_length*interval_length,1)];
+                  
 % Data: Renewable signal (normalized to max of 1)
 %       Facility demand charge
 %       Timed demand charge
 %       TOU bucket
 %       Meter Monthly charge
-data44A = num41A;      %%% reshape(num41A,[],1,length(Scenarios1));                       % (N/A) Renewable signal PV
-data44B = num41B;      %%% reshape(num41B,[],1,length(Scenarios1));                       % (N/A) Renewable signal WIND
-% % % data44C = repmat(num41C,1,1,length(Scenarios1));      %%% reshape(num41C,[],1,length(Scenarios1));                       % (N/A) Renewable signal 33curt
-% % % data44D = repmat(num41D,1,1,length(Scenarios1));      %%% reshape(num41D,[],1,length(Scenarios1));                       % (N/A) Renewable signal 40curt
-data55 = reshape(num51,[],1,length(Scenarios1))*1000;                    % ($/MW-month)
-data66 = reshape(num6A(1:Num_demand_tranches,:),Num_demand_tranches,1,length(Scenarios1))*1000;   % ($/MW-month) 
-% % % data77 = reshape(num71,[],1,length(Scenarios1));                         % (N/A) TOU
-data88 = reshape(num81,[],1,length(Scenarios1));                         % ($/month/meter)
-% % % data_most_PV = [data11,data11B,data22,data33,data_other,data44A];      % Combine energy price, AS price and other components listed in 'Inputs1'
-% % % data_most_WND = [data11,data11B,data22,data33,data_other,data44B];     % Combine energy price, AS price and other components listed in 'Inputs1'
-% % % data_most_33curt = [data11,data11B,data22,data33,data_other,data44C];  % Combine energy price, AS price and other components listed in 'Inputs1'
-% % % data_most_40curt = [data11,data11B,data22,data33,data_other,data44D];  % Combine energy price, AS price and other components listed in 'Inputs1'
+    data55 = reshape(num51,[],1,length(Scenarios1))*1000;                    % ($/MW-month)
+    data66 = reshape(num6A(1:Num_demand_tranches,:),Num_demand_tranches,1,length(Scenarios1))*1000;   % ($/MW-month) 
+    data88 = reshape(num81,[],1,length(Scenarios1));                         % ($/month/meter)
 
 
 %% Write regular tariff text files
 tic;
-if strcmp(write_regular_files,'yes')
-    [m1 n1 o1] = size(GAMS_string2);
-    % Add additional text to specify the resolution of the file being used
-    if     interval_length == 1;  add_txt1 = ['_hourly'];
-    elseif interval_length == 4;  add_txt1 = ['_15min'];
-    elseif interval_length == 12; add_txt1 = ['_5min'];
-    else                          error('Need to define interval length')
+
+[m1 n1 o1] = size(GAMS_string2);
+% Add additional text to specify the resolution of the file being used
+if     interval_length == 1;  add_txt1 = ['_hourly'];
+elseif interval_length == 4;  add_txt1 = ['_15min'];
+elseif interval_length == 12; add_txt1 = ['_5min'];
+else                          error('Need to define interval length')
+end
+init_val = 1;  % Used to adjust initial for loop value and for progress tracking
+for i5=init_val:length(Scenarios1)
+    filename2_short = filename2{i5};        
+    fileID = fopen([dir0,char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
+    data_most2 = [data11,data11B,data22];    % Combine energy price, AS price and other components listed in 'Inputs1'
+    % data_most2(:,3:6,:) = 0;                        % AS     Remove AS prices
+    % data_most2(:,[3,6],:) = 0;                      % REG    Remove SP NS prices
+    % data_most2(:,[4:6],:) = 0;                      % NS     Remove SP Reg prices
+    % data_most2(:,[4,5],:) = 0;                      % SP NS  Remove Reg prices
+
+    % Add demand charge times
+    fprintf(fileID,'%s\n','$onempty');
+    fprintf(fileID,'%s\n','Set');
+    for i6=1:m1
+        fprintf(fileID,'\t%s\t%s\t%s\n',['Month_',month_vec{i6},'(interval)'],'hours',GAMS_stringA{i6,i5});
     end
-    init_val = 3491  % Used to adjust initial for loop value and for progress tracking
-    for i5=init_val:length(Scenarios1)
-        filename2_short = filename2{i5};        
-        fileID = fopen([dir0,'Regular_tariffs\',char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
-        data_most2 = [data11,data11B,data22];    % Combine energy price, AS price and other components listed in 'Inputs1'
-        % data_most2(:,3:6,:) = 0;                        % AS     Remove AS prices
-        % data_most2(:,[3,6],:) = 0;                      % REG    Remove SP NS prices
-        % data_most2(:,[4:6],:) = 0;                      % NS     Remove SP Reg prices
-        % data_most2(:,[4,5],:) = 0;                      % SP NS  Remove Reg prices
-        
-        % Add demand charge times
-        fprintf(fileID,'%s\n','$onempty');
-        fprintf(fileID,'%s\n','Set');
-        for i6=1:m1
-            fprintf(fileID,'\t%s\t%s\t%s\n',['Month_',month_vec{i6},'(interval)'],'hours',GAMS_stringA{i6});
+    fprintf(fileID,'\n');
+    for i6=1:m1
+        for i66=1:n1
+        fprintf(fileID,'\t%s\t%s\t%s\n',[month_vec{i6},'_',num2str(i66),'(interval)'],'hours',GAMS_string2{i6,i66,i5});
         end
-        fprintf(fileID,'\n');
-        for i6=1:m1
-            for i66=1:n1
-            fprintf(fileID,'\t%s\t%s\t%s\n',[month_vec{i6},'_',num2str(i66),'(interval)'],'hours',GAMS_string2{i6,i66,i5});
-            end
-        end                
-        % Add yearly inputs
-        yearly_inputs = length(Inputs1)-3;
-        for i7=1:yearly_inputs
-            fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{i7},'/');
-            for i8=1:Year_length*interval_length
-                if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data_most2(i8,i7,i5),'/;');
-                else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data_most2(i8,i7,i5),'');
-                end
-            end
-        end
-        % Add meter charge
-        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+1},'/');
-        fprintf(fileID,'%i\t%g\t%s\n',1,data88(1,1,i5),'/;');
-        % Add fixed demand inputs
-        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+2},'/');
-        for i8=1:12
-            if i8==12, fprintf(fileID,'%i\t%g\t%s\n',i8,data55(i8,1,i5),'/;');
-            else       fprintf(fileID,'%i\t%g\t%s\n',i8,data55(i8,1,i5),'');
-            end
-        end
-        % Add timed demand inputs
-        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+3},'/');
-        for i8=1:size(data66,1)
-            if i8==size(data66,1), fprintf(fileID,'%i\t%g\t%s\n',i8,data66(i8,1,i5),'/;');
-            else                   fprintf(fileID,'%i\t%g\t%s\n',i8,data66(i8,1,i5),'');
-            end
-        end
-        fclose(fileID); 
-        disp([num2str(i5),' of ',num2str(length(Scenarios1)),' - ',num2str(round(toc/abs(i5-init_val)*(length(Scenarios1)-i5)/60)),' min. remain - ',char(filename2(i5))])   
-    end
-    clear data_most2
-    
-    %%% Create file with additional parameters
-    fileID = fopen([dir0,'Regular_tariffs\additional_parameters',add_txt1,'.txt'],'wt');        
-    for i7=1:length(Inputs2)
-        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs2{i7},'/');
+    end                
+    % Add yearly inputs
+    yearly_inputs = length(Inputs1)-3;
+    for i7=1:yearly_inputs
+        fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{i7},'/');
         for i8=1:Year_length*interval_length
-            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data_other(i8,i7),'/;');
-            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data_other(i8,i7),'');
+            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data_most2(i8,i7,i5),'/;');
+            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data_most2(i8,i7,i5),'');
             end
         end
     end
-    fclose(fileID);
-    
-    %%% Create file with no renewable profiles
-    fileID = fopen([dir0,'Regular_tariffs\renewable_profiles_none',add_txt1,'.txt'],'wt');    
-    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs3{1},'/');
-    for i7=1:length(Inputs3)
-        for i8=1:Year_length*interval_length
-            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,0,'/;');
-            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,0,'');
-            end
+    % Add meter charge
+    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+1},'/');
+    fprintf(fileID,'%i\t%g\t%s\n',1,data88(1,1,i5),'/;');
+    % Add fixed demand inputs
+    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+2},'/');
+    for i8=1:12
+        if i8==12, fprintf(fileID,'%i\t%g\t%s\n',i8,data55(i8,1,i5),'/;');
+        else       fprintf(fileID,'%i\t%g\t%s\n',i8,data55(i8,1,i5),'');
         end
     end
-    fclose(fileID);
-    
-    %%% Create file with renewable profiles
-    fileID = fopen([dir0,'Regular_tariffs\renewable_profiles_PV',add_txt1,'.txt'],'wt');    
-    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs3{1},'/');
-    for i7=1:length(Inputs3)
-        for i8=1:Year_length*interval_length
-            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data44A(i8,i7),'/;');
-            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data44A(i8,i7),'');
-            end
+    % Add timed demand inputs
+    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs1{yearly_inputs+3},'/');
+    for i8=1:size(data66,1)
+        if i8==size(data66,1), fprintf(fileID,'%i\t%g\t%s\n',i8,data66(i8,1,i5),'/;');
+        else                   fprintf(fileID,'%i\t%g\t%s\n',i8,data66(i8,1,i5),'');
         end
     end
-    fclose(fileID);
-    
-    fileID = fopen([dir0,'Regular_tariffs\renewable_profiles_WIND',add_txt1,'.txt'],'wt');    
-    fprintf(fileID,'%s\t%s\t%s\n','parameter',Inputs3{1},'/');
-    for i7=1:length(Inputs3)
-        for i8=1:Year_length*interval_length
-            if i8==Year_length*interval_length, fprintf(fileID,'%i\t%g\t%s\n',i8,data44B(i8,i7),'/;');
-            else                                fprintf(fileID,'%i\t%g\t%s\n',i8,data44B(i8,i7),'');
-            end
-        end
-    end
-    fclose(fileID);
+    fclose(fileID); 
+    disp([num2str(i5),' of ',num2str(length(Scenarios1)),' - ',num2str(round(toc/abs(i5-init_val)*(length(Scenarios1)-i5)/60)),' min. remain - ',char(filename2(i5))])   
+end
+clear data_most2
+
+%%% Create files for energy prices
+for i0=1:length(txt1C)
+        cHeader = {'Interval','Energy Price'};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'Energy_prices_',txt1C{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'Energy_prices_',txt1C{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num1C(:,i0+1)]],'-append');
+end
+
+%%% Create files with Ancillary_services
+for i0=1
+        cHeader = {'Interval','Regulation Up','Regulation Down','Spinning Reserve','Nonspinning reserve'};    % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'Ancillary_services',add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'Ancillary_services',add_txt1,'.csv'],num21,'-append');
+end
+
+%%% Create files with renewable profiles
+for i0=1:length(txt31)
+        cHeader = {'Interval',txt31{i0}};                       % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'NG_price_',txt31{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'NG_price_',txt31{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num31(:,i0+1)]],'-append');
+end 
+
+%%% Create files with renewable profiles
+for i0=1:length(txt41)
+        cHeader = {'Interval',txt41{i0}};                       % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num41(:,i0+1)]],'-append');
+end   
+
+%%% Create files with baseload mode profiles
+for i0=1:length(txt71)
+        cHeader = {'Interval',txt71{i0}};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'Input_power_',txt71{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'Input_power_',txt71{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num71(:,i0+1)]],'-append');
+end
+
+%%% Create files with additional load profiles
+for i0=1:length(txt91)
+        cHeader = {'Interval',txt91{i0}};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'Additional_load_',txt91{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'Additional_load_',txt91{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num91(:,i0+1)]],'-append');
+end
+
+%%% Create files with H2 price profiles
+for i0=1:length(txt10B)
+        cHeader = {'Interval',txt10B{i0}};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num10B(:,i0+1)]],'-append');
+end
+
+%%% Create files with H2 consumption profiles
+for i0=1:length(txt11B)
+        cHeader = {'Interval',txt11B{i0}};          % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num11B(:,i0+1)]],'-append');
+end
+
+%%% Create controller input file
+for i0=1
+        cHeader = {'current_interval','next_interval','current_storage_lvl','current_monthly_max','max_interval'};  % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir0,'controller_input_values.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir0,'controller_input_values.csv'],[-1,1,0.5,0.8],'-append');
 end
 
 
