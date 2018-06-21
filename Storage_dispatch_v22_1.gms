@@ -21,24 +21,24 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     5a4fca635457a3d834fc3f66_hourly
+$if not set elec_rate_instance     $set elec_rate_instance     5a3430585457a3e3595c48a2_hourly
 $if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_Price1_hourly
-$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_central_hourly
+$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_flat_hourly
 $if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_hourly
 $if not set NG_price_instance      $set NG_price_instance      NG_price_Price1_hourly
-$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_hourly
+$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_PV_hourly
 $if not set load_prof_instance     $set load_prof_instance     Additional_load_none_hourly
-$if not set energy_price_inst      $set energy_price_inst      Energy_prices_empty_hourly
+$if not set energy_price_inst      $set energy_price_inst      Energy_prices_Wholesale_MWh_hourly
 $if not set AS_price_inst          $set AS_price_inst          Ancillary_services_hourly
-$if not set outdir                 $set outdir                 RODeO\Projects\Central_vs_distributed\Output
-$if not set indir                  $set indir                  RODeO\Projects\Central_vs_distributed\Data_files\TXT_files
+$if not set outdir                 $set outdir                 RODeO\Projects\Solar_Hydrogen\Output
+$if not set indir                  $set indir                  RODeO\Projects\Solar_Hydrogen\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
 $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
-$if not set input_cap_instance     $set input_cap_instance     1000
+$if not set input_cap_instance     $set input_cap_instance     10
 $if not set output_cap_instance    $set output_cap_instance    0
 
 * Set the limiting price (must be less than infinity)
@@ -71,7 +71,7 @@ $if not set interest_rate_inst     $set interest_rate_inst     0
 
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   24
+$if not set storage_cap_instance   $set storage_cap_instance   8
 $if not set storage_set_instance   $set storage_set_instance   1
 $if not set storage_init_instance  $set storage_init_instance  0.5
 $if not set storage_final_instance $set storage_final_instance 0.5
@@ -86,16 +86,16 @@ $if not set op_period_instance     $set op_period_instance     8760
 $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
-$if not set energy_only_instance   $set energy_only_instance   1
+$if not set energy_only_instance   $set energy_only_instance   0
 $if not set file_name_instance     $set file_name_instance     "Test_test"
-$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    1
+$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
-$if not set Renewable_MW_instance  $set Renewable_MW_instance  0
+$if not set Renewable_MW_instance  $set Renewable_MW_instance  25
 $if not set CF_opt_instance        $set CF_opt_instance        0
-$if not set run_retail_instance    $set run_retail_instance    1
+$if not set run_retail_instance    $set run_retail_instance    2
 $if not set one_active_device_inst $set one_active_device_inst 1
 
 * Next values are used to initialize for real-time operation and shorten the run-time
@@ -157,6 +157,8 @@ Parameters
 
 * Adjust the files that are loaded
 $include /%indir%\%elec_rate_instance%.txt
+
+*$include /%indir%\%elec_rate_instance%.txt
 *$include /%indir%\%add_param_instance%.txt
 *$include /%indir%\%ren_prof_instance%.txt
 *$include /%indir%\%load_prof_instance%.txt
@@ -175,7 +177,7 @@ Scalars
          Apply_output_cap   Apply output capacity of storage facility (MW) /%Apply_output_cap_inst%/
          max_sys_output_cap output capacity of entire system (MW)/%max_output_cap_inst%/
          storage_capacity_hours storage capacity of storage facility (hours at rated INPUT capacity) /%storage_cap_instance%/
-         storage_set_final  Turns on or off storage final value /%storage_set_instance%/
+         storage_set_final  Turns on or off storage final value (set to zero if capacity factor is 100%) /%storage_set_instance%/
          storage_init       Storage level at beginning of simluation (interval = 1) /%storage_init_instance%/
          storage_final      Storage level at end of simluation (interval = operating_period_length) /%storage_final_instance%/
 
@@ -222,7 +224,7 @@ Scalars
          NG_price_adj "Average price of natural gas ($/MMBTU)" /%NG_price_adj_instance%/
          Renewable_MW "Installed renewable capacity (MW)" /%Renewable_MW_instance%/
          CF_opt "Select optimization criteria for system" /%CF_opt_instance%/
-         run_retail "Select to run retail or wholesale analysis (0=wholesale, 1=retail)" /%run_retail_instance%/
+         run_retail "Select to run retail or wholesale analysis (0=wholesale, 1=retail, 2=hybrid (retail for purchase and wholesale for sale))" /%run_retail_instance%/
          one_active_device "Enables equation to ensure that charge/discharge do not happen simultaneously" /%one_active_device_inst%/
 
          min_output_on_intervals 'minimum number of intervals the output side of the facility can be on at a time' /%min_runtime_instance%/
@@ -305,6 +307,12 @@ $GDXIN
 if (run_retail=0,
          elec_purchase_price(interval) = elec_purchase_price_interim(interval);
          elec_sale_price(interval)     = elec_purchase_price(interval);
+         regup_price(interval)         = regup_price_interim(interval);
+         regdn_price(interval)         = regdn_price_interim(interval);
+         spinres_price(interval)       = spinres_price_interim(interval);
+         nonspinres_price(interval)    = nonspinres_price_interim(interval);
+elseif run_retail=2,
+         elec_sale_price(interval)     = elec_purchase_price_interim(interval);
          regup_price(interval)         = regup_price_interim(interval);
          regdn_price(interval)         = regdn_price_interim(interval);
          spinres_price(interval)       = spinres_price_interim(interval);
