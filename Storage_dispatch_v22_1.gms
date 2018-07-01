@@ -94,7 +94,7 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set file_name_instance     $set file_name_instance     "JustTest_HighLCFS"
+$if not set file_name_instance     $set file_name_instance     "JustTest_1"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6.0
 $if not set H2_use_instance        $set H2_use_instance        1
@@ -1297,7 +1297,7 @@ H2_revenue = sum(interval, H2_price(interval) * H2_sold.l(interval));
 actual_operating_profit = arbitrage_revenue + regup_revenue + regdn_revenue + spinres_revenue + nonspinres_revenue + H2_revenue - startup_costs
                         + Fixed_dem_charge_cost + Timed_dem_1_cost + Timed_dem_2_cost + Timed_dem_3_cost + Timed_dem_4_cost + Timed_dem_5_cost + Timed_dem_6_cost + Meter_cost
                         + input_cap_cost2 + output_cap_cost2 + input_FOM_cost2 + output_FOM_cost2 + input_VOM_cost2 + output_VOM_cost2 + renewable_sales
-                        + renew_cap_cost2 + renew_FOM_cost2 + renew_VOM_cost2 + H2stor_cap_cost2 + REC_revenue  ;
+                        + renew_cap_cost2 + renew_FOM_cost2 + renew_VOM_cost2 + H2stor_cap_cost2 + REC_revenue +LCFS_revenue ;
 *                        + input_cap_cost2 + output_cap_cost2 + input_FOM_cost2 + output_FOM_cost2 + input_VOM_cost2 + output_VOM_cost2;
 
 Hydrogen_fraction_val = Hydrogen_fraction.l*100;
