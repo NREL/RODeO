@@ -16,7 +16,8 @@
 clear all, close all, clc
 disp(['Prepare data...'])
 
-Project_name = 'Central_vs_distributed';
+% Project_name = 'Central_vs_distributed';
+Project_name = 'Solar_Hydrogen';
 % Project_name = 'Example';
 
 dir1 = 'C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\';   % Set directory to send files
@@ -30,7 +31,8 @@ GAMS_lic = 'license=C:\GAMS\win64\24.8\gamslice.txt';
 files_to_create = 2;  % Select the number of batch files to create
 
 outdir = ['Projects\',Project_name,'\Output'];
-indir  = ['Projects\',Project_name,'\Data_files\TXT_files_HighEarly'];
+indir  = ['Projects\',Project_name,'\Data_files\TXT_files'];
+% % % indir  = ['Projects\',Project_name,'\Data_files\TXT_files_HighEarly'];
 
 % Load filenames
 files_tariff = dir([dir1,indir]);
@@ -60,7 +62,104 @@ files_add_load2=files_add_load2(find(load_file1));    clear load_file1 files_add
 
 %% SECTION 2: Set values to vary by scenario
 disp(['Set batch file values...'])
-if strcmp(Project_name,'Central_vs_distributed')
+if strcmp(Project_name,'Solar_Hydrogen')
+%%% Solar_Hydrogen
+    Batch_header.elec_rate_instance.val = {'5a3430585457a3e3595c48a2_hourly'};
+    Batch_header.H2_consumed_instance.val = {'H2_consumption_flat_hourly'};        
+    Batch_header.baseload_pwr_instance.val = {'Input_power_baseload_hourly'};        
+    Batch_header.NG_price_instance.val = {'NG_price_Price1_hourly'};        
+    Batch_header.ren_prof_instance.val = {'renewable_profiles_PV_hourly'};
+    Batch_header.load_prof_instance.val = {'Additional_load_none_hourly'};
+    Batch_header.energy_price_inst.val = {'Energy_prices_Wholesale_MWh_hourly'};
+    Batch_header.AS_price_inst.val = {'Ancillary_services_PGE2014_hourly'};
+    [status,msg] = mkdir(outdir);       % Create output file if it doesn't exist yet  
+    Batch_header.outdir.val = {outdir}; % Reference is dynamic from location of batch file (i.e., exclue 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
+    Batch_header.indir.val = {indir};   % Reference is dynamic from location of batch file (i.e., exclue 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
+
+    Batch_header.gas_price_instance.val = {'NA'};
+    Batch_header.zone_instance.val = {'NA'};
+    Batch_header.year_instance.val = {'NA'};
+
+    Batch_header.input_cap_instance.val = {'0','100'};
+    Batch_header.output_cap_instance.val = {'0'};
+    Batch_header.price_cap_instance.val = {'10000'};
+
+    Batch_header.Apply_input_cap_inst.val = {'0'};
+    Batch_header.Apply_output_cap_inst.val = {'0'};
+    Batch_header.max_output_cap_inst.val = {'inf'};
+    Batch_header.allow_import_instance.val = {'1','0'};
+
+    Batch_header.input_LSL_instance.val = {'0.1'};
+    Batch_header.output_LSL_instance.val = {'0'};
+    Batch_header.Input_start_cost_inst.val = {'0'};
+    Batch_header.Output_start_cost_inst.val = {'0'};
+    Batch_header.input_efficiency_inst.val = {'0.613668913'};
+    Batch_header.output_efficiency_inst.val = {'1'};
+   
+    Batch_header.renew_cap_cost_inst.val = {'1343000'};
+    Batch_header.input_cap_cost_inst.val = {'1691000'};
+    Batch_header.output_cap_cost_inst.val = {'0'};
+    Batch_header.H2stor_cap_cost_inst.val = {'1000'};
+    Batch_header.renew_FOM_cost_inst.val = {'12000'};
+    Batch_header.input_FOM_cost_inst.val = {'93840'};
+    Batch_header.output_FOM_cost_inst.val = {'0'};
+    Batch_header.renew_VOM_cost_inst.val = {'0'};
+    Batch_header.input_VOM_cost_inst.val = {'0'};
+    Batch_header.output_VOM_cost_inst.val = {'0'};
+
+    Batch_header.renew_lifetime_inst.val = {'20'};
+    Batch_header.input_lifetime_inst.val = {'20'};
+    Batch_header.output_lifetime_inst.val = {'0'};
+    Batch_header.H2stor_lifetime_inst.val = {'20'};
+    Batch_header.interest_rate_inst.val = {'0.07'};
+    Batch_header.renew_interest_rate_inst.val = {'0.07'};
+    Batch_header.H2stor_interest_rate_inst.val = {'0.07'};
+
+    Batch_header.in_heat_rate_instance.val = {'0'};
+    Batch_header.out_heat_rate_instance.val = {'0'};
+
+    Batch_header.storage_cap_instance.val = {'8'};
+    Batch_header.storage_set_instance.val = {'1'};
+    Batch_header.storage_init_instance.val = {'0.5'};
+    Batch_header.storage_final_instance.val = {'0.5'};
+    Batch_header.reg_cost_instance.val = {'0'};
+    Batch_header.min_runtime_instance.val = {'0'};
+    Batch_header.ramp_penalty_instance.val = {'0'};
+
+    Batch_header.op_length_instance.val = {'8760'};
+    Batch_header.op_period_instance.val = {'8760'};
+    Batch_header.int_length_instance.val = {'1'};
+
+    Batch_header.lookahead_instance.val = {'0'};
+    Batch_header.energy_only_instance.val = {'1'};        
+    Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
+    
+    Batch_header.H2_consume_adj_inst.val = {'0.9'};
+    Batch_header.H2_price_instance.val = {'2','3','6'};
+    Batch_header.H2_use_instance.val = {'1'};
+    Batch_header.base_op_instance.val = {'0'};
+    Batch_header.NG_price_adj_instance.val = {'1'};
+    Batch_header.Renewable_MW_instance.val = {'0','200'};
+    Batch_header.REC_price_instance.val = {'12'};
+    
+    Batch_header.CF_opt_instance.val = {'0','1'};
+    Batch_header.run_retail_instance.val = {'1'};
+    Batch_header.one_active_device_inst.val = {'1'};
+
+    Batch_header.current_int_instance.val = {'-1'};
+    Batch_header.next_int_instance.val = {'1'};
+    Batch_header.current_stor_intance.val = {'0.5'};
+    Batch_header.current_max_instance.val = {'0.8'};
+    Batch_header.max_int_instance.val = {'Inf'};
+    Batch_header.read_MPC_file_instance.val = {'0'}; 
+    
+    Batch_header.H2_EneDens_instance.val = {'120'};
+    Batch_header.H2_Gas_ratio_instance.val = {'2.5'};
+    Batch_header.Grid_CarbInt_instance.val = {'105'};
+    Batch_header.CI_base_line_instance.val = {'92.5'};
+    Batch_header.LCFS_price_instance.val = {'125'};   
+    
+elseif strcmp(Project_name,'Central_vs_distributed')
 %%% Central_vs_distributed
     Batch_header.elec_rate_instance.val = strrep(files_tariff2,'.txt','');
     Batch_header.H2_consumed_instance.val = {'H2_consumption_central_hourly','H2_consumption_centralEarly_hourly','H2_consumption_distributed_hourly','H2_consumption_distributedEarly_hourly'};        
@@ -338,7 +437,9 @@ fields1 = fieldnames(Batch_header);
 %  Load excel files that contain relationships between values. 
 %  The load_relation_file.m function will process the files and adjust Batch_header appropriately
 disp(['Define relationship between fields...'])
-if strcmp(Project_name,'Central_vs_distributed')
+if strcmp(Project_name,'Solar_Hydrogen')
+%%% Solar_Hydrogen
+elseif strcmp(Project_name,'Central_vs_distributed')
 %%% Central_vs_distributed
     V1 = length(Batch_header.input_cap_instance.val);
     V2 = length(Batch_header.H2_consume_adj_inst.val);
@@ -362,6 +463,7 @@ fprintf('\n')
 %% SECTION 4: Create 2D matrix and reduce based on relationships
 relationship_matrix = [];
 fields1_length = numel(fields1);
+No_relations = 0;                                           % Value to keep track if there are relations
 for i0=1:fields1_length        
     num_items = numel(Batch_header.(fields1{i0}).val);
     if i0==1,
@@ -411,6 +513,27 @@ for i0=1:fields1_length
         fprintf('%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%cCompleted %3d of %3d',8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,i0,fields1_length)
     end
 end
+
+% If no relations were included then create a 2D matrix of all possible combinations
+if isempty(relationship_matrix)   
+    No_relations = 1;
+    for i0=1:numel(fields1)
+        num_items = numel(Batch_header.(fields1{i0}).val);
+        if i0==1,
+            relationship_matrix = Batch_header.(fields1{i0}).val;
+        else
+            [M0,N0] = size(relationship_matrix);               
+            relationship_matrix_interim = relationship_matrix;  % Copy matrix to repeat
+            fields1_val = Batch_header.(fields1{i0}).val;       % Capture all values for selected field        
+            for i1=1:num_items
+                add_column = cell(M0,1);                        % Create empty matrix to add to existing matrix
+                [add_column{:}] = deal([fields1_val{i1}]);      % Populate matrix with repeated cell item
+                relationship_matrix_interim([(i1-1)*M0+1:i1*M0],[1:(N0+1)]) = horzcat(relationship_matrix,add_column); 
+            end
+            relationship_matrix = relationship_matrix_interim;  % Overwrite matrix with completed 
+        end   
+    end
+end
 clear i0 M0 N0 add_column relationship_matrix_interim relationship_toggle
 fprintf('\n'), fprintf('\n') 
 
@@ -418,16 +541,64 @@ fprintf('\n'), fprintf('\n')
 %% SECTION 5: Convert integer matrix to cell array
 [~,N0] = size(relationship_matrix); 
 relationship_matrix_final = cell(size(relationship_matrix));
-for i0=1:N0
-     find_index1 = i0;                                       % Repeat value for i0
-     find_val1 = Batch_header.(fields1{find_index1}).val;    % Find values in row
-     relationship_matrix_final(:,i0) = find_val1(relationship_matrix(:,i0));    
+if No_relations==0
+    for i0=1:N0
+        find_index1 = i0;                                       % Repeat value for i0
+        find_val1 = Batch_header.(fields1{find_index1}).val;    % Find values in row
+        relationship_matrix_final(:,i0) = find_val1(relationship_matrix(:,i0));    
+    end
+elseif No_relations==1
+    relationship_matrix_final = relationship_matrix;
 end
 
 %% SECTION 6: Create file names
 disp(['Create file names...'])
 [M0,~] = size(relationship_matrix); 
-if strcmp(Project_name,'Central_vs_distributed')
+if strcmp(Project_name,'Solar_Hydrogen')
+%%% Solar_Hydrogen
+    Index_file_name = strfind(fields1,'file_name_instance');    Index_file_name = find(not(cellfun('isempty',Index_file_name)));
+    Index_elec_rate = strfind(fields1,'elec_rate_instance');    Index_elec_rate = find(not(cellfun('isempty',Index_elec_rate)));
+    Index_base = strfind(fields1,'base_op_instance');           Index_base = find(not(cellfun('isempty',Index_base)));
+    Index_CF = strfind(fields1,'H2_consume_adj_inst');          Index_CF = find(not(cellfun('isempty',Index_CF)));
+    Index_input_cap = strfind(fields1,'input_cap_instance');    Index_input_cap = find(not(cellfun('isempty',Index_input_cap)));
+    Index_import = strfind(fields1,'allow_import_instance');    Index_import = find(not(cellfun('isempty',Index_import)));
+    Index_H2price = strfind(fields1,'H2_price_instance');       Index_H2price = find(not(cellfun('isempty',Index_H2price)));
+    Index_renew_cap = strfind(fields1,'Renewable_MW_instance'); Index_renew_cap = find(not(cellfun('isempty',Index_renew_cap)));
+    Index_CF_opt = strfind(fields1,'CF_opt_instance');          Index_CF_opt = find(not(cellfun('isempty',Index_CF_opt)));
+    
+    for i0=1:M0    
+        interim1 = relationship_matrix_final{i0,Index_elec_rate};
+        Find_underscore1 = strfind(interim1,'_');
+        interim1 = interim1(1:Find_underscore1-1);    
+
+        interim2 = relationship_matrix_final{i0,Index_input_cap};
+        if strcmp(interim2,'0'),     interim2='NoDevice';
+        else                         interim2=['Flex',num2str(relationship_matrix_final{i0,Index_input_cap})];
+        end
+
+        interim3 = relationship_matrix_final{i0,Index_CF};
+        if str2num(relationship_matrix_final{i0,Index_CF_opt})==0
+            interim3 = ['CF',num2str(round(str2num(interim3)*100,0))];       
+        elseif str2num(relationship_matrix_final{i0,Index_CF_opt})==1
+            interim3 = ['Opt'];
+        else
+            interim3 = [];
+        end
+        
+        interim4 = relationship_matrix_final{i0,Index_import};
+        if strcmp(interim4,'0'),     interim4='NoImport';
+        else                         interim4='AllowImport';
+        end
+
+        interim5 = relationship_matrix_final{i0,Index_H2price};
+        interim5 = ['H2price',num2str(round(str2num(interim5),0))];
+
+        interim6 = relationship_matrix_final{i0,Index_renew_cap};
+        interim6 = ['RenCap',num2str(round(str2num(interim6),0))];
+
+        relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3,'_',interim4,'_',interim5,'_',interim6);
+    end
+elseif strcmp(Project_name,'Central_vs_distributed')
 %%% Central_vs_distributed
     Index_file_name = strfind(fields1,'file_name_instance');    Index_file_name = find(not(cellfun('isempty',Index_file_name)));
     Index_elec_rate = strfind(fields1,'elec_rate_instance');    Index_elec_rate = find(not(cellfun('isempty',Index_elec_rate)));

@@ -38,7 +38,7 @@ $if not set gas_price_instance     $set gas_price_instance     NA
 $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
-$if not set input_cap_instance     $set input_cap_instance     100
+$if not set input_cap_instance     $set input_cap_instance     1.0
 $if not set output_cap_instance    $set output_cap_instance    0
 
 * Set the limiting price (must be less than infinity)
@@ -59,23 +59,34 @@ $if not set Output_start_cost_inst $set Output_start_cost_inst 0
 $if not set input_efficiency_inst  $set input_efficiency_inst  0.613668913
 $if not set output_efficiency_inst $set output_efficiency_inst 1
 
+*new line added by Omar
 $if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1343000
+***********************
 $if not set input_cap_cost_inst    $set input_cap_cost_inst    1691000
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
-$if not set H2stor_cap_cost_inst   $set H2stor_cap_cost_inst   1000
+*new line added by Omar
+$if not set storage_cap_cost_inst  $set storage_cap_cost_inst  1000
+***********************
+*new line added by Omar
 $if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    12000
+***********************
 $if not set input_FOM_cost_inst    $set input_FOM_cost_inst    93840
 $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
+*new line added by Omar
 $if not set renew_VOM_cost_inst    $set renew_VOM_cost_inst    0
+***********************
 $if not set input_VOM_cost_inst    $set input_VOM_cost_inst    0
 $if not set output_VOM_cost_inst   $set output_VOM_cost_inst   0
+*new line added by Omar
 $if not set renew_lifetime_inst    $set renew_lifetime_inst    20
+***********************
 $if not set input_lifetime_inst    $set input_lifetime_inst    20
 $if not set output_lifetime_inst   $set output_lifetime_inst   20
-$if not set H2stor_lifetime_inst   $set H2stor_lifetime_inst   20
+*new line added by Omar
+$if not set storage_lifetime_inst  $set storage_lifetime_inst  20
+***********************
 $if not set interest_rate_inst     $set interest_rate_inst     0.07
-$if not set renew_interest_inst    $set renew_interest_inst    0.07
-$if not set H2stor_interest_inst   $set H2stor_interest_inst   0.07
+
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
 $if not set storage_cap_instance   $set storage_cap_instance   8
@@ -94,14 +105,16 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set file_name_instance     $set file_name_instance     "JustTest_HighLCFS"
+$if not set file_name_instance     $set file_name_instance     "JustTest"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6.0
 $if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
-$if not set Renewable_MW_instance  $set Renewable_MW_instance  200
+$if not set Renewable_MW_instance  $set Renewable_MW_instance  2.0
+*new line added by Omar
 $if not set REC_price_inst         $set REC_price_inst         12
+***********************
 $if not set CF_opt_instance        $set CF_opt_instance        0
 $if not set run_retail_instance    $set run_retail_instance    2
 $if not set one_active_device_inst $set one_active_device_inst 1
@@ -115,12 +128,13 @@ $if not set current_max_instance   $set current_max_instance   0.8
 $if not set max_int_instance       $set max_int_instance       Inf
 $if not set read_MPC_file_instance $set read_MPC_file_instance 0
 
-*Assumptions for the Low Carbon Fuel Standard
+*new line added by Omar
 $if not set H2_EneDens_inst        $set H2_EneDens_inst        120
 $if not set H2_Gas_ratio_inst      $set H2_Gas_ratio_inst      2.5
 $if not set Grid_CarbInt_inst      $set Grid_CarbInt_inst      105
 $if not set CI_base_line_inst      $set CI_base_line_inst      92.5
 $if not set LCFS_price_inst        $set LCFS_price_inst        125
+***********************
 
 
 *        energy_only_instance = 0, 1 (1 = Energy only operation, 0 = All ancillary services included)
@@ -173,6 +187,12 @@ Parameters
 * Adjust the files that are loaded
 $include /%indir%\%elec_rate_instance%.txt
 
+*$include /%indir%\%elec_rate_instance%.txt
+*$include /%indir%\%add_param_instance%.txt
+*$include /%indir%\%ren_prof_instance%.txt
+*$include /%indir%\%load_prof_instance%.txt
+*$include /%indir%\%IO_cap_instance%.txt
+
 Scalars
          interval_length length of each interval (hours) /%int_length_instance%/
          optimization_length number of intervals in entire analysis /%op_length_instance%/
@@ -208,25 +228,35 @@ Scalars
          output_heat_rate "heat rate of facility (MMBtu/MWh produced)" /%out_heat_rate_instance%/
          input_startup_cost "cost to startup the input side of the facility ($/MW-start)" /%Input_start_cost_inst%/
          output_startup_cost "cost to startup the output side of the facility ($/MW-start)" /%Output_start_cost_inst%/
+*new line added by Omar
          renew_cap_cost "upfront capital cost ($/MW)" /%renew_cap_cost_inst%/
+***********************
          input_cap_cost "upfront capital cost ($/MW)" /%input_cap_cost_inst%/
          output_cap_cost "upfront capital cost ($/MW)" /%output_cap_cost_inst%/
-         H2stor_cap_cost "upfront capital cost ($/kg)" /%H2stor_cap_cost_inst%/
+*new line added by Omar
+         storage_cap_cost "upfront capital cost ($/kg)" /%storage_cap_cost_inst%/
+***********************
+*new line added by Omar
          renew_FOM_cost "upfront FOM cost ($/MW-year)" /%renew_FOM_cost_inst%/
+***********************
          input_FOM_cost "upfront FOM cost ($/MW-year)" /%input_FOM_cost_inst%/
          output_FOM_cost "upfront FOM cost ($/MW-year)" /%output_FOM_cost_inst%/
+*new line added by Omar
          renew_VOM_cost "upfront VOM cost ($/MW-year)" /%renew_VOM_cost_inst%/
+***********************
          input_VOM_cost "upfront VOM cost ($/MWh)" /%input_VOM_cost_inst%/
          output_VOM_cost "upfront VOM cost ($/MWh)" /%output_VOM_cost_inst%/
 
+*new line added by Omar
          renew_lifetime "equipment lifetime (years)" /%renew_lifetime_inst%/
+***********************
          input_lifetime "equipment lifetime (years)" /%input_lifetime_inst%/
          output_lifetime "equipment lifetime (years)" /%output_lifetime_inst%/
-         H2stor_lifetime "equipment lifetime (years)" /%H2stor_lifetime_inst%/
+*new line added by Omar
+         storage_lifetime "equipment lifetime (years)" /%storage_lifetime_inst%/
+***********************
 
          interest_rate "interest rate on debt" /%interest_rate_inst%/
-         renew_interest_rate "interest rate on debt for renewables" /%renew_interest_inst%/
-         H2stor_interest_rate "interest rate on debt for storage" /%H2stor_interest_inst%/
 
          VOM_cost "variable O&M cost associated with selling electricity ($/MWh)" /0/
          reg_cost "variable costs associated with providing regulation ($/MW-h)" /%reg_cost_instance%/
@@ -239,8 +269,9 @@ Scalars
          baseload_operation "Determines if input is operated with baseload duty cycle" /%base_op_instance%/
          NG_price_adj "Average price of natural gas ($/MMBTU)" /%NG_price_adj_instance%/
          Renewable_MW "Installed renewable capacity (MW)" /%Renewable_MW_instance%/
+*new line added by Omar
          REC_price "Renewable Energy Credits (RECs) ($/MWh)" /%REC_price_inst%/
-
+***********************
          CF_opt "Select optimization criteria for system" /%CF_opt_instance%/
          run_retail "Select to run retail or wholesale analysis (0=wholesale, 1=retail, 2=hybrid (retail for purchase and wholesale for sale))" /%run_retail_instance%/
          one_active_device "Enables equation to ensure that charge/discharge do not happen simultaneously" /%one_active_device_inst%/
@@ -258,12 +289,13 @@ Scalars
          allow_import            'Allows or restricts imports 0=no imports, 1=allows imports'                    /%allow_import_instance%/
          nominal_penalty         'Used to add penalty price that is not considered in the results'               /0.000001/
          price_cap               'Set price cap for input prices'                                                /%price_cap_instance%/
-
+*new line added by Omar
          H2_EneDens "Energy density of hydrogen (MJ/kg)" /%H2_EneDens_inst%/
          H2_Gas_ratio "Energy economy ratio of hydrogen (relative to gasoline)" /%H2_Gas_ratio_inst%/
          Grid_CarbInt "Carbon intensity of electricity from the grid (gCO2e/MJ)" /%Grid_CarbInt_inst%/
          CI_base_line "Base line carbon intensity for the displaced fuel and current year (gCO2e/MJ)" /%CI_base_line_inst%/
          LCFS_price "Low Carbon Fuel Standard (LCFS) credit prices ($ per credit)" /%LCFS_price_inst%/
+***********************
 ;
 
 Set
@@ -409,8 +441,9 @@ Renewable_power(interval) = renewable_signal(interval) * Renewable_MW;
 
 if (output_lifetime=0, output_lifetime=1; output_cap_cost=0; output_FOM_cost=0; output_VOM_cost=0; interest_rate=0.01;);
 if ( input_lifetime=0,  input_lifetime=1;  input_cap_cost=0;  input_FOM_cost=0;  input_VOM_cost=0; interest_rate=0.01;);
-if ( renew_lifetime=0,  renew_lifetime=1;  renew_cap_cost=0;  renew_FOM_cost=0;  renew_VOM_cost=0; renew_interest_rate=0.01;);
-if (H2stor_lifetime=0, H2stor_lifetime=1; H2stor_cap_cost=0; H2stor_interest_rate=0.01;);
+*new line added by Omar
+if (renew_lifetime=0, renew_lifetime=1; renew_cap_cost=0; renew_FOM_cost=0; renew_VOM_cost=0; interest_rate=0.01;);
+***********************
 
 *check to make sure operating period length is not longer than the number of intervals in the input file
 if ( operating_period_length > card(interval), operating_period_length = card(interval) );
@@ -683,11 +716,13 @@ H2_CF_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval
 H2_CF_eqn2$(CF_opt=1).. Hydrogen_fraction =l= 1;
 H2_CF_eqn3$(CF_opt=0).. Hydrogen_fraction =e= 1;
 
-*** Cost function: Elec sale price, elec purchase price, regup, regdown, spin, nonspin, NGout/in, unused VOM cost, startup cost, H2 price, VOM cost, demand charge (fixed and timed), meter cost, cap and FOM cost, etc.
+*** Cost function: Elec sale price, elec purchase price, regup, regdown, spin, nonspin, NGout/in, unused VOM cost, startup cost, H2 price, VOM cost, demand charge (fixed and timed), meter cost, cap and FOM cost
 operating_profit_eqn..
          operating_profit =e= sum( (interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ),
                    (elec_sale_price_forecast(interval) * (output_power_MW(interval)+output_power_MW_ren(interval)) * interval_length)
+*new line added by Omar
                  + REC_price * output_power_MW_ren(interval) * interval_length
+***********************
                  - (elec_purchase_price_forecast(interval) * input_power_MW_non_ren(interval) * interval_length)
                  + ( regup_price(interval) - reg_cost ) * ( output_regup_MW(interval) + input_regup_MW(interval) ) * interval_length
                  + ( regdn_price(interval) - reg_cost ) * ( output_regdn_MW(interval) + input_regdn_MW(interval) ) * interval_length
@@ -699,9 +734,9 @@ operating_profit_eqn..
                  - output_startup_cost * output_capacity_MW * output_start(interval)
                  - input_startup_cost  * input_capacity_MW  * input_start(interval)
                  + H2_price(interval) * H2_sold(interval)
-                 + (CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency)*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold(interval)
-                 + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * input_power_MW_ren(interval) * interval_length / H2_LHV
-                 - renew_VOM_cost * Renewable_power(interval) * interval_length
+*new line added by Omar
+                 - renew_VOM_cost * renewable_signal(interval) * Renewable_MW
+***********************
                  - input_VOM_cost * input_power_MW(interval) * interval_length
                  - output_VOM_cost * output_power_MW(interval) * interval_length
                  - (input_ramp_pos(interval)+input_ramp_neg(interval))*ramp_penalty
@@ -714,10 +749,14 @@ operating_profit_eqn..
                  - sum(months, cap_5(months) * Timed_dem("5"))
                  - sum(months, cap_6(months) * Timed_dem("6"))
                  - meter_mnth_chg("1") * 12
-                 - (renew_cap_cost+renew_FOM_cost*input_lifetime) * Renewable_MW * (renew_interest_rate+(renew_interest_rate/(power((1+renew_interest_rate),renew_lifetime)-1)))
+*new line added by Omar
+                 - (renew_cap_cost+renew_FOM_cost*input_lifetime) * Renewable_MW * (interest_rate+(interest_rate/(power((1+interest_rate),renew_lifetime)-1)))
+***********************
                  - (input_cap_cost+input_FOM_cost*input_lifetime) * input_capacity_MW * (interest_rate+(interest_rate/(power((1+interest_rate),input_lifetime)-1)))
                  - (output_cap_cost+output_FOM_cost*output_lifetime) * output_capacity_MW * (interest_rate+(interest_rate/(power((1+interest_rate),output_lifetime)-1)))
-                 - H2stor_cap_cost * input_capacity_MW *( input_efficiency / H2_LHV )*(H2_consumed_adj*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours* (H2stor_interest_rate+(H2stor_interest_rate/(power((1+H2stor_interest_rate),H2stor_lifetime)-1)))
+*new line added by Omar
+                 - storage_cap_cost *input_capacity_MW *( input_efficiency / H2_LHV )*(H2_consumed_adj*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours* (interest_rate+(interest_rate/(power((1+interest_rate),storage_lifetime)-1)))
+***********************
                  ;
 
 system_power_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
@@ -1164,8 +1203,9 @@ Scalars
          spinres_revenue          operating profits due to spinning reserve AS market (dollars)
          nonspinres_revenue       operating profits due to nonspinning reserve AS market (dollars)
          H2_revenue               operating profits due to selling hydrogen (dollars)
+*new line added by Omar
          REC_revenue              REC revenue ($)
-         LCFS_revenue             LCSF revenue ($)
+***********************
          startup_costs            cost due to startups
          actual_operating_profit  actual operating profits (dollars)
          Renewable_pen_input      renewable penetration of input device (%)
@@ -1180,16 +1220,24 @@ Scalars
          Timed_dem_6_cost         Yearly Timed demand charge cost
          Meter_cost               Yearly cost for operating meter
 
+*new line added by Omar
          renew_cap_cost2          Annualized capital cost
+***********************
          input_cap_cost2          Annualized capital cost
          output_cap_cost2         Annualized capital cost
+*new line added by Omar
          renew_FOM_cost2          Annualized FOM cost
+***********************
          input_FOM_cost2          Annualized FOM cost
          output_FOM_cost2         Annualized FOM cost
+*new line added by Omar
          renew_VOM_cost2          Annualized VOM cost
+***********************
          input_VOM_cost2          Annualized VOM cost
          output_VOM_cost2         Annualized VOM cost
-         H2stor_cap_cost2         Annualized hydrogen storage cost
+*new line added by Omar
+         storage_cap_cost2        Annualized storage cost
+***********************
          Hydrogen_fraction_val    Optimized Capacity Factor (%)
          renewable_sales          Revenue from renewables sales ($)
          curtailment_sum          Sum of curtailment over the region
@@ -1210,7 +1258,7 @@ Parameters
          cap_5_val(months)        determine power cap for demand period 5 (MW)
          cap_6_val(months)        determine power cap for demand period 6 (MW)
          curtailment(interval)    calculate renewable curtialment (MW)
-;
+ ;
 
 * calculate values to be output in the report
 Fixed_cap_val(months) = Fixed_cap.l(months);
@@ -1272,22 +1320,31 @@ arbitrage_revenue = sum(interval,
                         - VOM_cost * output_power_MW.l(interval) * interval_length
                         );
 renewable_sales = sum(interval, elec_sale_price(interval) * output_power_MW_ren.l(interval) * interval_length );
+*new line added by Omar
 REC_revenue  = sum(interval, REC_price * output_power_MW_ren.l(interval) * interval_length );
-LCFS_revenue = sum(interval, (CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency)*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold.l(interval)
-                           + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * input_power_MW_ren.l(interval) * interval_length / H2_LHV );
 
+Display REC_revenue, Hydrogen_fraction.l;
+***********************
 Display input_cap_cost, input_capacity_MW,interest_rate,input_lifetime;
-renew_cap_cost2  = -renew_cap_cost * Renewable_MW * (renew_interest_rate+(renew_interest_rate/(power((1+renew_interest_rate),renew_lifetime)-1)));
+*new line added by Omar
+renew_cap_cost2  = -renew_cap_cost * Renewable_MW * (interest_rate+(interest_rate/(power((1+interest_rate),renew_lifetime)-1)));
+***********************
 input_cap_cost2  = -input_cap_cost * input_capacity_MW * (interest_rate+(interest_rate/(power((1+interest_rate),input_lifetime)-1)));
 output_cap_cost2 = -output_cap_cost * output_capacity_MW * (interest_rate+(interest_rate/(power((1+interest_rate),output_lifetime)-1)));
-renew_FOM_cost2  = -renew_FOM_cost * Renewable_MW * (renew_interest_rate+(renew_interest_rate/(power((1+renew_interest_rate),renew_lifetime)-1)));
+*new line added by Omar
+renew_FOM_cost2  = -renew_FOM_cost * Renewable_MW * (interest_rate+(interest_rate/(power((1+interest_rate),renew_lifetime)-1)));
+***********************
 input_FOM_cost2  = -input_FOM_cost * input_capacity_MW * input_lifetime * (interest_rate+(interest_rate/(power((1+interest_rate),input_lifetime)-1)));
 output_FOM_cost2 = -output_FOM_cost * output_capacity_MW * output_lifetime * (interest_rate+(interest_rate/(power((1+interest_rate),output_lifetime)-1)));
+*new line added by Omar
 renew_VOM_cost2  = renew_VOM_cost*sum(interval, (renewable_signal(interval) * Renewable_MW));
+***********************
 input_VOM_cost2  = -elec_in_MWh * input_VOM_cost;
 output_VOM_cost2 = -elec_output_MWh * output_VOM_cost;
-H2stor_cap_cost2 = - H2stor_cap_cost * input_capacity_MW *( input_efficiency / H2_LHV ) * (H2_consumed_adj * (1-CF_opt) + CF_opt * Hydrogen_fraction.l) * storage_capacity_hours * (H2stor_interest_rate+(H2stor_interest_rate/(power((1+H2stor_interest_rate),H2stor_lifetime)-1)));
 
+*new line added by Omar
+storage_cap_cost2 = - storage_cap_cost * input_capacity_MW *( input_efficiency / H2_LHV ) * (H2_consumed_adj * (1-CF_opt) + CF_opt * Hydrogen_fraction.l) * storage_capacity_hours * (interest_rate+(interest_rate/(power((1+interest_rate),storage_lifetime)-1)));
+***********************
 regup_revenue = sum(interval, ( regup_price(interval) - reg_cost ) * ( output_regup_MW.l(interval) + input_regup_MW.l(interval) ) * interval_length );
 regdn_revenue = sum(interval, ( regdn_price(interval) - reg_cost ) * ( output_regdn_MW.l(interval) + input_regdn_MW.l(interval) ) * interval_length );
 spinres_revenue = sum(interval, spinres_price(interval) * ( output_spinres_MW.l(interval) + input_spinres_MW.l(interval) ) * interval_length );
@@ -1297,7 +1354,10 @@ H2_revenue = sum(interval, H2_price(interval) * H2_sold.l(interval));
 actual_operating_profit = arbitrage_revenue + regup_revenue + regdn_revenue + spinres_revenue + nonspinres_revenue + H2_revenue - startup_costs
                         + Fixed_dem_charge_cost + Timed_dem_1_cost + Timed_dem_2_cost + Timed_dem_3_cost + Timed_dem_4_cost + Timed_dem_5_cost + Timed_dem_6_cost + Meter_cost
                         + input_cap_cost2 + output_cap_cost2 + input_FOM_cost2 + output_FOM_cost2 + input_VOM_cost2 + output_VOM_cost2 + renewable_sales
-                        + renew_cap_cost2 + renew_FOM_cost2 + renew_VOM_cost2 + H2stor_cap_cost2 + REC_revenue  ;
+*new line added by Omar
+                        + renew_cap_cost2 + renew_FOM_cost2 + renew_VOM_cost2 + storage_cap_cost2 + REC_revenue  ;
+***********************
+
 *                        + input_cap_cost2 + output_cap_cost2 + input_FOM_cost2 + output_FOM_cost2 + input_VOM_cost2 + output_VOM_cost2;
 
 Hydrogen_fraction_val = Hydrogen_fraction.l*100;
@@ -1441,8 +1501,9 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'spinres revenue ($), ', spinres_revenue /;
                  put 'nonspinres revenue ($), ', nonspinres_revenue /;
                  put 'hydrogen revenue ($), ', H2_revenue /;
+*new line added by Omar
                  put 'REC revenue ($), ', REC_revenue /;
-                 put 'LCFS revenue ($), ', LCFS_revenue /;
+***********************
                  put 'startup costs ($), ', startup_costs /;
                  put /;
                  put 'Interval, In Pwr (MW), Out Pwr (MW), Storage Lvl (MW-h), In Reg Up (MW), Out Reg Up (MW), In Reg Dn (MW), Out Reg Dn (MW), In Spin (MW), Out Spin (MW), In Nonspin (MW), Out Nonspin (MW), H2 Out (kg), Non-Ren In (MW), Ren In (MW), Ren Sold (MW), Curt (MW)'/;
@@ -1525,8 +1586,9 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'spinres revenue ($), ', spinres_revenue /;
                  put 'nonspinres revenue ($), ', nonspinres_revenue /;
                  put 'hydrogen revenue ($), ', H2_revenue /;
+*new line added by Omar
                  put 'REC revenue ($), ', REC_revenue /;
-                 put 'LCFS revenue ($), ', LCFS_revenue /;
+***********************
                  put 'startup costs ($), ', startup_costs /;
                  put 'Fixed demand charge ($), ',Fixed_dem_charge_cost/;
                  put 'Timed demand charge 1 ($), ',Timed_dem_1_cost/;
@@ -1537,16 +1599,24 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Timed demand charge 6 ($), ',Timed_dem_6_cost/;
                  put 'Meter cost ($), ',Meter_cost/;
 *                 put 'Renewable Penetration net meter (%), ', Renewable_pen_input_net /;
+*new line added by Omar
                  put 'Renewable annualized capital cost ($), ',renew_cap_cost2 /;
+***********************
                  put 'Input annualized capital cost ($), ',input_cap_cost2 /;
                  put 'Output annualized capital cost ($), ',output_cap_cost2 /;
-                 put 'Hydrogen storage annualized cost ($), ',H2stor_cap_cost2 /;
+*new line added by Omar
                  put 'Renewable FOM cost ($), ',renew_FOM_cost2 /;
+***********************
                  put 'Input FOM cost ($), ',input_FOM_cost2 /;
                  put 'Output FOM cost ($), ',output_FOM_cost2 /;
+*new line added by Omar
                  put 'Renewable VOM cost ($), ',renew_VOM_cost2 /;
+***********************
                  put 'Input VOM cost ($), ',input_VOM_cost2 /;
                  put 'Output VOM cost ($), ',output_VOM_cost2 /;
+*new line added by Omar
+                 put 'Storage annualized cost ($), ',storage_cap_cost2 /;
+***********************
                  put 'Renewable sales ($), ',renewable_sales /;
                  put 'Renewable Penetration net meter (%), ', Renewable_pen_input_net /;
                  put 'Curtailment (MWh), ',curtailment_sum /;

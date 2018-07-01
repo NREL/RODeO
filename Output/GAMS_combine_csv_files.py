@@ -12,7 +12,8 @@ import numpy as np
 import warnings 
 warnings.simplefilter("ignore",UserWarning)
 
-Scenario1 = 'Central_vs_distributed'
+#Scenario1 = 'Central_vs_distributed'
+Scenario1 = 'Solar_Hydrogen'
 #Scenario1 = 'Example'
 
 dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/'+Scenario1+'/Output/'  # Location to put database files
@@ -127,12 +128,38 @@ for files2load in os.listdir(dir1):
             int1[2] = int1[2].replace('CF', '')
             int1[5] = int1[5].replace('hrs.csv', '')
             files2load_summary_title[c0[2]] = int1
+    elif Scenario1=='Solar_Hydrogen':
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
+            c0[0]=c0[0]+1
+            files2load_input[c0[0]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+#            int1[2] = int1[2].replace('CF', '')            
+            int1[1] = int1[1].replace('hrs.csv', '')
+            files2load_input_title[c0[0]] = int1
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_results*'):
+            c0[1]=c0[1]+1
+            files2load_results[c0[1]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+#            int1[2] = int1[2].replace('CF', '')
+            int1[1] = int1[1].replace('hrs.csv', '')
+            files2load_results_title[c0[1]] = int1
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_summary*'):
+            c0[2]=c0[2]+1
+            files2load_summary[c0[2]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+#            int1[2] = int1[2].replace('CF', '')
+            int1[1] = int1[1].replace('hrs.csv', '')
+            files2load_summary_title[c0[2]] = int1
 
 
 # Connecting to the database file
 sqlite_file = 'Default_summary.db'  # name of the sqlite database file
 conn = sqlite3.connect(dir0+sqlite_file)                           # Setup connection with sqlite
 c = conn.cursor()
+### conn.close()
 
 if 1==1:            # This section captures the scenario table from summary files
     # Create Scenarios table and populate
@@ -210,6 +237,21 @@ if 1==1:            # This section captures the scenario table from summary file
             print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
         c.executemany(sql, params)
         conn.commit()         
+    elif Scenario1=='Solar_Hydrogen':
+        c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
+                                             'Tariff' text,                                             
+                                             'Capacity Factor (%)' real,
+                                             'Storage duration (hours)' real)''')
+    
+        sql = "INSERT INTO Scenarios VALUES (?,?,?,?)"
+        params=list()
+        for i0 in range(len(files2load_summary)):    
+            params.insert(i0,tuple(list([str(i0+1)])+files2load_summary_title[i0+1]))
+            print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
+        c.executemany(sql, params)
+        conn.commit()         
+
+
         
 if 1==1:            # This section captures the summary files         
     # Creating Summary Table
@@ -259,6 +301,8 @@ if 1==1:            # This section captures the summary files
                                        'spinres revenue ($)' real,
                                        'nonspinres revenue ($)' real,
                                        'hydrogen revenue ($)' real,
+                                       'REC revenue ($)' real,
+                                       'LCFS revenue ($)' real,
                                        'startup costs ($)' real,
                                        'Fixed demand charge ($)' real,
                                        'Timed demand charge 1 ($)' real,
@@ -268,10 +312,14 @@ if 1==1:            # This section captures the summary files
                                        'Timed demand charge 5 ($)' real,
                                        'Timed demand charge 6 ($)' real,
                                        'Meter cost ($)' real,
+                                       'Renweable annualized capital cost ($)' real,
                                        'Input annualized capital cost ($)' real,
                                        'Output annualized capital cost ($)' real,
+                                       'Hydrogen storage annualized cost ($)' real,
+                                       'Renewable FOM cost ($)' real,
                                        'Input FOM cost ($)' real,
                                        'Output FOM cost ($)' real,
+                                       'Renewable VOM cost ($)' real,
                                        'Input VOM cost ($)' real,
                                        'Output VOM cost ($)' real,
                                        'Renewable Sales ($)' real,
@@ -284,7 +332,7 @@ if 1==1:            # This section captures the summary files
                                        'Electricity Import (MWh)' real)''')
     
     # Print Summary data
-    summary_data = np.zeros(shape=(68,len(files2load_summary))) 
+    summary_data = np.zeros(shape=(74,len(files2load_summary))) 
     for i0 in range(len(files2load_summary)):
         if (i0==1):
             summary_data_headers = np.genfromtxt(dir1+files2load_summary[i0+1], dtype=(str), delimiter=",",usecols=(0),invalid_raise = False,skip_header=2)   # Other values (skip_header=3, skip_footer=49)
@@ -295,7 +343,7 @@ if 1==1:            # This section captures the summary files
     interval_length = summary_data[3,0]
     
     # Committing changes and closing the connection to the database file
-    sql = "INSERT INTO Summary VALUES (?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?)"
+    sql = "INSERT INTO Summary VALUES (?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?)"
     params=list()
     for i0 in range(len(files2load_summary)):
         summary_data2 = np.transpose(summary_data[:,i0])
@@ -316,8 +364,8 @@ if 1==1:            # This section captures a subset of the results files
     sql = "INSERT INTO Results VALUES (?,?,?,?,?,?)"
     for i0 in range(len(files2load_results)):
         #if (i0==1):
-        #    results_data_headers = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(str), delimiter=",",invalid_raise = False,skip_header=27, max_rows=1)   
-        results_data0 = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(float), delimiter=",",invalid_raise = False,skip_header=28)
+        #    results_data_headers = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(str), delimiter=",",invalid_raise = False,skip_header=29, max_rows=1)   
+        results_data0 = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(float), delimiter=",",invalid_raise = False,skip_header=30)
         results_data = np.delete(results_data0, np.s_[2,4,5,6,7,8,9,10,11,14,15,16], axis=1)
         results_data_size = results_data.shape
         results_data2 = np.zeros((results_data_size[0],results_data_size[1]+1))
@@ -355,8 +403,8 @@ if 1==0:            # This section creates the entire results files
     sql = "INSERT INTO Results VALUES (?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?)"
     for i0 in range(len(files2load_results)):
         if (i0==1):
-            results_data_headers = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(str), delimiter=",",invalid_raise = False,skip_header=27, max_rows=1)   
-        results_data = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(float), delimiter=",",invalid_raise = False,skip_header=28)
+            results_data_headers = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(str), delimiter=",",invalid_raise = False,skip_header=29, max_rows=1)   
+        results_data = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(float), delimiter=",",invalid_raise = False,skip_header=30)
         results_data_size = results_data.shape
         results_data2 = np.zeros((results_data_size[0],results_data_size[1]+1))
         results_data2[:,1:] = results_data
