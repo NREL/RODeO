@@ -936,8 +936,7 @@ H2_output_limit_eqn3(interval)$( rolling_window_min_index <= ord(interval) and o
 
 *JOSH
 H2_renewable_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>current_interval and ord(interval)<max_interval )..
-         H2_sold(interval) =g= H2_sold_ren(interval);
-*         H2_sold(interval) * Renewable_split =g= H2_sold_ren(interval);
+         H2_sold(interval) * Renewable_split =g= H2_sold_ren(interval);
 
 storage_level_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW>0 and ord(interval)>current_interval and ord(interval)<max_interval )..
          storage_level_MWh(interval) =l= Max_input_cap(interval) * input_capacity_MW * storage_capacity_hours
