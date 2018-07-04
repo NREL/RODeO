@@ -27,7 +27,7 @@ $if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_fl
 $if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_hourly
 $if not set NG_price_instance      $set NG_price_instance      NG_price_Price1_v2_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_none_v2_hourly
-$if not set load_prof_instance     $set load_prof_instance     Additional_load_none_v2_hourly
+$if not set load_prof_instance     $set load_prof_instance     Additional_load_none_hourly
 $if not set energy_price_inst      $set energy_price_inst      Energy_prices_Wholesale_MWh_hourly
 $if not set AS_price_inst          $set AS_price_inst          Ancillary_services_hourly
 $if not set outdir                 $set outdir                 RODeO\Projects\Test\Output
@@ -146,6 +146,7 @@ Sets
          timed_dem_period  number of timed demand periods        /1 * 6/
 * You can select only the first device by setting "devices" equal to "/1/". Also, files loaded need to have at least two value columns.
          devices           number of devices modeled             /1 * 2/
+         devices_ren       number of renewable devices included  /1 * 3/
 ;
 
 Parameters
@@ -155,20 +156,18 @@ Parameters
          regdn_price(interval)                   "price paid for regulation down ancillary service ($/MW)"
          spinres_price(interval)                 "price paid for spinning reserve ancillary service ($/MW)"
          nonspinres_price(interval)              "price paid for nonspinning reserve ancillary service ($/MW)"
-*JOSH
-*  Revert to 1D array
-         NG_price(interval,devices)              "natural gas price in each interval ($/MMBtu)"
+         NG_price(interval)                      "natural gas price in each interval ($/MMBtu)"
          elec_purchase_price_forecast(interval)  "electricity price forecast in each interval ($/MWh)"
          elec_sale_price_forecast(interval)      "electricity price forecast in each interval ($/MWh)"
          H2_consumed(interval,devices)           "Amount of H2 consumed each interval (kg)"
          H2_price(interval,devices)              "Price for Hydrogen for each interval ($/kg)"
          input_power_baseload(interval)          "Establishes the input power signal under baseload operation (MW)"
-         renewable_signal(interval,devices)      "Renewable generation signal (MW) (range from 0 to 1)"
+         renewable_signal(interval,devices_ren)  "Renewable generation signal (MW) (range from 0 to 1)"
          meter_mnth_chg(interval)                "monthly charge for meter ($/meter/month)"
-         Renewable_power(interval,devices)       "Scaled renewable signal based on 'Renewable_MW'"
+         Renewable_power(interval,devices_ren)   "Scaled renewable signal based on 'Renewable_MW'"
          Fixed_dem(months)                       "Fixed demand charge $/MW-month"
          Timed_dem(timed_dem_period)             "Timed demand charge $/MW-month"
-         Load_profile(interval,devices)          "Load profile (MW)"
+         Load_profile(interval)                  "Load profile (MW)"
          Max_input_cap(interval,devices)         "Maximum capacity for input"
          Max_output_cap(interval,devices)        "Maximum capacity for output"
 *         ones_mat(interval)                      "define all elements to 10"     /set.interval 1/;
@@ -200,24 +199,24 @@ Parameters
          output_heat_rate(devices)               "heat rate of facility (MMBtu/MWh produced)"            /1 %out_heat_rate_instance%, 2 %out_heat_rate_instance%/
          input_startup_cost(devices)             "cost to startup the input side ($/MW-start)"           /1 %Input_start_cost_inst%, 2 %Input_start_cost_inst%/
          output_startup_cost(devices)            "cost to startup the output side ($/MW-start)"          /1 %Output_start_cost_inst%, 2 %Output_start_cost_inst%/
-         renew_cap_cost(devices)                 "upfront capital cost ($/MW)"                           /1 %renew_cap_cost_inst%, 2 %renew_cap_cost_inst%/
+         renew_cap_cost(devices_ren)             "upfront capital cost ($/MW)"                           /1 %renew_cap_cost_inst%, 2 %renew_cap_cost_inst%, 3 %renew_cap_cost_inst%/
          input_cap_cost(devices)                 "upfront capital cost ($/MW)"                           /1 %input_cap_cost_inst%, 2 %input_cap_cost_inst%/
          output_cap_cost(devices)                "upfront capital cost ($/MW)"                           /1 %output_cap_cost_inst%, 2 %output_cap_cost_inst%/
          H2stor_cap_cost(devices)                "upfront capital cost ($/kg)"                           /1 %H2stor_cap_cost_inst%, 2 %H2stor_cap_cost_inst%/
-         renew_FOM_cost(devices)                 "upfront FOM cost ($/MW-year)"                          /1 %renew_FOM_cost_inst%, 2 %renew_FOM_cost_inst%/
+         renew_FOM_cost(devices_ren)             "upfront FOM cost ($/MW-year)"                          /1 %renew_FOM_cost_inst%, 2 %renew_FOM_cost_inst%, 3 %renew_FOM_cost_inst%/
          input_FOM_cost(devices)                 "upfront FOM cost ($/MW-year)"                          /1 %input_FOM_cost_inst%, 2 %input_FOM_cost_inst%/
          output_FOM_cost(devices)                "upfront FOM cost ($/MW-year)"                          /1 %output_FOM_cost_inst%, 2 %output_FOM_cost_inst%/
-         renew_VOM_cost(devices)                 "upfront VOM cost ($/MW-year)"                          /1 %renew_VOM_cost_inst%, 2 %renew_VOM_cost_inst%/
+         renew_VOM_cost(devices_ren)             "upfront VOM cost ($/MW-year)"                          /1 %renew_VOM_cost_inst%, 2 %renew_VOM_cost_inst%, 3 %renew_VOM_cost_inst%/
          input_VOM_cost(devices)                 "upfront VOM cost ($/MWh)"                              /1 %input_VOM_cost_inst%, 2 %input_VOM_cost_inst%/
          output_VOM_cost(devices)                "upfront VOM cost ($/MWh)"                              /1 %output_VOM_cost_inst%, 2 %output_VOM_cost_inst%/
 
-         renew_lifetime(devices)                 "equipment lifetime (years)"                            /1 %renew_lifetime_inst%, 2 %renew_lifetime_inst%/
+         renew_lifetime(devices_ren)             "equipment lifetime (years)"                            /1 %renew_lifetime_inst%, 2 %renew_lifetime_inst%, 3 %renew_lifetime_inst%/
          input_lifetime(devices)                 "equipment lifetime (years)"                            /1 %input_lifetime_inst%, 2 %input_lifetime_inst%/
          output_lifetime(devices)                "equipment lifetime (years)"                            /1 %output_lifetime_inst%, 2 %output_lifetime_inst%/
          H2stor_lifetime(devices)                "equipment lifetime (years)"                            /1 %H2stor_lifetime_inst%, 2 %H2stor_lifetime_inst%/
 
          interest_rate(devices)                  "interest rate on debt"                                 /1 %interest_rate_inst%, 2 %interest_rate_inst%/
-         renew_interest_rate(devices)            "interest rate on debt for renewables"                  /1 %renew_interest_inst%, 2 %renew_interest_inst%/
+         renew_interest_rate(devices_ren)        "interest rate on debt for renewables"                  /1 %renew_interest_inst%, 2 %renew_interest_inst%, 3 %renew_interest_inst%/
          H2stor_interest_rate(devices)           "interest rate on debt for storage"                     /1 %H2stor_interest_inst%, 2 %H2stor_interest_inst%/
 
          H2_use(devices)                         "Determines if Hydrogen outputted as a product or not (toggle)" /1 %H2_use_instance%, 2 0/
@@ -226,8 +225,8 @@ Parameters
 
          energy_only(devices)                    "Sets different services for different devices"                 /1 %energy_only_instance%, 2 %energy_only_instance%/
          baseload_operation(devices)             "Determines if input is operated with baseload duty cycle"      /1 %base_op_instance%, 2 %base_op_instance%/
-         NG_price_adj(devices)                   "Average price of natural gas ($/MMBTU)"                        /1 %NG_price_adj_instance%, 2 %NG_price_adj_instance%/
-         Renewable_MW(devices)                   "Installed renewable capacity (MW)"                             /1 %Renewable_MW_instance%, 2 %Renewable_MW_instance%/
+         NG_price_adj                            "Average price of natural gas ($/MMBTU)"                        /%NG_price_adj_instance%/
+         Renewable_MW(devices_ren)               "Installed renewable capacity (MW)"                             /1 %Renewable_MW_instance%, 2 %Renewable_MW_instance%, 3 %Renewable_MW_instance%/
 ;
 
 * Adjust the files that are loaded
@@ -355,18 +354,18 @@ parameter input_power_baseload(interval)   "Profile of baseload consumption"
 $GDXIN %indir%\%baseload_pwr_instance%.gdx
 $LOAD input_power_baseload
 $GDXIN
-$call CSV2GDX %indir%\%NG_price_instance%.csv Output=%indir%\%NG_price_instance%.gdx ID=NG_price UseHeader=y Index=1 Values=(2..LastCol)
-parameter NG_price(interval,devices)   "Natural gas price in each interval ($/MMBtu)"
+$call CSV2GDX %indir%\%NG_price_instance%.csv Output=%indir%\%NG_price_instance%.gdx ID=NG_price UseHeader=y Index=1 Values=2
+parameter NG_price(interval)   "Natural gas price in each interval ($/MMBtu)"
 $GDXIN %indir%\%NG_price_instance%.gdx
 $LOAD NG_price
 $GDXIN
-$call CSV2GDX %indir%\%load_prof_instance%.csv Output=%indir%\%load_prof_instance%.gdx ID=Load_profile UseHeader=y Index=1 Values=(2..LastCol)
-parameter Load_profile(interval,devices)   "additional load profiles (MW)"
+$call CSV2GDX %indir%\%load_prof_instance%.csv Output=%indir%\%load_prof_instance%.gdx ID=Load_profile UseHeader=y Index=1 Values=2
+parameter Load_profile(interval)   "additional load profiles (MW)"
 $GDXIN %indir%\%load_prof_instance%.gdx
 $LOAD Load_profile
 $GDXIN
 $call CSV2GDX %indir%\%ren_prof_instance%.csv Output=%indir%\%ren_prof_instance%.gdx ID=renewable_signal UseHeader=y Index=1 Values=(2..LastCol)
-parameter renewable_signal(interval,devices)   "normalized renewable production profiles (MW)"
+parameter renewable_signal(interval,devices_ren)   "normalized renewable production profiles (MW)"
 $GDXIN %indir%\%ren_prof_instance%.gdx
 $LOAD renewable_signal
 $GDXIN
@@ -472,14 +471,16 @@ elec_sale_price(interval) = (price_cap+elec_sale_price(interval)-ABS(elec_sale_p
 elec_sale_price_forecast(interval) = elec_sale_price(interval);
 
 * Scale renewable signal to desired installed capacity level
-Renewable_power(interval,devices) = renewable_signal(interval,devices) * Renewable_MW(devices);
+Renewable_power(interval,devices_ren) = renewable_signal(interval,devices_ren) * Renewable_MW(devices_ren);
 
 * Adjust the lifetime if it is equal to zero and zero the cost components (i.e., raising to the power of 0 throws an error)
 loop(devices,
-         if (output_lifetime(devices)=0, output_lifetime(devices)=1; output_cap_cost(devices)=0; output_FOM_cost(devices)=0; output_VOM_cost(devices)=0; interest_rate(devices)=0.01;);
-         if ( input_lifetime(devices)=0,  input_lifetime(devices)=1;  input_cap_cost(devices)=0;  input_FOM_cost(devices)=0;  input_VOM_cost(devices)=0; interest_rate(devices)=0.01;);
-         if ( renew_lifetime(devices)=0,  renew_lifetime(devices)=1;  renew_cap_cost(devices)=0;  renew_FOM_cost(devices)=0;  renew_VOM_cost(devices)=0; renew_interest_rate(devices)=0.01;);
-         if (H2stor_lifetime(devices)=0, H2stor_lifetime(devices)=1; H2stor_cap_cost(devices)=0; H2stor_interest_rate(devices)=0.01;);
+         if (output_lifetime(devices)=0,     output_lifetime(devices)=1;    output_cap_cost(devices)=0;    output_FOM_cost(devices)=0;    output_VOM_cost(devices)=0;    interest_rate(devices)=0.01;);
+         if ( input_lifetime(devices)=0,     input_lifetime(devices)=1;     input_cap_cost(devices)=0;     input_FOM_cost(devices)=0;     input_VOM_cost(devices)=0;     interest_rate(devices)=0.01;);
+         if (H2stor_lifetime(devices)=0,     H2stor_lifetime(devices)=1;    H2stor_cap_cost(devices)=0;                                                                  H2stor_interest_rate(devices)=0.01;);
+);
+loop(devices_ren,
+         if ( renew_lifetime(devices_ren)=0, renew_lifetime(devices_ren)=1; renew_cap_cost(devices_ren)=0; renew_FOM_cost(devices_ren)=0; renew_VOM_cost(devices_ren)=0; renew_interest_rate(devices_ren)=0.01;);
 );
 
 *check to make sure operating period length is not longer than the number of intervals in the input file
@@ -545,9 +546,9 @@ Positive Variables
          input_regdn_MW(interval,devices)        input capacity committed for regulation down ancillary service (MW)
          input_spinres_MW(interval,devices)      input capacity committed for spinning reserve ancillary service (MW)
          input_nonspinres_MW(interval,devices)   input capacity committed for nonspinning reserve ancillary service (MW)
-         input_power_MW_ren(interval,devices)    actual amount of renewable generation used (MWh)
-         input_power_MW_non_ren(interval,devices) actual amount of non renewable generation used (MWh)
-         output_power_MW_ren(interval,devices)   actual amount of renewable generation sold (MWh)
+         input_power_MW_ren(interval,devices_ren)  actual amount of renewable generation used (MWh)
+         input_power_MW_non_ren(interval,devices)  actual amount of non renewable generation used (MWh)
+         output_power_MW_ren(interval,devices_ren) actual amount of renewable generation sold (MWh)
 
          storage_level_MWh(interval,devices) amount of energy stored at the end of each interval (MWh)
 
@@ -595,9 +596,9 @@ Equations
          input_pwr_eqn(interval,devices)                 equation that defines the input power for baseload operation
          input_LSL_eqn(interval,devices)                 equation that limits the lower sustainable limit for the input of the facility
          input_capacity_limit_eqn(interval,devices)      equation that limits the upper limit for the input of the facility
-         input_capacity_limit_eqn2(interval,devices)     equation that limits the upper limit for the input of the facility
+         input_capacity_limit_eqn2(interval)             equation that limits the upper limit for the input of the facility
          input_capacity_limit_eqn3(interval,devices)     equation that limits the upper limit for the input of the facility
-         input_ren_contribution(interval,devices)        equation that sets the amount of renewable gen consumed
+         input_ren_contribution(interval,devices_ren)    equation that sets the amount of renewable gen consumed
          input_regup_limit_eqn(interval,devices)         equation that limits the amount of regulation up the input side of the facilty can offer
          input_regdn_limit_eqn(interval,devices)         equation that limits the amount of regulation down the input side of the facilty can offer
          input_spinres_limit_eqn(interval,devices)       equation that limits the amount of spinning reserve the input side of the facilty can offer
@@ -731,12 +732,12 @@ Equations
          output_ramp_eqn(interval,devices)       equation to limit ramping with penalty price
          input_ramp_eqn(interval,devices)        equation to limit ramping with penalty price
 
-         system_power_eqn(interval,devices)      "sets the maximum system power level (e.g., inverter size for solar+storage)"
+         system_power_eqn(interval)              "sets the maximum system power level (e.g., inverter size for solar+storage)"
          one_active_device_eqn(interval,devices) equation to ensure that both generator and pump cannot be simultaneously active
 ;
 
 * Adjusts the price of natural gas to the selected value "NG_price_adj"
-NG_price(interval,devices) = NG_price(interval,devices) * NG_price_adj(devices);
+NG_price(interval) = NG_price(interval) * NG_price_adj;
 
 * Check to see if H2 will be exported for this analysis (i.e., H2 = 1 or 2)
 loop(devices,
@@ -763,22 +764,22 @@ H2_CF_eqn3$(CF_opt=0).. Hydrogen_fraction =e= 1;
 *** Cost function: Elec sale price, elec purchase price, regup, regdown, spin, nonspin, NGout/in, unused VOM cost, startup cost, H2 price, VOM cost, demand charge (fixed and timed), meter cost, cap and FOM cost, etc.
 operating_profit_eqn..
          operating_profit =e= sum( (interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ),
-                   (elec_sale_price_forecast(interval) * (sum(devices,output_power_MW(interval,devices)+output_power_MW_ren(interval,devices))) * interval_length)
-                 + REC_price * sum(devices,output_power_MW_ren(interval,devices)) * interval_length
+                   (elec_sale_price_forecast(interval) * (sum(devices,output_power_MW(interval,devices))+sum(devices_ren,output_power_MW_ren(interval,devices_ren))) * interval_length)
+                 + REC_price * sum(devices_ren,output_power_MW_ren(interval,devices_ren)) * interval_length
                  - (elec_purchase_price_forecast(interval) * sum(devices,input_power_MW_non_ren(interval,devices)) * interval_length)
                  + ( regup_price(interval) - reg_cost ) * ( sum(devices,output_regup_MW(interval,devices) + input_regup_MW(interval,devices)) ) * interval_length
                  + ( regdn_price(interval) - reg_cost ) * ( sum(devices,output_regdn_MW(interval,devices) + input_regdn_MW(interval,devices)) ) * interval_length
                  + spinres_price(interval) * ( sum(devices,output_spinres_MW(interval,devices) + input_spinres_MW(interval,devices)) ) * interval_length
                  + nonspinres_price(interval) * ( sum(devices,output_nonspinres_MW(interval,devices) + input_nonspinres_MW(interval,devices)) ) * interval_length
-                 - sum(devices,output_heat_rate(devices) * NG_price(interval,devices) * output_power_MW(interval,devices)) * interval_length
-                 - sum(devices,input_heat_rate(devices) * NG_price(interval,devices) * input_power_MW(interval,devices)) * interval_length
+                 - sum(devices,output_heat_rate(devices) * NG_price(interval) * output_power_MW(interval,devices)) * interval_length
+                 - sum(devices,input_heat_rate(devices) * NG_price(interval) * input_power_MW(interval,devices)) * interval_length
                  - VOM_cost * sum(devices,output_power_MW(interval,devices)) * interval_length
                  - sum(devices,output_startup_cost(devices) * output_capacity_MW(devices) * output_start(interval,devices))
                  - sum(devices,input_startup_cost(devices) * input_capacity_MW(devices)*input_start(interval,devices))
                  + sum(devices,H2_price(interval,devices) * H2_sold(interval,devices))
                  + sum(devices,(CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency(devices))*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold(interval,devices))
                  + sum(devices,Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * input_power_MW_ren(interval,devices) * interval_length / H2_LHV)
-                 - sum(devices,renew_VOM_cost(devices) * Renewable_power(interval,devices))* interval_length
+                 - sum(devices_ren,renew_VOM_cost(devices_ren) * Renewable_power(interval,devices_ren))* interval_length
                  - sum(devices,input_VOM_cost(devices) * input_power_MW(interval,devices)) * interval_length
                  - sum(devices,output_VOM_cost(devices)* output_power_MW(interval,devices))* interval_length
                  - sum(devices,(input_ramp_pos(interval,devices)+input_ramp_neg(interval,devices))*ramp_penalty)
@@ -791,14 +792,14 @@ operating_profit_eqn..
                  - sum(months, sum(devices,cap_5(months,devices)) * Timed_dem("5"))
                  - sum(months, sum(devices,cap_6(months,devices)) * Timed_dem("6"))
                  - meter_mnth_chg("1") * 12
-                 - sum(devices,(renew_cap_cost(devices)+renew_FOM_cost(devices)*input_lifetime(devices)) * Renewable_MW(devices) * (renew_interest_rate(devices)+(renew_interest_rate(devices)/(power((1+renew_interest_rate(devices)),renew_lifetime(devices))-1))))
+                 - sum(devices_ren,(renew_cap_cost(devices_ren)+renew_FOM_cost(devices_ren)*renew_lifetime(devices_ren)) * Renewable_MW(devices_ren) * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1))))
                  - sum(devices,(input_cap_cost(devices)+input_FOM_cost(devices)*input_lifetime(devices)) * input_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1))))
                  - sum(devices,(output_cap_cost(devices)+output_FOM_cost(devices)*output_lifetime(devices)) * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1))))
                  - sum(devices,H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours(devices)* (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1))))
                  ;
-
-system_power_eqn(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
-         output_power_MW(interval,devices) + output_power_MW_ren(interval,devices) =l= max_sys_output_cap;
+**** Fix this
+system_power_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+         sum(devices, output_power_MW(interval,devices)) + sum(devices_ren, output_power_MW_ren(interval,devices_ren)) =l= max_sys_output_cap;
 
 output_LSL_eqn(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          output_power_MW(interval,devices) - output_regdn_MW(interval,devices) =g= output_LSL_fraction(devices) * output_capacity_MW(devices) * output_active(interval,devices);
@@ -943,16 +944,16 @@ Nov_6_eqn(Nov_6,devices)$( rolling_window_min_index <= ord(Nov_6) and ord(Nov_6)
 Dec_6_eqn(Dec_6,devices)$( rolling_window_min_index <= ord(Dec_6) and ord(Dec_6) <= rolling_window_max_index ).. input_power_MW_non_ren(Dec_6,devices) =l= Cap_6("12",devices);
 *************************
 
-input_capacity_limit_eqn2(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
-         input_power_MW_ren(interval,devices)-Load_profile(interval,devices)+input_power_MW_non_ren(interval,devices) =e= input_power_MW(interval,devices);
+input_capacity_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+         sum(devices_ren, input_power_MW_ren(interval,devices_ren))+sum(devices, input_power_MW_non_ren(interval,devices)-input_power_MW(interval,devices)) =e= Load_profile(interval);
 *         input_power_MW_ren(interval)-Load_profile(interval)+input_power_MW_non_ren(interval)-output_power_MW_ren(interval) =e= input_power_MW(interval);
 *         input_power_MW_ren(interval)-Load_profile(interval)+input_power_MW_non_ren(interval) =e= input_power_MW(interval);
 
 input_capacity_limit_eqn3(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and allow_import=0)..
          input_power_MW_non_ren(interval,devices) =e= 0;
 
-input_ren_contribution(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
-         input_power_MW_ren(interval,devices) + output_power_MW_ren(interval,devices) =l= Renewable_power(interval,devices);
+input_ren_contribution(interval,devices_ren)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+         input_power_MW_ren(interval,devices_ren) + output_power_MW_ren(interval,devices_ren) =l= Renewable_power(interval,devices_ren);
 *         input_power_MW_ren(interval) =l= Renewable_power(interval);
 
 input_regup_limit_eqn(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
@@ -1107,7 +1108,7 @@ output_start.l(interval,devices)         = 0;
 input_start.l(interval,devices)          = 1;
 H2_sold.l(interval,devices)              = 0;
 H2_sold_daily.l(days,devices)            = 0;
-output_power_MW_ren.l(interval,devices)  = 0;
+output_power_MW_ren.l(interval,devices_ren)= 0;
 loop(devices,
     if(H2_use(devices) = 2,
          H2_sold_daily.l(days,devices)   = 24;
@@ -1145,7 +1146,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
          input_start.fx(interval,devices)          = input_start.l(interval,devices)      ;
          H2_sold.fx(interval,devices)              = H2_sold.l(interval,devices)          ;
          H2_sold_daily.fx(days,devices)            = H2_sold_daily.l(days,devices)        ;
-         output_power_MW_ren.fx(interval,devices)  = output_power_MW_ren.l(interval,devices);
+         output_power_MW_ren.fx(interval,devices_ren)= output_power_MW_ren.l(interval,devices_ren);
 
 *        calculate the min and max indices for the rolling window
          operating_period_min_index = ( solve_index-1 ) * operating_period_length + 1;
@@ -1171,7 +1172,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
          input_start.lo(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )          = 0;
          H2_sold.lo(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )              = 0;
          H2_sold_daily.lo(days,devices)$(H2_use(devices)=2)                                                                                    = 0;
-         output_power_MW_ren.lo(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )  = 0;
+         output_power_MW_ren.lo(interval,devices_ren)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)= 0;
 
          output_power_MW.up(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      =  inf;
          output_regup_MW.up(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      =  inf;
@@ -1191,7 +1192,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
 
          H2_sold.up(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )              = inf;
          H2_sold_daily.up(days,devices)$(H2_use(devices)=2)                                                                                    = inf;
-         output_power_MW_ren.up(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )  = inf;
+         output_power_MW_ren.up(interval,devices_ren)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)= inf;
 
 
          Solve arbitrage_and_AS using MIP maximizing operating_profit;
@@ -1306,8 +1307,6 @@ Parameters
          LCFS_revenue_vec(devices)             LCSF revenue ($)
          startup_costs_vec(devices)            cost due to startups
          actual_operating_profit_vec(devices)  actual operating profits (dollars)
-         Renewable_pen_input_vec(devices)      renewable penetration of input device (%)
-         Renewable_pen_input_net_vec(devices)  renewable penetration of input device for net metering (%)
 
          Fixed_dem_charge_cost_vec(devices)    Yearly Fixed demand charge cost
          Timed_dem_1_cost_vec(devices)         Yearly Timed demand charge cost
@@ -1320,24 +1319,24 @@ Parameters
          renew_cap_cost2_vec(devices)          Annualized capital cost
          input_cap_cost2_vec(devices)          Annualized capital cost
          output_cap_cost2_vec(devices)         Annualized capital cost
-         renew_FOM_cost2_vec(devices)          Annualized FOM cost
+         renew_FOM_cost2_vec(devices_ren)      Annualized FOM cost
          input_FOM_cost2_vec(devices)          Annualized FOM cost
          output_FOM_cost2_vec(devices)         Annualized FOM cost
-         renew_VOM_cost2_vec(devices)          Annualized VOM cost
+         renew_VOM_cost2_vec(devices_ren)      Annualized VOM cost
          input_VOM_cost2_vec(devices)          Annualized VOM cost
          output_VOM_cost2_vec(devices)         Annualized VOM cost
          H2stor_cap_cost2_vec(devices)         Annualized hydrogen storage cost
-         renewable_sales_vec(devices)          Revenue from renewables sales ($)
+         renewable_sales_vec(devices_ren)      Revenue from renewables sales ($)
          curtailment_sum_vec(devices)          Sum of curtailment over the region
 
          Storage_revenue_vec(devices)          Track the storage revenue from the storage only (no renewable charging) ($)
          Renewable_only_revenue_vec(devices)   Track the revenue portion from renewables ($)
-         Renewable_max_revenue_vec(devices)    Calculate the maximum revenue from renewables without any storage installed ($)
-         Renewable_electricity_in_vec(devices) Calculate the amount of renewable electricity coming in for sale and storage (MWh)
+         Renewable_max_revenue_vec(devices_ren)    Calculate the maximum revenue from renewables without any storage installed ($)
+         Renewable_electricity_in_vec(devices_ren) Calculate the amount of renewable electricity coming in for sale and storage (MWh)
          Electricity_import_vec(devices)       Calculate the amount of imported electricity (MWh)
 
          curtailment(interval)                 calculate renewable curtialment (MW)
-         curtailment_vec(interval,devices)     calculate renewable curtialment (MW)
+         curtailment_vec(interval,devices_ren) calculate renewable curtialment (MW)
 ;
 
 * calculate values to be output in the report
@@ -1350,10 +1349,11 @@ Timed_dem_5_cost_vec(devices) = -sum(months, cap_5.l(months,devices) * Timed_dem
 Timed_dem_6_cost_vec(devices) = -sum(months, cap_6.l(months,devices) * Timed_dem("6"));
 Meter_cost = -(meter_mnth_chg("1") * 12);
 
-curtailment_vec(interval,devices) =  Renewable_power(interval,devices) - input_power_MW_ren.l(interval,devices) - output_power_MW_ren.l(interval,devices);
-curtailment_sum_vec(devices) = sum(interval, curtailment_vec(interval,devices) * interval_length );
 
-elec_in_MWh_vec(devices)     = sum(interval, (input_power_MW.l(interval,devices) + Load_profile(interval,devices)) * interval_length );
+* curtailment_vec(interval,devices_ren) =  Renewable_power(interval,devices_ren) - input_power_MW_ren.l(interval,devices) - output_power_MW_ren.l(interval,devices);
+* curtailment_sum_vec(devices) = sum(interval, curtailment_vec(interval,devices) * interval_length );
+
+elec_in_MWh_vec(devices)     = sum(interval, (input_power_MW.l(interval,devices) + Load_profile(interval)) * interval_length );
 elec_output_MWh_vec(devices) = sum(interval, output_power_MW.l(interval,devices) * interval_length );
 
 loop(devices,
@@ -1382,31 +1382,32 @@ avg_nonspinres_MW_vec(devices) = sum(interval, output_nonspinres_MW.l(interval,d
 num_input_starts_vec(devices) = sum(interval, input_start.l(interval,devices) );
 num_output_starts_vec(devices) = sum(interval, output_start.l(interval,devices) );
 
-fuel_cost_vec(devices) = sum(interval,- output_heat_rate(devices) * NG_price(interval,devices) * output_power_MW.l(interval,devices) * interval_length
-                         - input_heat_rate(devices) * NG_price(interval,devices) * input_power_MW.l(interval,devices) * interval_length);
-elec_cost_vec(devices) = sum(interval,((elec_sale_price(interval) * (output_power_MW.l(interval,devices)+output_power_MW_ren.l(interval,devices))) - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval,devices))) * interval_length);
+fuel_cost_vec(devices) = sum(interval,- output_heat_rate(devices) * NG_price(interval) * output_power_MW.l(interval,devices) * interval_length
+                         - input_heat_rate(devices) * NG_price(interval) * input_power_MW.l(interval,devices) * interval_length);
+***** fix below repeatinng ren cost
+elec_cost_vec(devices) = sum(interval,((elec_sale_price(interval) * (output_power_MW.l(interval,devices)+sum(devices_ren, output_power_MW_ren.l(interval,devices_ren)))) - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval,devices))) * interval_length);
 VOM_cost_val_vec(devices) = sum(interval,- VOM_cost * output_power_MW.l(interval,devices) * interval_length);
 arbitrage_revenue_vec(devices) = sum(interval,
                         ((elec_sale_price(interval) * (output_power_MW.l(interval,devices)))
                         - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval,devices))) * interval_length
-                        - output_heat_rate(devices) * NG_price(interval,devices) * output_power_MW.l(interval,devices) * interval_length
-                        - input_heat_rate(devices) * NG_price(interval,devices) * input_power_MW.l(interval,devices) * interval_length
+                        - output_heat_rate(devices) * NG_price(interval) * output_power_MW.l(interval,devices) * interval_length
+                        - input_heat_rate(devices) * NG_price(interval) * input_power_MW.l(interval,devices) * interval_length
                         - VOM_cost * output_power_MW.l(interval,devices) * interval_length
                         );
-renewable_sales_vec(devices) = sum(interval, elec_sale_price(interval) * output_power_MW_ren.l(interval,devices) * interval_length );
+renewable_sales_vec(devices_ren) = sum(interval, elec_sale_price(interval) * output_power_MW_ren.l(interval,devices_ren) * interval_length );
 REC_revenue_vec(devices)  = sum(interval, REC_price * output_power_MW_ren.l(interval,devices) * interval_length );
 LCFS_revenue_vec(devices) = sum(interval, (CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency(devices))*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold.l(interval,devices)
-                           + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * input_power_MW_ren.l(interval,devices) * interval_length / H2_LHV );
+                           + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * input_power_MW_ren.l(interval,devices_ren) * interval_length / H2_LHV );
 
 Display input_cap_cost, input_capacity_MW, interest_rate, input_lifetime;
-renew_cap_cost2_vec(devices)  = -renew_cap_cost(devices)  * Renewable_MW(devices)       * (renew_interest_rate(devices)+(renew_interest_rate(devices)/(power((1+renew_interest_rate(devices)),renew_lifetime(devices))-1)));
+renew_cap_cost2_vec(devices_ren)  = -renew_cap_cost(devices_ren)  * Renewable_MW(devices_ren)       * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1)));
 input_cap_cost2_vec(devices)  = -input_cap_cost(devices)  * input_capacity_MW(devices)  * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1)));
 output_cap_cost2_vec(devices) = -output_cap_cost(devices) * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1)));
 H2stor_cap_cost2_vec(devices) = -H2stor_cap_cost(devices) * input_capacity_MW(devices)  * (input_efficiency(devices) / H2_LHV ) * (H2_consumed_adj(devices) * (1-CF_opt) + CF_opt * Hydrogen_fraction.l) * storage_capacity_hours(devices) * (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1)));
-renew_FOM_cost2_vec(devices)  = -renew_FOM_cost(devices)  * Renewable_MW(devices)       * (renew_interest_rate(devices)+(renew_interest_rate(devices)/(power((1+renew_interest_rate(devices)),renew_lifetime(devices))-1)));
+renew_FOM_cost2_vec(devices_ren)  = -renew_FOM_cost(devices_ren)  * Renewable_MW(devices_ren)       * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1)));
 input_FOM_cost2_vec(devices)  = -input_FOM_cost(devices)  * input_capacity_MW(devices)  * input_lifetime(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1)));
 output_FOM_cost2_vec(devices) = -output_FOM_cost(devices) * output_capacity_MW(devices) * output_lifetime(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1)));
-renew_VOM_cost2_vec(devices)  = renew_VOM_cost(devices)   * sum(interval, (renewable_signal(interval,devices) * Renewable_MW(devices)));
+renew_VOM_cost2_vec(devices_ren)  = renew_VOM_cost(devices_ren)   * sum(interval, (renewable_signal(interval,devices_ren) * Renewable_MW(devices_ren)));
 input_VOM_cost2_vec(devices)  = -elec_in_MWh_vec(devices)    * input_VOM_cost(devices);
 output_VOM_cost2_vec(devices) = -elec_output_MWh_vec(devices)* output_VOM_cost(devices);
 
@@ -1416,32 +1417,32 @@ spinres_revenue_vec(devices)    = sum(interval, spinres_price(interval) * ( outp
 nonspinres_revenue_vec(devices) = sum(interval, nonspinres_price(interval) * ( output_nonspinres_MW.l(interval,devices) + input_nonspinres_MW.l(interval,devices) ) * interval_length );
 startup_costs_vec(devices)      = sum(interval, -(output_startup_cost(devices) * output_capacity_MW(devices) * output_start.l(interval,devices) + input_startup_cost(devices) * input_capacity_MW(devices) * input_start.l(interval,devices)) );
 H2_revenue_vec(devices)         = sum(interval, H2_price(interval,devices) * H2_sold.l(interval,devices));
+***** Fix this repeat renewable cost Fix RECs
 actual_operating_profit_vec(devices) = arbitrage_revenue_vec(devices) + regup_revenue_vec(devices) + regdn_revenue_vec(devices) + spinres_revenue_vec(devices) + nonspinres_revenue_vec(devices) + H2_revenue_vec(devices) - startup_costs_vec(devices)
                         + Fixed_dem_charge_cost_vec(devices) + Timed_dem_1_cost_vec(devices) + Timed_dem_2_cost_vec(devices) + Timed_dem_3_cost_vec(devices) + Timed_dem_4_cost_vec(devices) + Timed_dem_5_cost_vec(devices) + Timed_dem_6_cost_vec(devices) + Meter_cost
-                        + input_cap_cost2_vec(devices) + output_cap_cost2_vec(devices) + input_FOM_cost2_vec(devices) + output_FOM_cost2_vec(devices) + input_VOM_cost2_vec(devices) + output_VOM_cost2_vec(devices) + renewable_sales_vec(devices)
+                        + input_cap_cost2_vec(devices) + output_cap_cost2_vec(devices) + input_FOM_cost2_vec(devices) + output_FOM_cost2_vec(devices) + input_VOM_cost2_vec(devices) + output_VOM_cost2_vec(devices) + sum(devices_ren, renewable_sales_vec(devices_ren))
                         + renew_cap_cost2_vec(devices) + renew_FOM_cost2_vec(devices) + renew_VOM_cost2_vec(devices) + H2stor_cap_cost2_vec(devices) + REC_revenue_vec(devices) + LCFS_revenue_vec(devices);
 
 Hydrogen_fraction_val = Hydrogen_fraction.l*100;
 
-loop(devices,
-    if ( sum(interval,input_power_MW.l(interval,devices))=0,
-         Renewable_pen_input_vec(devices) = 0;
-         Renewable_pen_input_net_vec(devices) = 0;
-    else
-         Renewable_pen_input_vec(devices) = sum(interval,input_power_MW_ren.l(interval,devices) )/sum(interval,input_power_MW.l(interval,devices));
-         Renewable_pen_input_net_vec(devices) = sum(interval,Renewable_power(interval,devices) )/sum(interval,input_power_MW.l(interval,devices));
-    );
-    if (Renewable_pen_input_net_vec(devices)>1,
-         Renewable_pen_input_net_vec(devices)=1;
-    );
+if ( sum((interval,devices),input_power_MW.l(interval,devices))=0,
+         Renewable_pen_input = 0;
+         Renewable_pen_input = 0;
+else
+         Renewable_pen_input = sum((interval,devices_ren),input_power_MW_ren.l(interval,devices_ren) )/sum((interval,devices),input_power_MW.l(interval,devices));
+         Renewable_pen_input_net = sum((interval,devices_ren),Renewable_power(interval,devices_ren) )/sum((interval,devices),input_power_MW.l(interval,devices));
+);
+if (Renewable_pen_input_net>1,
+         Renewable_pen_input_net=1;
 );
 
 Storage_revenue_vec(devices)          = sum(interval,(output_power_MW.l(interval,devices) - input_power_MW.l(interval,devices))*elec_sale_price(interval));
-Renewable_only_revenue_vec(devices)   = sum(interval,(input_power_MW.l(interval,devices) - input_power_MW_non_ren.l(interval,devices)+output_power_MW_ren.l(interval,devices)) * elec_sale_price(interval));
+***** Fix this repeat renewable value
+Renewable_only_revenue_vec(devices)   = sum(interval,(input_power_MW.l(interval,devices) - input_power_MW_non_ren.l(interval,devices))+sum(devices_ren, output_power_MW_ren.l(interval,devices_ren))) * elec_sale_price(interval));
 *JOSH
 *    FIX this with max_sys_output_cap
-Renewable_max_revenue_vec(devices)    = sum(interval,(renewable_signal(interval,devices) - (abs(renewable_signal(interval,devices)-max_sys_output_cap)-max_sys_output_cap))/2 * elec_sale_price(interval)) * Renewable_MW(devices);
-Renewable_electricity_in_vec(devices) = sum(interval,input_power_MW_ren.l(interval,devices) + output_power_MW_ren.l(interval,devices));
+Renewable_max_revenue_vec(devices_ren)    = sum(interval,(renewable_signal(interval,devices_ren) - (abs(renewable_signal(interval,devices_ren)-max_sys_output_cap)-max_sys_output_cap))/2 * elec_sale_price(interval)) * Renewable_MW(devices_ren);
+Renewable_electricity_in_vec(devices_ren) = sum(interval,input_power_MW_ren.l(interval,devices_ren) + output_power_MW_ren.l(interval,devices_ren));
 Electricity_import_vec(devices)       = sum(interval,input_power_MW_non_ren.l(interval,devices));
 
 if (1=1,
