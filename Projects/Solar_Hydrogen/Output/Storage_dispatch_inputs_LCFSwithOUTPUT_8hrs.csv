@@ -1,4 +1,4 @@
-Run on a MSNT machine on 07/02/18 14:09:06.
+Run on a MSNT machine on 07/06/18 02:29:36.
 Optimal solution found within time limit:,Yes
 
 zone, NA
@@ -6,11 +6,11 @@ year, NA
 interval length (hours),         1.00
 operating period length (hours),      8760.00
 additional look-ahead (hours),         0.00
-output capacity (MW),         0.00
+output capacity (MW),       100.00
 input capacity (MW),       100.00
 storage capacity (hours),         8.00
 input efficiency (%),         0.61
-output efficiency (%),         1.00
+output efficiency (%),         0.90
 input heat rate (MMBtu/MWh),         0.00
 ouptut heat rate (MMBtu/MWh),         0.00
 variable O&M cost,         0.00

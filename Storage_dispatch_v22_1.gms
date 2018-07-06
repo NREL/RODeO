@@ -49,7 +49,7 @@ $if not set price_cap_instance     $set price_cap_instance     10000
 * which constraints the maximum system output (left "Apply_..." values for future work)
 $if not set Apply_input_cap_inst   $set Apply_input_cap_inst   0
 $if not set Apply_output_cap_inst  $set Apply_output_cap_inst  0
-$if not set max_output_cap_inst    $set max_output_cap_inst    inf
+$if not set max_output_cap_inst    $set max_output_cap_inst    Inf
 $if not set allow_import_instance  $set allow_import_instance  1
 
 $if not set input_LSL_instance     $set input_LSL_instance     0
@@ -57,7 +57,7 @@ $if not set output_LSL_instance    $set output_LSL_instance    0
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0
 $if not set Output_start_cost_inst $set Output_start_cost_inst 0
 $if not set input_efficiency_inst  $set input_efficiency_inst  0.613668913
-$if not set output_efficiency_inst $set output_efficiency_inst 1
+$if not set output_efficiency_inst $set output_efficiency_inst 0.4
 
 $if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1343000
 $if not set input_cap_cost_inst    $set input_cap_cost_inst    1691000
@@ -467,6 +467,8 @@ Positive Variables
          output_regdn_MW(interval)       output capacity committed for regulation down ancillary service (MW)
          output_spinres_MW(interval)     output capacity committed for spinning reserve ancillary service (MW)
          output_nonspinres_MW(interval)  output capacity committed for nonspinning reserve ancillary service (MW)
+         output_power_MW_ren2(interval)  renewable output power actually supplying power to the grid (MW)
+         output_power_MW_non_ren(interval) non-renewable output power actually supplying power to the grid (MW)
 
          input_power_MW(interval)        input capacity actually buying power from the grid (MW)
          input_regup_MW(interval)        input capacity committed for regulation up ancillary service (MW)
@@ -477,11 +479,13 @@ Positive Variables
          input_power_MW_non_ren(interval) actual amount of non renewable generation used (MWh)
          output_power_MW_ren(interval)    actual amount of renewable generation sold (MWh)
 
-         storage_level_MWh(interval) amount of energy stored at the end of each interval (MWh)
+         storage_level_MWh(interval)     amount of energy stored at the end of each interval (MWh)
+         storage_level_MWh_ren(interval) amount of renewable energy stored at the end of each interval (MWh)
 
-         H2_sold(interval)       Determines how much hydrogen is sold
-         H2_sold_ren(interval)   Determines how much renewable hydrogen is sold
-         H2_sold_daily(days)     Represents how much hydrogen is sold each day
+         H2_sold(interval)               Determines how much hydrogen is sold
+         H2_sold_non_ren(interval)       Determines how much non-renewable hydrogen is sold
+         H2_sold_ren(interval)           Determines how much renewable hydrogen is sold
+         H2_sold_daily(days)             Represents how much hydrogen is sold each day
 
          Fixed_cap(months)       Sets peak capacity for the fixed demand charges (MW)
          cap_1(months)           Sets max capacity for the month (MW)
@@ -492,8 +496,6 @@ Positive Variables
          cap_6(months)           Sets max capacity for the month (MW)
 
          Hydrogen_fraction       Sets the capacity factor
-*JOSH
-         Renewable_split         Selects portion of renewable energy between product sale (H2) and sent to output device
 
          input_ramp_pos(interval)  Positive ramp rate constraint (used to linearize absolute value)
          input_ramp_neg(interval)  Negative ramp rate constraint (used to linearize absolute value)
@@ -516,6 +518,7 @@ Variables
 Equations
          operating_profit_eqn equation that sums the operating profits for the storage facility
 
+         output_pwr_eqn2(interval) equation that defines the relationship between renewable and non-renewable output power
          output_LSL_eqn(interval) equation that limits the lower sustainable limit for the output of the facility
          output_capacity_limit_eqn(interval) equation that limits the upper limit for the output of the facility
          output_regup_limit_eqn(interval) equation that limits the amount of regulation up the output side of the facilty can offer
@@ -524,6 +527,7 @@ Equations
          output_nonspinres_limit_eqn(interval) equation that limits the amount of nonspinning reserve the output side of the facility can offer
 
          input_pwr_eqn(interval) equation that defines the input power for baseload operation
+         input_pwr_eqn2(interval) equation that defines the relationship between renewable and non-renewable input power
          input_LSL_eqn(interval) equation that limits the lower sustainable limit for the input of the facility
          input_capacity_limit_eqn(interval) equation that limits the upper limit for the input of the facility
          input_capacity_limit_eqn2(interval) equation that limits the upper limit for the input of the facility
@@ -538,6 +542,7 @@ Equations
          storage_level_accounting_final_eqn(interval) equation that sets the final storage level as the same as the initial
          storage_level_accounting_eqn(interval) equation that keeps track of how much energy is in storage on an output power basis for storage or pump technologies (MWh)
          storage_level_accounting_eqn2(interval) equation that keeps track of how much energy is in storage on an output power basis for generation only technologies (MWh)
+         storage_level_accounting_eqn3(interval) equation that keeps track of the renewable content in the storage tank (MWh)
          storage_level_limit_eqn(interval) equation that limits the storage level to the maximum capacity of the storage facility including ancillary services (MWh)
          storage_level_limit_eqn2(interval) equation that limits the storage level to the maximum capacity of the storage facility including ancillary services (MWh)
          storage_level_limit_eqn3(interval) equation that limits the storage level to the maximum capacity of the storage facility including ancillary services (MWh)
@@ -548,7 +553,6 @@ Equations
          H2_output_limit_eqn(days) equation that calculates the daily H2 consumed from the hourly production vector
          H2_output_limit_eqn2(days) equation that limits the maximum hydrogen production per day
          H2_output_limit_eqn3(interval) equation that ensures the H2_sold = H2_consumed
-*JOSH
          H2_renewable_eqn(interval)   equation to determine how much of the hydrogen sold is renewable
 
          output_min_on_eqn1(interval) equation that requires that if the output unit turns off during the first few intervals of the year it must stay on for all of the previous intervals
@@ -692,7 +696,7 @@ H2_CF_eqn3$(CF_opt=0).. Hydrogen_fraction =e= 1;
 operating_profit_eqn..
          operating_profit =e= sum( (interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ),
                    (elec_sale_price_forecast(interval) * (output_power_MW(interval)+output_power_MW_ren(interval)) * interval_length)
-                 + REC_price * output_power_MW_ren(interval) * interval_length
+                 + REC_price * (output_power_MW_ren(interval) + output_power_MW_ren2(interval)) * interval_length
                  - (elec_purchase_price_forecast(interval) * input_power_MW_non_ren(interval) * interval_length)
                  + ( regup_price(interval) - reg_cost ) * ( output_regup_MW(interval) + input_regup_MW(interval) ) * interval_length
                  + ( regdn_price(interval) - reg_cost ) * ( output_regdn_MW(interval) + input_regdn_MW(interval) ) * interval_length
@@ -704,12 +708,8 @@ operating_profit_eqn..
                  - output_startup_cost * output_capacity_MW * output_start(interval)
                  - input_startup_cost  * input_capacity_MW  * input_start(interval)
                  + H2_price(interval) * H2_sold(interval)
-*JOSH
                  + (CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency)*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold(interval)
-                 + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * input_power_MW_ren(interval) * interval_length / H2_LHV
-*                H2_sold_ren(interval)
-*                 + (CI_base_line*H2_Gas_ratio-(1-Renewable_split)*Grid_CarbInt/input_efficiency)*LCFS_price*H2_EneDens*(power(10,-6))
-
+                 + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold_ren(interval)
                  - renew_VOM_cost * Renewable_power(interval) * interval_length
                  - input_VOM_cost * input_power_MW(interval) * interval_length
                  - output_VOM_cost * output_power_MW(interval) * interval_length
@@ -731,6 +731,9 @@ operating_profit_eqn..
 
 system_power_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          output_power_MW(interval) + output_power_MW_ren(interval) =l= max_sys_output_cap;
+
+output_pwr_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+         output_power_MW(interval) =e= output_power_MW_non_ren(interval) + output_power_MW_ren2(interval);
 
 output_LSL_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          output_power_MW(interval) - output_regdn_MW(interval) =g= output_LSL_fraction * output_capacity_MW * output_active(interval);
@@ -765,6 +768,9 @@ input_ramp_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(int
 input_pwr_eqn(interval)$(baseload_operation = 1)..
          input_power_MW(interval) =e= Max_input_cap(interval) * input_capacity_MW * H2_consumed_adj;
 *         input_power_MW(interval) =e=  input_capacity_MW * H2_consumed_adj;
+
+input_pwr_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+         input_power_MW(interval) =e= input_power_MW_non_ren(interval) + input_power_MW_ren(interval);
 
 input_LSL_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          input_power_MW(interval) - input_regup_MW(interval) - input_spinres_MW(interval) - input_nonspinres_MW(interval) =g= input_LSL_fraction * input_capacity_MW * input_active(interval);
@@ -904,26 +910,31 @@ input_nonspinres_limit_eqn(interval)$( rolling_window_min_index <= ord(interval)
 *         input_nonspinres_MW(interval) =l= input_capacity_MW * input_nonspinres_limit_fraction;
 
 storage_level_accounting_init_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and baseload_operation=0 and ord(interval)=1)..
-         storage_level_MWh(interval) =e= storage_init*storage_capacity_hours*input_capacity_MW
-         + input_power_MW(interval) * interval_length * input_efficiency
-         - output_power_MW(interval) * interval_length / output_efficiency
-         - H2_sold(interval) * H2_LHV;
+         storage_level_MWh(interval)+storage_level_MWh_ren(interval) =e= storage_init*storage_capacity_hours*input_capacity_MW
+         + (input_power_MW(interval)+input_power_MW_ren(interval)) * interval_length * input_efficiency
+         - (output_power_MW(interval)+output_power_MW_ren2(interval)) * interval_length / output_efficiency
+         - (H2_sold_non_ren(interval)+H2_sold_ren(interval)) * H2_LHV;
 * LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
 storage_level_accounting_final_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and baseload_operation=0 and ord(interval)=operating_period_length and storage_set_final=1)..
-         storage_level_MWh(interval) =g= storage_final*storage_capacity_hours*input_capacity_MW;
-* LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
+         storage_level_MWh(interval)+storage_level_MWh_ren(interval) =g= storage_final*storage_capacity_hours*input_capacity_MW;
 
 storage_level_accounting_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and baseload_operation=0 and ord(interval)>current_interval and ord(interval)<max_interval and ord(interval)>1)..
          storage_level_MWh(interval) =e= storage_level_MWh(interval-1)
-         + input_power_MW(interval) * interval_length * input_efficiency
-         - output_power_MW(interval) * interval_length / output_efficiency
-         - H2_sold(interval) * H2_LHV;
+         + input_power_MW_non_ren(interval) * interval_length * input_efficiency
+         - output_power_MW_non_ren(interval) * interval_length / output_efficiency
+         - H2_sold_non_ren(interval) * H2_LHV;
 * LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
 storage_level_accounting_eqn2(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW = 0 and baseload_operation=0 and ord(interval)>current_interval and ord(interval)<max_interval )..
-         storage_level_MWh(interval) =e= storage_level_MWh(interval-1);
+         storage_level_MWh(interval)+storage_level_MWh_ren(interval) =e= storage_level_MWh(interval-1)+storage_level_MWh_ren(interval-1);
 * If input capacity is equal to zero then output device cannot interact with storage system so storage_level_MWh is held constant
+
+storage_level_accounting_eqn3(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW > 0 and ord(interval)>current_interval and ord(interval)<max_interval )..
+         storage_level_MWh_ren(interval) =e= storage_level_MWh_ren(interval-1)
+         + input_power_MW_ren(interval) * interval_length * input_efficiency
+         - output_power_MW_ren2(interval) * interval_length / output_efficiency
+         - H2_sold_ren(interval) * H2_LHV;
 
 H2_output_limit_eqn(days)$(H2_use = 2)..
          H2_sold_daily(days) =e= sum( interval$(floor(div(ord(interval)-1,24))+1 = ord(days) ), H2_sold(interval) );
@@ -934,25 +945,19 @@ H2_output_limit_eqn2(days)$(H2_use = 2)..
 H2_output_limit_eqn3(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and H2_use <= 1 and CF_opt=0)..
          H2_sold(interval) =e= H2_consumed(interval);
 
-*JOSH
 H2_renewable_eqn(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>current_interval and ord(interval)<max_interval )..
-         H2_sold(interval) =g= H2_sold_ren(interval);
-*         H2_sold(interval) * Renewable_split =g= H2_sold_ren(interval);
+         H2_sold(interval) =e= H2_sold_non_ren(interval) + H2_sold_ren(interval);
 
 storage_level_limit_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW>0 and ord(interval)>current_interval and ord(interval)<max_interval )..
-         storage_level_MWh(interval) =l= Max_input_cap(interval) * input_capacity_MW * storage_capacity_hours
+         storage_level_MWh(interval) + storage_level_MWh_ren(interval) =l= input_capacity_MW * storage_capacity_hours
          - input_regdn_MW(interval) * interval_length * 0.5;
-*         storage_level_MWh(interval) =l= input_capacity_MW * storage_capacity_hours
 
 storage_level_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW<=0 and ord(interval)>current_interval and ord(interval)<max_interval )..
-         storage_level_MWh(interval) =l= Max_output_cap(interval) * output_capacity_MW * storage_capacity_hours
+         storage_level_MWh(interval) + storage_level_MWh_ren(interval) =l= output_capacity_MW * storage_capacity_hours
          - input_regdn_MW(interval) * interval_length * 0.5;
-*         storage_level_MWh(interval) =l= output_capacity_MW * storage_capacity_hours
-
-*****(ord(interval)>current_interval OR ord(interval)<max_interval )
 
 storage_level_limit_eqn3(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>current_interval and ord(interval)<max_interval )..
-         storage_level_MWh(interval) =g= (output_regup_MW(interval) + output_spinres_MW(interval) + output_nonspinres_MW(interval)) / input_efficiency * interval_length * 0.5;
+         storage_level_MWh(interval) + storage_level_MWh_ren(interval) =g= (output_regup_MW(interval) + output_spinres_MW(interval) + output_nonspinres_MW(interval)) / input_efficiency * interval_length * 0.5;
 * Ensures that reserves can be provided if necessary for at least 1/2 hour.
 
 output_startup_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
@@ -962,19 +967,19 @@ input_startup_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(
          input_start(interval) =g= input_active(interval) - input_active(interval-1);
 
 RT_eqn1(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)<=current_interval and current_monthly_max>=0)..
-         input_power_MW(interval) =e= current_monthly_max * Max_input_cap(interval) * input_capacity_MW;
+         input_power_MW(interval) =e= current_monthly_max * input_capacity_MW;
 *         input_power_MW(interval) =e= current_monthly_max * input_capacity_MW;
 
 RT_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)<=current_interval and current_storage_lvl>=0)..
-         storage_level_MWh(interval) =e= current_storage_lvl * Max_input_cap(interval) * input_capacity_MW * storage_capacity_hours;
+         storage_level_MWh(interval) + storage_level_MWh_ren(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
 *         storage_level_MWh(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
 
 RT_eqn3(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>=max_interval and current_monthly_max>=0)..
-         input_power_MW(interval) =e= current_monthly_max * Max_input_cap(interval) * input_capacity_MW;
+         input_power_MW(interval) =e= current_monthly_max * input_capacity_MW;
 *         input_power_MW(interval) =e= current_monthly_max * input_capacity_MW;
 
 RT_eqn4(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>=max_interval and current_storage_lvl>=0)..
-         storage_level_MWh(interval) =e= current_storage_lvl * Max_input_cap(interval) * input_capacity_MW * storage_capacity_hours;
+         storage_level_MWh(interval)  + storage_level_MWh_ren(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
 *         storage_level_MWh(interval) =e= current_storage_lvl * input_capacity_MW * storage_capacity_hours;
 
 one_active_device_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and one_active_device=1)..
@@ -1028,22 +1033,28 @@ option optcr=0.01;
 
 *give initial values to all of the variables
 output_power_MW.l(interval)      = 0;
+output_power_MW_non_ren.l(interval) = 0;
+output_power_MW_ren2.l(interval) = 0;
 output_regup_MW.l(interval)      = 0;
 output_regdn_MW.l(interval)      = 0;
 output_spinres_MW.l(interval)    = 0;
 output_nonspinres_MW.l(interval) = 0;
 input_power_MW.l(interval)       = 1;
+input_power_MW_non_ren.l(interval) = 1;
+input_power_MW_ren.l(interval)   = 1;
 input_regup_MW.l(interval)       = 0;
 input_regdn_MW.l(interval)       = 0;
 input_spinres_MW.l(interval)     = 0;
 input_nonspinres_MW.l(interval)  = 0;
 storage_level_MWh.l(interval)    = 1;
+storage_level_MWh_ren.l(interval)= 1;
 output_active.l(interval)        = 0;
 input_active.l(interval)         = 0;
 output_start.l(interval)         = 0;
 input_start.l(interval)          = 1;
 H2_sold.l(interval)              = 0;
-H2_sold_ren.l(interval)              = 0;
+H2_sold_non_ren.l(interval)      = 0;
+H2_sold_ren.l(interval)          = 0;
 H2_sold_daily.l(days)            = 0;
 output_power_MW_ren.l(interval)  = 0;
 if(H2_use = 2,
@@ -1066,21 +1077,27 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
 *        fix all variables' values
 *        (will relax the values within the rolling window later)
          output_power_MW.fx(interval)      = output_power_MW.l(interval)  ;
+         output_power_MW_non_ren.fx(interval) = output_power_MW_non_ren.l(interval);
+         output_power_MW_ren2.fx(interval) = output_power_MW_ren2.l(interval);
          output_regup_MW.fx(interval)      = output_regup_MW.l(interval)  ;
          output_regdn_MW.fx(interval)      = output_regdn_MW.l(interval)  ;
          output_spinres_MW.fx(interval)    = output_spinres_MW.l(interval);
          output_nonspinres_MW.fx(interval) = output_nonspinres_MW.l(interval);
          input_power_MW.fx(interval)       = input_power_MW.l(interval)   ;
+         input_power_MW_non_ren.fx(interval) = input_power_MW_non_ren.l(interval);
+         input_power_MW_ren.fx(interval)   = input_power_MW_ren.l(interval);
          input_regup_MW.fx(interval)       = input_regup_MW.l(interval)   ;
          input_regdn_MW.fx(interval)       = input_regdn_MW.l(interval)   ;
          input_spinres_MW.fx(interval)     = input_spinres_MW.l(interval) ;
          input_nonspinres_MW.fx(interval)  = input_nonspinres_MW.l(interval);
          storage_level_MWh.fx(interval)    = storage_level_MWh.l(interval);
+         storage_level_MWh_ren.fx(interval)= storage_level_MWh_ren.l(interval);
          output_active.fx(interval)        = output_active.l(interval)    ;
          input_active.fx(interval)         = input_active.l(interval)     ;
          output_start.fx(interval)         = output_start.l(interval)     ;
          input_start.fx(interval)          = input_start.l(interval)      ;
          H2_sold.fx(interval)              = H2_sold.l(interval)          ;
+         H2_sold_non_ren.fx(interval)      = H2_sold_non_ren.l(interval)  ;
          H2_sold_ren.fx(interval)          = H2_sold_ren.l(interval)      ;
          H2_sold_daily.fx(days)            = H2_sold_daily.l(days)        ;
          output_power_MW_ren.fx(interval)  = output_power_MW_ren.l(interval);
@@ -1093,42 +1110,53 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
 
 *        relax variables in current rolling window
          output_power_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      = 0;
+         output_power_MW_non_ren.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) = 0;
+         output_power_MW_ren2.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) = 0;
          output_regup_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      = 0;
          output_regdn_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      = 0;
          output_spinres_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )    = 0;
          output_nonspinres_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) = 0;
          input_power_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       = 0;
+         input_power_MW_non_ren.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) = 0;
+         input_power_MW_ren.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )   = 0;
          input_regup_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       = 0;
          input_regdn_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       = 0;
          input_spinres_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )     = 0;
          input_nonspinres_MW.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )  = 0;
          storage_level_MWh.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )    = 0;
+         storage_level_MWh_ren.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )= 0;
          output_active.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )        = 0;
          input_active.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )         = 0;
          output_start.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )         = 0;
          input_start.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )          = 0;
          H2_sold.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )              = 0;
+         H2_sold_non_ren.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      = 0;
          H2_sold_ren.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )          = 0;
          H2_sold_daily.lo(days)$(H2_use=2)                                                                                             = 0;
          output_power_MW_ren.lo(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )  = 0;
 
          output_power_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      =  inf;
+         output_power_MW_non_ren.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) =  inf;
+         output_power_MW_ren2.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) =  inf;
          output_regup_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      =  inf;
          output_regdn_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      =  inf;
          output_spinres_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )    =  inf;
          output_nonspinres_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) =  inf;
          input_power_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       =  inf;
+         input_power_MW_non_ren.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) =  inf;
+         input_power_MW_ren.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )   =  inf;
          input_regup_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       =  inf;
          input_regdn_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )       =  inf;
          input_spinres_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )     =  inf;
          input_nonspinres_MW.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )  =  inf;
          storage_level_MWh.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )    =  inf;
+         storage_level_MWh_ren.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )=  inf;
          output_active.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )        =  1;
          input_active.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )         =  1;
          output_start.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )         =  1;
          input_start.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )          =  1;
-
          H2_sold.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )              = inf;
+         H2_sold_non_ren.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      = inf;
          H2_sold_ren.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )          = inf;
          H2_sold_daily.up(days)$(H2_use=2)                                                                                             = inf;
          output_power_MW_ren.up(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )  = inf;
@@ -1280,7 +1308,6 @@ num_output_starts = sum(interval, output_start.l(interval) );
 fuel_cost = sum(interval,- output_heat_rate * NG_price(interval) * output_power_MW.l(interval) * interval_length
                          - input_heat_rate * NG_price(interval) * input_power_MW.l(interval) * interval_length);
 elec_cost = sum(interval,((elec_sale_price(interval) * (output_power_MW.l(interval)+output_power_MW_ren.l(interval))) - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval))) * interval_length);
-*elec_cost = sum(interval,((elec_sale_price(interval) * output_power_MW.l(interval)) - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval))) * interval_length);
 VOM_cost_val = sum(interval,- VOM_cost * output_power_MW.l(interval) * interval_length);
 arbitrage_revenue = sum(interval,
                         ((elec_sale_price(interval) * (output_power_MW.l(interval)))
@@ -1290,9 +1317,9 @@ arbitrage_revenue = sum(interval,
                         - VOM_cost * output_power_MW.l(interval) * interval_length
                         );
 renewable_sales = sum(interval, elec_sale_price(interval) * output_power_MW_ren.l(interval) * interval_length );
-REC_revenue  = sum(interval, REC_price * output_power_MW_ren.l(interval) * interval_length );
+REC_revenue  = sum(interval, REC_price * (output_power_MW_ren.l(interval) + output_power_MW_ren2.l(interval)) * interval_length );
 LCFS_revenue = sum(interval, (CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency)*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold.l(interval)
-                           + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * input_power_MW_ren.l(interval) * interval_length / H2_LHV );
+                           + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold_ren.l(interval));
 
 Display input_cap_cost, input_capacity_MW,interest_rate,input_lifetime;
 renew_cap_cost2  = -renew_cap_cost * Renewable_MW * (renew_interest_rate+(renew_interest_rate/(power((1+renew_interest_rate),renew_lifetime)-1)));
@@ -1337,7 +1364,7 @@ Renewable_max_revenue    = sum(interval,(renewable_signal(interval)-(abs(renewab
 Renewable_electricity_in = sum(interval,input_power_MW_ren.l(interval) + output_power_MW_ren.l(interval));
 Electricity_import       = sum(interval,input_power_MW_non_ren.l(interval));
 
-if (1=1,
+if (1=0,
 option decimals=8;
 display elec_in_MWh;
 display elec_output_MWh;
@@ -1365,6 +1392,60 @@ display actual_operating_profit;
 *display current_monthly_max;
 *display max_interval;
 );
+
+$ontext
+* Debug separated renewable / non-renewable calculations
+Scalars
+         In1
+         In1_non_ren
+         In1_ren
+         Out1
+         Out1_non_ren
+         Out1_ren
+         Stor1
+         Stor1_ren
+         H2_tot
+         H2_non_ren
+         H2_ren
+;
+
+In1 = sum(interval, input_power_MW.l(interval));
+In1_non_ren = sum(interval, input_power_MW_non_ren.l(interval));
+In1_ren = sum(interval, input_power_MW_ren.l(interval));
+Out1 = sum(interval, output_power_MW.l(interval));
+Out1_non_ren = sum(interval, output_power_MW_non_ren.l(interval));
+Out1_ren = sum(interval, output_power_MW_ren2.l(interval));
+Stor1 = sum(interval, storage_level_MWh.l(interval));
+Stor1_ren = sum(interval, storage_level_MWh_ren.l(interval));
+H2_tot = sum(interval, H2_sold.l(interval));
+H2_non_ren = sum(interval, H2_sold_non_ren.l(interval));
+H2_ren = sum(interval, H2_sold_ren.l(interval));
+
+display In1, In1_non_ren, In1_ren, Out1, Out1_non_ren, Out1_ren, Stor1, Stor1_ren, H2_tot, H2_non_ren, H2_ren, Electricity_import;
+display storage_level_MWh.l, storage_level_MWh_ren.l, Renewable_power;
+
+         results_file.pw = 10000;
+         put results_file;
+                 put 'Interval, Input Pwr (MW), Input nonren (MW), Input ren (MW), Output Pwr (MW), Output nonren (MW), Output ren (MW), Storage Lvl (MW-h), Storage Lvl ren (MW-h),'
+                 put 'H2 Out (kg), H2 nonren (kg), H2 ren (kg), Non-Ren In (MW), Ren In (MW), Ren Sold (MW), Curt (MW)' /;
+                 loop(interval, put      ord(interval),',',
+                                         input_power_MW.l(interval),',',
+                                         input_power_MW_non_ren.l(interval),',',
+                                         input_power_MW_ren.l(interval),',',
+                                         output_power_MW.l(interval),',',
+                                         output_power_MW_non_ren.l(interval),',',
+                                         output_power_MW_ren2.l(interval),',',
+                                         storage_level_MWh.l(interval),',',
+                                         storage_level_MWh_ren.l(interval),',',
+                                         H2_sold.l(interval),',',
+                                         H2_sold_non_ren.l(interval),',',
+                                         H2_sold_ren.l(interval),',',
+                                         input_power_MW_non_ren.l(interval),',',
+                                         Renewable_power(interval),',',
+                                         output_power_MW_ren.l(interval),',',
+                                         curtailment(interval) /;
+                 );
+$offtext
 
 * - - - - write output to files - - - -
 if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_and_AS.modelstat=8),
@@ -1428,6 +1509,7 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                                          meter_mnth_chg(interval) /;
                  );
 
+         results_file.pw = 10000;
          put results_file;
                  PUT 'Run on a %system.filesys% machine on %system.date% %system.time%.' /;
                  put 'Optimal solution found within time limit:,',
@@ -1464,7 +1546,6 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'startup costs ($), ', startup_costs /;
                  put /;
                  put 'Interval, In Pwr (MW), Out Pwr (MW), Storage Lvl (MW-h), In Reg Up (MW), Out Reg Up (MW), In Reg Dn (MW), Out Reg Dn (MW), In Spin (MW), Out Spin (MW), In Nonspin (MW), Out Nonspin (MW), H2 Out (kg), Non-Ren In (MW), Ren In (MW), Ren Sold (MW), Curt (MW)'/;
-*                put 'Interval, In Pwr (MW), Out Pwr (MW), Storage Level (MW-h), In Reg Up (MW), Out Reg Up (MW), In Reg Dn (MW), Out Reg Dn (MW), In Spin Res (MW), Out Spin Res (MW), In Nonspin (MW), Out Nonspin (MW), H2 Out (kg), Renewable Input (MW), Nonrenewable Input (MW)'/;
                  loop(interval, put      ord(interval),',',
                                          input_power_MW.l(interval),',',
                                          output_power_MW.l(interval),',',
