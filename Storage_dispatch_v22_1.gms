@@ -21,17 +21,17 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     5a3430585457a3e3595c48a2_hourly
+$if not set elec_rate_instance     $set elec_rate_instance     5a330a215457a35d4b5c48a8_hourly_PGE_A-6
 $if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_Price1_v2_hourly
 $if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_flat_v2_hourly
 $if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_hourly
 $if not set NG_price_instance      $set NG_price_instance      NG_price_Price1_v2_hourly
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_PV_v2_hourly
-$if not set load_prof_instance     $set load_prof_instance     Additional_load_none_hourly
+$if not set load_prof_instance     $set load_prof_instance     Additional_load_VTA_Depot1_hourly
 $if not set energy_price_inst      $set energy_price_inst      Energy_prices_Wholesale_MWh_hourly
 $if not set AS_price_inst          $set AS_price_inst          Ancillary_services_PGE2014_hourly
-$if not set outdir                 $set outdir                 RODeO\Projects\Test\Output
-$if not set indir                  $set indir                  RODeO\Projects\Test\Data_files\TXT_files
+$if not set outdir                 $set outdir                 RODeO\Projects\VTA_bus_project\Output
+$if not set indir                  $set indir                  RODeO\Projects\VTA_bus_project\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
@@ -94,16 +94,16 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set file_name_instance     $set file_name_instance     "LCFSwithOUTPUT"
+$if not set file_name_instance     $set file_name_instance     "Test2_A-6"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6.0
 $if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  80
-$if not set REC_price_inst         $set REC_price_inst         12
+$if not set REC_price_inst         $set REC_price_inst         0
 $if not set CF_opt_instance        $set CF_opt_instance        0
-$if not set run_retail_instance    $set run_retail_instance    2
+$if not set run_retail_instance    $set run_retail_instance    1
 $if not set one_active_device_inst $set one_active_device_inst 1
 
 * Next values are used to initialize for real-time operation and shorten the run-time
@@ -120,7 +120,7 @@ $if not set H2_EneDens_inst        $set H2_EneDens_inst        120
 $if not set H2_Gas_ratio_inst      $set H2_Gas_ratio_inst      2.5
 $if not set Grid_CarbInt_inst      $set Grid_CarbInt_inst      105
 $if not set CI_base_line_inst      $set CI_base_line_inst      92.5
-$if not set LCFS_price_inst        $set LCFS_price_inst        125
+$if not set LCFS_price_inst        $set LCFS_price_inst        0
 
 
 *        energy_only_instance = 0, 1 (1 = Energy only operation, 0 = All ancillary services included)
@@ -170,6 +170,7 @@ Parameters
          Fixed_dem(months)                       "Fixed demand charge $/MW-month"
          Timed_dem(timed_dem_period)             "Timed demand charge $/MW-month"
          Load_profile(interval)                  "Load profile (MW)"
+
          Max_input_cap(interval,devices)         "Maximum capacity for input"
          Max_output_cap(interval,devices)        "Maximum capacity for output"
 
@@ -591,6 +592,10 @@ Positive Variables
          input_ramp_neg(interval,devices)  Negative ramp rate constraint (used to linearize absolute value)
          output_ramp_pos(interval,devices) Positive ramp rate constraint (used to linearize absolute value)
          output_ramp_neg(interval,devices) Negative ramp rate constraint (used to linearize absolute value)
+
+         Import_elec_profile(interval)     "Imported electricity"
+         Load_profile_non_ren(interval)    Track non-renewable electricity used to meet the load profile (MW)
+         Load_profile_ren(interval)        Track renewable electricity used to meet the load profile (MW)
 ;
 
 Binary Variables
@@ -620,7 +625,7 @@ Equations
          input_pwr_eqn2(interval,devices)                equation that defines the relationship between renewable and non-renewable input power
          input_LSL_eqn(interval,devices)                 equation that limits the lower sustainable limit for the input of the facility
          input_capacity_limit_eqn(interval,devices)      equation that limits the upper limit for the input of the facility
-         input_capacity_limit_eqn2(interval,devices)     equation that limits the upper limit for the input of the facility
+         input_capacity_limit_eqn2(interval)             equation that defines the relationship between load_profile and non-renewable input power
          input_capacity_limit_eqn3(interval,devices)     equation that limits the upper limit for the input of the facility
          input_ren_contribution(interval)                equation that sets the amount of renewable gen consumed
          input_regup_limit_eqn(interval,devices)         equation that limits the amount of regulation up the input side of the facilty can offer
@@ -636,6 +641,8 @@ Equations
          storage_level_limit_eqn(interval,devices)       equation that limits the storage level to the maximum capacity of the storage facility including ancillary services (MWh)
          storage_level_limit_eqn2(interval,devices)      equation that limits the storage level to the maximum capacity of the storage facility including ancillary services (MWh)
          storage_level_limit_eqn3(interval,devices)      equation that limits the storage level to the maximum capacity of the storage facility including ancillary services (MWh)
+
+         load_profile_eqn(interval)                      equation that keeps track of the split between renewable and non-renewable power that goes to meet the load demand
 
          output_startup_eqn(interval,devices)            equation that determines if the output side of the facility started up
          input_startup_eqn(interval,devices)             equation that determines if the input side of the facility started up
@@ -789,7 +796,7 @@ operating_profit_eqn..
          operating_profit =e= sum( (interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ),
                    (elec_sale_price_forecast(interval) * (sum(devices,output_power_MW(interval,devices))+sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))) * interval_length)
                  + REC_price * (sum(devices_ren,renewable_power_MW_sold(interval,devices_ren)) + sum(devices,output_power_MW_ren(interval,devices))) * interval_length
-                 - (elec_purchase_price_forecast(interval) * sum(devices,input_power_MW_non_ren(interval,devices)) * interval_length)
+                 - (elec_purchase_price_forecast(interval) * Import_elec_profile(interval) * interval_length)
                  + ( regup_price(interval) - reg_cost ) * ( sum(devices,output_regup_MW(interval,devices) + input_regup_MW(interval,devices)) ) * interval_length
                  + ( regdn_price(interval) - reg_cost ) * ( sum(devices,output_regdn_MW(interval,devices) + input_regdn_MW(interval,devices)) ) * interval_length
                  + spinres_price(interval) * ( sum(devices,output_spinres_MW(interval,devices) + input_spinres_MW(interval,devices)) ) * interval_length
@@ -798,7 +805,7 @@ operating_profit_eqn..
                  - sum(devices,input_heat_rate(devices) * NG_price(interval) * input_power_MW(interval,devices)) * interval_length
                  - VOM_cost * sum(devices,output_power_MW(interval,devices)) * interval_length
                  - sum(devices,output_startup_cost(devices) * output_capacity_MW(devices) * output_start(interval,devices))
-                 - sum(devices,input_startup_cost(devices) * input_capacity_MW(devices)*input_start(interval,devices))
+                 - sum(devices,input_startup_cost(devices) * input_capacity_MW(devices) * input_start(interval,devices))
                  + sum(devices,H2_price(interval,devices) * H2_sold(interval,devices))
                  + sum(devices,(CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency(devices))*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold(interval,devices))
                  + sum(devices,Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold_ren(interval,devices))
@@ -875,115 +882,112 @@ input_capacity_limit_eqn(interval,devices)$( rolling_window_min_index <= ord(int
 
 
 *** Fixed Demand Charge ***
-Fixed_dem_Jan(Month_Jan)$( rolling_window_min_index <= ord(Month_Jan) and ord(Month_Jan) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Jan,devices)) =l= Fixed_cap("1");
-Fixed_dem_Feb(Month_Feb)$( rolling_window_min_index <= ord(Month_Feb) and ord(Month_Feb) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Feb,devices)) =l= Fixed_cap("2");
-Fixed_dem_Mar(Month_Mar)$( rolling_window_min_index <= ord(Month_Mar) and ord(Month_Mar) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Mar,devices)) =l= Fixed_cap("3");
-Fixed_dem_Apr(Month_Apr)$( rolling_window_min_index <= ord(Month_Apr) and ord(Month_Apr) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Apr,devices)) =l= Fixed_cap("4");
-Fixed_dem_May(Month_May)$( rolling_window_min_index <= ord(Month_May) and ord(Month_May) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_May,devices)) =l= Fixed_cap("5");
-Fixed_dem_Jun(Month_Jun)$( rolling_window_min_index <= ord(Month_Jun) and ord(Month_Jun) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Jun,devices)) =l= Fixed_cap("6");
-Fixed_dem_Jul(Month_Jul)$( rolling_window_min_index <= ord(Month_Jul) and ord(Month_Jul) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Jul,devices)) =l= Fixed_cap("7");
-Fixed_dem_Aug(Month_Aug)$( rolling_window_min_index <= ord(Month_Aug) and ord(Month_Aug) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Aug,devices)) =l= Fixed_cap("8");
-Fixed_dem_Sep(Month_Sep)$( rolling_window_min_index <= ord(Month_Sep) and ord(Month_Sep) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Sep,devices)) =l= Fixed_cap("9");
-Fixed_dem_Oct(Month_Oct)$( rolling_window_min_index <= ord(Month_Oct) and ord(Month_Oct) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Oct,devices)) =l= Fixed_cap("10");
-Fixed_dem_Nov(Month_Nov)$( rolling_window_min_index <= ord(Month_Nov) and ord(Month_Nov) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Nov,devices)) =l= Fixed_cap("11");
-Fixed_dem_Dec(Month_Dec)$( rolling_window_min_index <= ord(Month_Dec) and ord(Month_Dec) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Month_Dec,devices)) =l= Fixed_cap("12");
+Fixed_dem_Jan(Month_Jan)$( rolling_window_min_index <= ord(Month_Jan) and ord(Month_Jan) <= rolling_window_max_index ).. Import_elec_profile(Month_Jan) =l= Fixed_cap("1");
+Fixed_dem_Feb(Month_Feb)$( rolling_window_min_index <= ord(Month_Feb) and ord(Month_Feb) <= rolling_window_max_index ).. Import_elec_profile(Month_Feb) =l= Fixed_cap("2");
+Fixed_dem_Mar(Month_Mar)$( rolling_window_min_index <= ord(Month_Mar) and ord(Month_Mar) <= rolling_window_max_index ).. Import_elec_profile(Month_Mar) =l= Fixed_cap("3");
+Fixed_dem_Apr(Month_Apr)$( rolling_window_min_index <= ord(Month_Apr) and ord(Month_Apr) <= rolling_window_max_index ).. Import_elec_profile(Month_Apr) =l= Fixed_cap("4");
+Fixed_dem_May(Month_May)$( rolling_window_min_index <= ord(Month_May) and ord(Month_May) <= rolling_window_max_index ).. Import_elec_profile(Month_May) =l= Fixed_cap("5");
+Fixed_dem_Jun(Month_Jun)$( rolling_window_min_index <= ord(Month_Jun) and ord(Month_Jun) <= rolling_window_max_index ).. Import_elec_profile(Month_Jun) =l= Fixed_cap("6");
+Fixed_dem_Jul(Month_Jul)$( rolling_window_min_index <= ord(Month_Jul) and ord(Month_Jul) <= rolling_window_max_index ).. Import_elec_profile(Month_Jul) =l= Fixed_cap("7");
+Fixed_dem_Aug(Month_Aug)$( rolling_window_min_index <= ord(Month_Aug) and ord(Month_Aug) <= rolling_window_max_index ).. Import_elec_profile(Month_Aug) =l= Fixed_cap("8");
+Fixed_dem_Sep(Month_Sep)$( rolling_window_min_index <= ord(Month_Sep) and ord(Month_Sep) <= rolling_window_max_index ).. Import_elec_profile(Month_Sep) =l= Fixed_cap("9");
+Fixed_dem_Oct(Month_Oct)$( rolling_window_min_index <= ord(Month_Oct) and ord(Month_Oct) <= rolling_window_max_index ).. Import_elec_profile(Month_Oct) =l= Fixed_cap("10");
+Fixed_dem_Nov(Month_Nov)$( rolling_window_min_index <= ord(Month_Nov) and ord(Month_Nov) <= rolling_window_max_index ).. Import_elec_profile(Month_Nov) =l= Fixed_cap("11");
+Fixed_dem_Dec(Month_Dec)$( rolling_window_min_index <= ord(Month_Dec) and ord(Month_Dec) <= rolling_window_max_index ).. Import_elec_profile(Month_Dec) =l= Fixed_cap("12");
 *************************
 **** Demand Charge 1 ****
-Jan_1_eqn(Jan_1)$( rolling_window_min_index <= ord(Jan_1) and ord(Jan_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jan_1,devices)) =l= Cap_1("1");
-Feb_1_eqn(Feb_1)$( rolling_window_min_index <= ord(Feb_1) and ord(Feb_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Feb_1,devices)) =l= Cap_1("2");
-Mar_1_eqn(Mar_1)$( rolling_window_min_index <= ord(Mar_1) and ord(Mar_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Mar_1,devices)) =l= Cap_1("3");
-Apr_1_eqn(Apr_1)$( rolling_window_min_index <= ord(Apr_1) and ord(Apr_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Apr_1,devices)) =l= Cap_1("4");
-May_1_eqn(May_1)$( rolling_window_min_index <= ord(May_1) and ord(May_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(May_1,devices)) =l= Cap_1("5");
-Jun_1_eqn(Jun_1)$( rolling_window_min_index <= ord(Jun_1) and ord(Jun_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jun_1,devices)) =l= Cap_1("6");
-Jul_1_eqn(Jul_1)$( rolling_window_min_index <= ord(Jul_1) and ord(Jul_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jul_1,devices)) =l= Cap_1("7");
-Aug_1_eqn(Aug_1)$( rolling_window_min_index <= ord(Aug_1) and ord(Aug_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Aug_1,devices)) =l= Cap_1("8");
-Sep_1_eqn(Sep_1)$( rolling_window_min_index <= ord(Sep_1) and ord(Sep_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Sep_1,devices)) =l= Cap_1("9");
-Oct_1_eqn(Oct_1)$( rolling_window_min_index <= ord(Oct_1) and ord(Oct_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Oct_1,devices)) =l= Cap_1("10");
-Nov_1_eqn(Nov_1)$( rolling_window_min_index <= ord(Nov_1) and ord(Nov_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Nov_1,devices)) =l= Cap_1("11");
-Dec_1_eqn(Dec_1)$( rolling_window_min_index <= ord(Dec_1) and ord(Dec_1) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Dec_1,devices)) =l= Cap_1("12");
+Jan_1_eqn(Jan_1)$( rolling_window_min_index <= ord(Jan_1) and ord(Jan_1) <= rolling_window_max_index ).. Import_elec_profile(Jan_1) =l= Cap_1("1");
+Feb_1_eqn(Feb_1)$( rolling_window_min_index <= ord(Feb_1) and ord(Feb_1) <= rolling_window_max_index ).. Import_elec_profile(Feb_1) =l= Cap_1("2");
+Mar_1_eqn(Mar_1)$( rolling_window_min_index <= ord(Mar_1) and ord(Mar_1) <= rolling_window_max_index ).. Import_elec_profile(Mar_1) =l= Cap_1("3");
+Apr_1_eqn(Apr_1)$( rolling_window_min_index <= ord(Apr_1) and ord(Apr_1) <= rolling_window_max_index ).. Import_elec_profile(Apr_1) =l= Cap_1("4");
+May_1_eqn(May_1)$( rolling_window_min_index <= ord(May_1) and ord(May_1) <= rolling_window_max_index ).. Import_elec_profile(May_1) =l= Cap_1("5");
+Jun_1_eqn(Jun_1)$( rolling_window_min_index <= ord(Jun_1) and ord(Jun_1) <= rolling_window_max_index ).. Import_elec_profile(Jun_1) =l= Cap_1("6");
+Jul_1_eqn(Jul_1)$( rolling_window_min_index <= ord(Jul_1) and ord(Jul_1) <= rolling_window_max_index ).. Import_elec_profile(Jul_1) =l= Cap_1("7");
+Aug_1_eqn(Aug_1)$( rolling_window_min_index <= ord(Aug_1) and ord(Aug_1) <= rolling_window_max_index ).. Import_elec_profile(Aug_1) =l= Cap_1("8");
+Sep_1_eqn(Sep_1)$( rolling_window_min_index <= ord(Sep_1) and ord(Sep_1) <= rolling_window_max_index ).. Import_elec_profile(Sep_1) =l= Cap_1("9");
+Oct_1_eqn(Oct_1)$( rolling_window_min_index <= ord(Oct_1) and ord(Oct_1) <= rolling_window_max_index ).. Import_elec_profile(Oct_1) =l= Cap_1("10");
+Nov_1_eqn(Nov_1)$( rolling_window_min_index <= ord(Nov_1) and ord(Nov_1) <= rolling_window_max_index ).. Import_elec_profile(Nov_1) =l= Cap_1("11");
+Dec_1_eqn(Dec_1)$( rolling_window_min_index <= ord(Dec_1) and ord(Dec_1) <= rolling_window_max_index ).. Import_elec_profile(Dec_1) =l= Cap_1("12");
 *************************
 **** Demand Charge 2 ****
-Jan_2_eqn(Jan_2)$( rolling_window_min_index <= ord(Jan_2) and ord(Jan_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jan_2,devices)) =l= Cap_2("1");
-Feb_2_eqn(Feb_2)$( rolling_window_min_index <= ord(Feb_2) and ord(Feb_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Feb_2,devices)) =l= Cap_2("2");
-Mar_2_eqn(Mar_2)$( rolling_window_min_index <= ord(Mar_2) and ord(Mar_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Mar_2,devices)) =l= Cap_2("3");
-Apr_2_eqn(Apr_2)$( rolling_window_min_index <= ord(Apr_2) and ord(Apr_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Apr_2,devices)) =l= Cap_2("4");
-May_2_eqn(May_2)$( rolling_window_min_index <= ord(May_2) and ord(May_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(May_2,devices)) =l= Cap_2("5");
-Jun_2_eqn(Jun_2)$( rolling_window_min_index <= ord(Jun_2) and ord(Jun_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jun_2,devices)) =l= Cap_2("6");
-Jul_2_eqn(Jul_2)$( rolling_window_min_index <= ord(Jul_2) and ord(Jul_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jul_2,devices)) =l= Cap_2("7");
-Aug_2_eqn(Aug_2)$( rolling_window_min_index <= ord(Aug_2) and ord(Aug_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Aug_2,devices)) =l= Cap_2("8");
-Sep_2_eqn(Sep_2)$( rolling_window_min_index <= ord(Sep_2) and ord(Sep_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Sep_2,devices)) =l= Cap_2("9");
-Oct_2_eqn(Oct_2)$( rolling_window_min_index <= ord(Oct_2) and ord(Oct_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Oct_2,devices)) =l= Cap_2("10");
-Nov_2_eqn(Nov_2)$( rolling_window_min_index <= ord(Nov_2) and ord(Nov_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Nov_2,devices)) =l= Cap_2("11");
-Dec_2_eqn(Dec_2)$( rolling_window_min_index <= ord(Dec_2) and ord(Dec_2) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Dec_2,devices)) =l= Cap_2("12");
+Jan_2_eqn(Jan_2)$( rolling_window_min_index <= ord(Jan_2) and ord(Jan_2) <= rolling_window_max_index ).. Import_elec_profile(Jan_2) =l= Cap_2("1");
+Feb_2_eqn(Feb_2)$( rolling_window_min_index <= ord(Feb_2) and ord(Feb_2) <= rolling_window_max_index ).. Import_elec_profile(Feb_2) =l= Cap_2("2");
+Mar_2_eqn(Mar_2)$( rolling_window_min_index <= ord(Mar_2) and ord(Mar_2) <= rolling_window_max_index ).. Import_elec_profile(Mar_2) =l= Cap_2("3");
+Apr_2_eqn(Apr_2)$( rolling_window_min_index <= ord(Apr_2) and ord(Apr_2) <= rolling_window_max_index ).. Import_elec_profile(Apr_2) =l= Cap_2("4");
+May_2_eqn(May_2)$( rolling_window_min_index <= ord(May_2) and ord(May_2) <= rolling_window_max_index ).. Import_elec_profile(May_2) =l= Cap_2("5");
+Jun_2_eqn(Jun_2)$( rolling_window_min_index <= ord(Jun_2) and ord(Jun_2) <= rolling_window_max_index ).. Import_elec_profile(Jun_2) =l= Cap_2("6");
+Jul_2_eqn(Jul_2)$( rolling_window_min_index <= ord(Jul_2) and ord(Jul_2) <= rolling_window_max_index ).. Import_elec_profile(Jul_2) =l= Cap_2("7");
+Aug_2_eqn(Aug_2)$( rolling_window_min_index <= ord(Aug_2) and ord(Aug_2) <= rolling_window_max_index ).. Import_elec_profile(Aug_2) =l= Cap_2("8");
+Sep_2_eqn(Sep_2)$( rolling_window_min_index <= ord(Sep_2) and ord(Sep_2) <= rolling_window_max_index ).. Import_elec_profile(Sep_2) =l= Cap_2("9");
+Oct_2_eqn(Oct_2)$( rolling_window_min_index <= ord(Oct_2) and ord(Oct_2) <= rolling_window_max_index ).. Import_elec_profile(Oct_2) =l= Cap_2("10");
+Nov_2_eqn(Nov_2)$( rolling_window_min_index <= ord(Nov_2) and ord(Nov_2) <= rolling_window_max_index ).. Import_elec_profile(Nov_2) =l= Cap_2("11");
+Dec_2_eqn(Dec_2)$( rolling_window_min_index <= ord(Dec_2) and ord(Dec_2) <= rolling_window_max_index ).. Import_elec_profile(Dec_2) =l= Cap_2("12");
 *************************
 **** Demand Charge 3 ****
-Jan_3_eqn(Jan_3)$( rolling_window_min_index <= ord(Jan_3) and ord(Jan_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jan_3,devices)) =l= Cap_3("1");
-Feb_3_eqn(Feb_3)$( rolling_window_min_index <= ord(Feb_3) and ord(Feb_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Feb_3,devices)) =l= Cap_3("2");
-Mar_3_eqn(Mar_3)$( rolling_window_min_index <= ord(Mar_3) and ord(Mar_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Mar_3,devices)) =l= Cap_3("3");
-Apr_3_eqn(Apr_3)$( rolling_window_min_index <= ord(Apr_3) and ord(Apr_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Apr_3,devices)) =l= Cap_3("4");
-May_3_eqn(May_3)$( rolling_window_min_index <= ord(May_3) and ord(May_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(May_3,devices)) =l= Cap_3("5");
-Jun_3_eqn(Jun_3)$( rolling_window_min_index <= ord(Jun_3) and ord(Jun_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jun_3,devices)) =l= Cap_3("6");
-Jul_3_eqn(Jul_3)$( rolling_window_min_index <= ord(Jul_3) and ord(Jul_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jul_3,devices)) =l= Cap_3("7");
-Aug_3_eqn(Aug_3)$( rolling_window_min_index <= ord(Aug_3) and ord(Aug_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Aug_3,devices)) =l= Cap_3("8");
-Sep_3_eqn(Sep_3)$( rolling_window_min_index <= ord(Sep_3) and ord(Sep_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Sep_3,devices)) =l= Cap_3("9");
-Oct_3_eqn(Oct_3)$( rolling_window_min_index <= ord(Oct_3) and ord(Oct_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Oct_3,devices)) =l= Cap_3("10");
-Nov_3_eqn(Nov_3)$( rolling_window_min_index <= ord(Nov_3) and ord(Nov_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Nov_3,devices)) =l= Cap_3("11");
-Dec_3_eqn(Dec_3)$( rolling_window_min_index <= ord(Dec_3) and ord(Dec_3) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Dec_3,devices)) =l= Cap_3("12");
+Jan_3_eqn(Jan_3)$( rolling_window_min_index <= ord(Jan_3) and ord(Jan_3) <= rolling_window_max_index ).. Import_elec_profile(Jan_3) =l= Cap_3("1");
+Feb_3_eqn(Feb_3)$( rolling_window_min_index <= ord(Feb_3) and ord(Feb_3) <= rolling_window_max_index ).. Import_elec_profile(Feb_3) =l= Cap_3("2");
+Mar_3_eqn(Mar_3)$( rolling_window_min_index <= ord(Mar_3) and ord(Mar_3) <= rolling_window_max_index ).. Import_elec_profile(Mar_3) =l= Cap_3("3");
+Apr_3_eqn(Apr_3)$( rolling_window_min_index <= ord(Apr_3) and ord(Apr_3) <= rolling_window_max_index ).. Import_elec_profile(Apr_3) =l= Cap_3("4");
+May_3_eqn(May_3)$( rolling_window_min_index <= ord(May_3) and ord(May_3) <= rolling_window_max_index ).. Import_elec_profile(May_3) =l= Cap_3("5");
+Jun_3_eqn(Jun_3)$( rolling_window_min_index <= ord(Jun_3) and ord(Jun_3) <= rolling_window_max_index ).. Import_elec_profile(Jun_3) =l= Cap_3("6");
+Jul_3_eqn(Jul_3)$( rolling_window_min_index <= ord(Jul_3) and ord(Jul_3) <= rolling_window_max_index ).. Import_elec_profile(Jul_3) =l= Cap_3("7");
+Aug_3_eqn(Aug_3)$( rolling_window_min_index <= ord(Aug_3) and ord(Aug_3) <= rolling_window_max_index ).. Import_elec_profile(Aug_3) =l= Cap_3("8");
+Sep_3_eqn(Sep_3)$( rolling_window_min_index <= ord(Sep_3) and ord(Sep_3) <= rolling_window_max_index ).. Import_elec_profile(Sep_3) =l= Cap_3("9");
+Oct_3_eqn(Oct_3)$( rolling_window_min_index <= ord(Oct_3) and ord(Oct_3) <= rolling_window_max_index ).. Import_elec_profile(Oct_3) =l= Cap_3("10");
+Nov_3_eqn(Nov_3)$( rolling_window_min_index <= ord(Nov_3) and ord(Nov_3) <= rolling_window_max_index ).. Import_elec_profile(Nov_3) =l= Cap_3("11");
+Dec_3_eqn(Dec_3)$( rolling_window_min_index <= ord(Dec_3) and ord(Dec_3) <= rolling_window_max_index ).. Import_elec_profile(Dec_3) =l= Cap_3("12");
 *************************
 **** Demand Charge 4 ****
-Jan_4_eqn(Jan_4)$( rolling_window_min_index <= ord(Jan_4) and ord(Jan_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jan_4,devices)) =l= Cap_4("1");
-Feb_4_eqn(Feb_4)$( rolling_window_min_index <= ord(Feb_4) and ord(Feb_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Feb_4,devices)) =l= Cap_4("2");
-Mar_4_eqn(Mar_4)$( rolling_window_min_index <= ord(Mar_4) and ord(Mar_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Mar_4,devices)) =l= Cap_4("3");
-Apr_4_eqn(Apr_4)$( rolling_window_min_index <= ord(Apr_4) and ord(Apr_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Apr_4,devices)) =l= Cap_4("4");
-May_4_eqn(May_4)$( rolling_window_min_index <= ord(May_4) and ord(May_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(May_4,devices)) =l= Cap_4("5");
-Jun_4_eqn(Jun_4)$( rolling_window_min_index <= ord(Jun_4) and ord(Jun_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jun_4,devices)) =l= Cap_4("6");
-Jul_4_eqn(Jul_4)$( rolling_window_min_index <= ord(Jul_4) and ord(Jul_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jul_4,devices)) =l= Cap_4("7");
-Aug_4_eqn(Aug_4)$( rolling_window_min_index <= ord(Aug_4) and ord(Aug_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Aug_4,devices)) =l= Cap_4("8");
-Sep_4_eqn(Sep_4)$( rolling_window_min_index <= ord(Sep_4) and ord(Sep_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Sep_4,devices)) =l= Cap_4("9");
-Oct_4_eqn(Oct_4)$( rolling_window_min_index <= ord(Oct_4) and ord(Oct_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Oct_4,devices)) =l= Cap_4("10");
-Nov_4_eqn(Nov_4)$( rolling_window_min_index <= ord(Nov_4) and ord(Nov_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Nov_4,devices)) =l= Cap_4("11");
-Dec_4_eqn(Dec_4)$( rolling_window_min_index <= ord(Dec_4) and ord(Dec_4) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Dec_4,devices)) =l= Cap_4("12");
+Jan_4_eqn(Jan_4)$( rolling_window_min_index <= ord(Jan_4) and ord(Jan_4) <= rolling_window_max_index ).. Import_elec_profile(Jan_4) =l= Cap_4("1");
+Feb_4_eqn(Feb_4)$( rolling_window_min_index <= ord(Feb_4) and ord(Feb_4) <= rolling_window_max_index ).. Import_elec_profile(Feb_4) =l= Cap_4("2");
+Mar_4_eqn(Mar_4)$( rolling_window_min_index <= ord(Mar_4) and ord(Mar_4) <= rolling_window_max_index ).. Import_elec_profile(Mar_4) =l= Cap_4("3");
+Apr_4_eqn(Apr_4)$( rolling_window_min_index <= ord(Apr_4) and ord(Apr_4) <= rolling_window_max_index ).. Import_elec_profile(Apr_4) =l= Cap_4("4");
+May_4_eqn(May_4)$( rolling_window_min_index <= ord(May_4) and ord(May_4) <= rolling_window_max_index ).. Import_elec_profile(May_4) =l= Cap_4("5");
+Jun_4_eqn(Jun_4)$( rolling_window_min_index <= ord(Jun_4) and ord(Jun_4) <= rolling_window_max_index ).. Import_elec_profile(Jun_4) =l= Cap_4("6");
+Jul_4_eqn(Jul_4)$( rolling_window_min_index <= ord(Jul_4) and ord(Jul_4) <= rolling_window_max_index ).. Import_elec_profile(Jul_4) =l= Cap_4("7");
+Aug_4_eqn(Aug_4)$( rolling_window_min_index <= ord(Aug_4) and ord(Aug_4) <= rolling_window_max_index ).. Import_elec_profile(Aug_4) =l= Cap_4("8");
+Sep_4_eqn(Sep_4)$( rolling_window_min_index <= ord(Sep_4) and ord(Sep_4) <= rolling_window_max_index ).. Import_elec_profile(Sep_4) =l= Cap_4("9");
+Oct_4_eqn(Oct_4)$( rolling_window_min_index <= ord(Oct_4) and ord(Oct_4) <= rolling_window_max_index ).. Import_elec_profile(Oct_4) =l= Cap_4("10");
+Nov_4_eqn(Nov_4)$( rolling_window_min_index <= ord(Nov_4) and ord(Nov_4) <= rolling_window_max_index ).. Import_elec_profile(Nov_4) =l= Cap_4("11");
+Dec_4_eqn(Dec_4)$( rolling_window_min_index <= ord(Dec_4) and ord(Dec_4) <= rolling_window_max_index ).. Import_elec_profile(Dec_4) =l= Cap_4("12");
 *************************
 **** Demand Charge 5 ****
-Jan_5_eqn(Jan_5)$( rolling_window_min_index <= ord(Jan_5) and ord(Jan_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jan_5,devices)) =l= Cap_5("1");
-Feb_5_eqn(Feb_5)$( rolling_window_min_index <= ord(Feb_5) and ord(Feb_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Feb_5,devices)) =l= Cap_5("2");
-Mar_5_eqn(Mar_5)$( rolling_window_min_index <= ord(Mar_5) and ord(Mar_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Mar_5,devices)) =l= Cap_5("3");
-Apr_5_eqn(Apr_5)$( rolling_window_min_index <= ord(Apr_5) and ord(Apr_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Apr_5,devices)) =l= Cap_5("4");
-May_5_eqn(May_5)$( rolling_window_min_index <= ord(May_5) and ord(May_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(May_5,devices)) =l= Cap_5("5");
-Jun_5_eqn(Jun_5)$( rolling_window_min_index <= ord(Jun_5) and ord(Jun_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jun_5,devices)) =l= Cap_5("6");
-Jul_5_eqn(Jul_5)$( rolling_window_min_index <= ord(Jul_5) and ord(Jul_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jul_5,devices)) =l= Cap_5("7");
-Aug_5_eqn(Aug_5)$( rolling_window_min_index <= ord(Aug_5) and ord(Aug_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Aug_5,devices)) =l= Cap_5("8");
-Sep_5_eqn(Sep_5)$( rolling_window_min_index <= ord(Sep_5) and ord(Sep_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Sep_5,devices)) =l= Cap_5("9");
-Oct_5_eqn(Oct_5)$( rolling_window_min_index <= ord(Oct_5) and ord(Oct_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Oct_5,devices)) =l= Cap_5("10");
-Nov_5_eqn(Nov_5)$( rolling_window_min_index <= ord(Nov_5) and ord(Nov_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Nov_5,devices)) =l= Cap_5("11");
-Dec_5_eqn(Dec_5)$( rolling_window_min_index <= ord(Dec_5) and ord(Dec_5) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Dec_5,devices)) =l= Cap_5("12");
+Jan_5_eqn(Jan_5)$( rolling_window_min_index <= ord(Jan_5) and ord(Jan_5) <= rolling_window_max_index ).. Import_elec_profile(Jan_5) =l= Cap_5("1");
+Feb_5_eqn(Feb_5)$( rolling_window_min_index <= ord(Feb_5) and ord(Feb_5) <= rolling_window_max_index ).. Import_elec_profile(Feb_5) =l= Cap_5("2");
+Mar_5_eqn(Mar_5)$( rolling_window_min_index <= ord(Mar_5) and ord(Mar_5) <= rolling_window_max_index ).. Import_elec_profile(Mar_5) =l= Cap_5("3");
+Apr_5_eqn(Apr_5)$( rolling_window_min_index <= ord(Apr_5) and ord(Apr_5) <= rolling_window_max_index ).. Import_elec_profile(Apr_5) =l= Cap_5("4");
+May_5_eqn(May_5)$( rolling_window_min_index <= ord(May_5) and ord(May_5) <= rolling_window_max_index ).. Import_elec_profile(May_5) =l= Cap_5("5");
+Jun_5_eqn(Jun_5)$( rolling_window_min_index <= ord(Jun_5) and ord(Jun_5) <= rolling_window_max_index ).. Import_elec_profile(Jun_5) =l= Cap_5("6");
+Jul_5_eqn(Jul_5)$( rolling_window_min_index <= ord(Jul_5) and ord(Jul_5) <= rolling_window_max_index ).. Import_elec_profile(Jul_5) =l= Cap_5("7");
+Aug_5_eqn(Aug_5)$( rolling_window_min_index <= ord(Aug_5) and ord(Aug_5) <= rolling_window_max_index ).. Import_elec_profile(Aug_5) =l= Cap_5("8");
+Sep_5_eqn(Sep_5)$( rolling_window_min_index <= ord(Sep_5) and ord(Sep_5) <= rolling_window_max_index ).. Import_elec_profile(Sep_5) =l= Cap_5("9");
+Oct_5_eqn(Oct_5)$( rolling_window_min_index <= ord(Oct_5) and ord(Oct_5) <= rolling_window_max_index ).. Import_elec_profile(Oct_5) =l= Cap_5("10");
+Nov_5_eqn(Nov_5)$( rolling_window_min_index <= ord(Nov_5) and ord(Nov_5) <= rolling_window_max_index ).. Import_elec_profile(Nov_5) =l= Cap_5("11");
+Dec_5_eqn(Dec_5)$( rolling_window_min_index <= ord(Dec_5) and ord(Dec_5) <= rolling_window_max_index ).. Import_elec_profile(Dec_5) =l= Cap_5("12");
 *************************
 **** Demand Charge 6 ****
-Jan_6_eqn(Jan_6)$( rolling_window_min_index <= ord(Jan_6) and ord(Jan_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jan_6,devices)) =l= Cap_6("1");
-Feb_6_eqn(Feb_6)$( rolling_window_min_index <= ord(Feb_6) and ord(Feb_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Feb_6,devices)) =l= Cap_6("2");
-Mar_6_eqn(Mar_6)$( rolling_window_min_index <= ord(Mar_6) and ord(Mar_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Mar_6,devices)) =l= Cap_6("3");
-Apr_6_eqn(Apr_6)$( rolling_window_min_index <= ord(Apr_6) and ord(Apr_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Apr_6,devices)) =l= Cap_6("4");
-May_6_eqn(May_6)$( rolling_window_min_index <= ord(May_6) and ord(May_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(May_6,devices)) =l= Cap_6("5");
-Jun_6_eqn(Jun_6)$( rolling_window_min_index <= ord(Jun_6) and ord(Jun_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jun_6,devices)) =l= Cap_6("6");
-Jul_6_eqn(Jul_6)$( rolling_window_min_index <= ord(Jul_6) and ord(Jul_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Jul_6,devices)) =l= Cap_6("7");
-Aug_6_eqn(Aug_6)$( rolling_window_min_index <= ord(Aug_6) and ord(Aug_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Aug_6,devices)) =l= Cap_6("8");
-Sep_6_eqn(Sep_6)$( rolling_window_min_index <= ord(Sep_6) and ord(Sep_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Sep_6,devices)) =l= Cap_6("9");
-Oct_6_eqn(Oct_6)$( rolling_window_min_index <= ord(Oct_6) and ord(Oct_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Oct_6,devices)) =l= Cap_6("10");
-Nov_6_eqn(Nov_6)$( rolling_window_min_index <= ord(Nov_6) and ord(Nov_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Nov_6,devices)) =l= Cap_6("11");
-Dec_6_eqn(Dec_6)$( rolling_window_min_index <= ord(Dec_6) and ord(Dec_6) <= rolling_window_max_index ).. sum(devices, input_power_MW_non_ren(Dec_6,devices)) =l= Cap_6("12");
+Jan_6_eqn(Jan_6)$( rolling_window_min_index <= ord(Jan_6) and ord(Jan_6) <= rolling_window_max_index ).. Import_elec_profile(Jan_6) =l= Cap_6("1");
+Feb_6_eqn(Feb_6)$( rolling_window_min_index <= ord(Feb_6) and ord(Feb_6) <= rolling_window_max_index ).. Import_elec_profile(Feb_6) =l= Cap_6("2");
+Mar_6_eqn(Mar_6)$( rolling_window_min_index <= ord(Mar_6) and ord(Mar_6) <= rolling_window_max_index ).. Import_elec_profile(Mar_6) =l= Cap_6("3");
+Apr_6_eqn(Apr_6)$( rolling_window_min_index <= ord(Apr_6) and ord(Apr_6) <= rolling_window_max_index ).. Import_elec_profile(Apr_6) =l= Cap_6("4");
+May_6_eqn(May_6)$( rolling_window_min_index <= ord(May_6) and ord(May_6) <= rolling_window_max_index ).. Import_elec_profile(May_6) =l= Cap_6("5");
+Jun_6_eqn(Jun_6)$( rolling_window_min_index <= ord(Jun_6) and ord(Jun_6) <= rolling_window_max_index ).. Import_elec_profile(Jun_6) =l= Cap_6("6");
+Jul_6_eqn(Jul_6)$( rolling_window_min_index <= ord(Jul_6) and ord(Jul_6) <= rolling_window_max_index ).. Import_elec_profile(Jul_6) =l= Cap_6("7");
+Aug_6_eqn(Aug_6)$( rolling_window_min_index <= ord(Aug_6) and ord(Aug_6) <= rolling_window_max_index ).. Import_elec_profile(Aug_6) =l= Cap_6("8");
+Sep_6_eqn(Sep_6)$( rolling_window_min_index <= ord(Sep_6) and ord(Sep_6) <= rolling_window_max_index ).. Import_elec_profile(Sep_6) =l= Cap_6("9");
+Oct_6_eqn(Oct_6)$( rolling_window_min_index <= ord(Oct_6) and ord(Oct_6) <= rolling_window_max_index ).. Import_elec_profile(Oct_6) =l= Cap_6("10");
+Nov_6_eqn(Nov_6)$( rolling_window_min_index <= ord(Nov_6) and ord(Nov_6) <= rolling_window_max_index ).. Import_elec_profile(Nov_6) =l= Cap_6("11");
+Dec_6_eqn(Dec_6)$( rolling_window_min_index <= ord(Dec_6) and ord(Dec_6) <= rolling_window_max_index ).. Import_elec_profile(Dec_6) =l= Cap_6("12");
 *************************
 
-* FIX LOAD_PROFILE and interactions with input_ren and input_non_ren (equation makes input_power not equal to input_ren+input_non_ren)
-input_capacity_limit_eqn2(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
-         input_power_MW_ren(interval,devices) + input_power_MW_non_ren(interval,devices)-input_power_MW(interval,devices) =e= Load_profile(interval);
-*         input_power_MW_ren(interval)-Load_profile(interval)+input_power_MW_non_ren(interval)-renewable_power_MW_sold(interval) =e= input_power_MW(interval);
-*         input_power_MW_ren(interval)-Load_profile(interval)+input_power_MW_non_ren(interval) =e= input_power_MW(interval);
+input_capacity_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+         Import_elec_profile(interval) =e= sum(devices,input_power_MW_non_ren(interval,devices)) + Load_profile_non_ren(interval);
 
 input_capacity_limit_eqn3(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and allow_import=0)..
-         input_power_MW_non_ren(interval,devices) =e= 0;
+         Import_elec_profile(interval) =e= 0;
 
 input_ren_contribution(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
-         sum(devices,input_power_MW_ren(interval,devices)) + sum(devices_ren,renewable_power_MW_sold(interval,devices_ren)) =l= sum(devices_ren,Renewable_power(interval,devices_ren));
+         sum(devices,input_power_MW_ren(interval,devices)) + sum(devices_ren,renewable_power_MW_sold(interval,devices_ren)) + Load_profile_ren(interval) =l= sum(devices_ren,Renewable_power(interval,devices_ren));
 *         input_power_MW_ren(interval) =l= Renewable_power(interval);
 
 input_regup_limit_eqn(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
@@ -1001,6 +1005,9 @@ input_spinres_limit_eqn(interval,devices)$( rolling_window_min_index <= ord(inte
 input_nonspinres_limit_eqn(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          input_nonspinres_MW(interval,devices) =l= Max_input_cap(interval,devices) * input_capacity_MW(devices) * input_nonspinres_limit_fraction(devices);
 *         input_nonspinres_MW(interval) =l= input_capacity_MW * input_nonspinres_limit_fraction;
+
+load_profile_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
+         Load_profile(interval) =e= Load_profile_non_ren(interval) + Load_profile_ren(interval);
 
 storage_level_accounting_init_eqn(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices) > 0 and baseload_operation(devices)=0 and ord(interval)=1)..
          storage_level_MWh(interval,devices)+storage_level_MWh_ren(interval,devices) =e= storage_init(devices)*storage_capacity_hours(devices)*input_capacity_MW(devices)
@@ -1147,6 +1154,9 @@ H2_sold_non_ren.l(interval,devices)      = 0;
 H2_sold_ren.l(interval,devices)          = 0;
 H2_sold_daily.l(days,devices)            = 0;
 renewable_power_MW_sold.l(interval,devices_ren)= 0;
+Import_elec_profile.l(interval)          = 0;
+Load_profile_non_ren.l(interval)         = 1;
+Load_profile_ren.l(interval)             = 1;
 loop(devices,
     if(H2_use(devices) = 2,
          H2_sold_daily.l(days,devices)   = 24;
@@ -1192,6 +1202,9 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
          H2_sold_ren.fx(interval,devices)          = H2_sold_ren.l(interval,devices)      ;
          H2_sold_daily.fx(days,devices)            = H2_sold_daily.l(days,devices)        ;
          renewable_power_MW_sold.fx(interval,devices_ren)= renewable_power_MW_sold.l(interval,devices_ren);
+         Import_elec_profile.fx(interval)          = Import_elec_profile.l(interval);
+         Load_profile_non_ren.fx(interval)         = Load_profile_non_ren.l(interval);
+         Load_profile_ren.fx(interval)             = Load_profile_ren.l(interval);
 
 *        calculate the min and max indices for the rolling window
          operating_period_min_index = ( solve_index-1 ) * operating_period_length + 1;
@@ -1225,6 +1238,9 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
          H2_sold_ren.lo(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )          = 0;
          H2_sold_daily.lo(days,devices)$(H2_use(devices)=2)                                                                                    = 0;
          renewable_power_MW_sold.lo(interval,devices_ren)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)= 0;
+         Import_elec_profile.lo(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)             = 0;
+         Load_profile_non_ren.lo(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)            = 0;
+         Load_profile_ren.lo(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)                = 0;
 
          output_power_MW.up(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )      =  inf;
          output_power_MW_non_ren.up(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ) =  inf;
@@ -1251,6 +1267,9 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
          H2_sold_ren.up(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )          = inf;
          H2_sold_daily.up(days,devices)$(H2_use(devices)=2)                                                                                    = inf;
          renewable_power_MW_sold.up(interval,devices_ren)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)= inf;
+         Import_elec_profile.up(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)             = inf;
+         Load_profile_non_ren.up(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)            = inf;
+         Load_profile_ren.up(interval)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index)                = inf;
 
          Solve arbitrage_and_AS using MIP maximizing operating_profit;
 
@@ -1400,7 +1419,7 @@ Timed_dem_6_cost = -sum(months, cap_6.l(months) * Timed_dem("6"));
 Meter_cost = -(meter_mnth_chg("1") * 12);
 
 
-curtailment(interval) = sum(devices_ren, Renewable_power(interval,devices_ren) - renewable_power_MW_sold.l(interval,devices_ren)) - sum(devices,input_power_MW_ren.l(interval,devices));
+curtailment(interval) = sum(devices_ren, Renewable_power(interval,devices_ren) - renewable_power_MW_sold.l(interval,devices_ren)) - sum(devices,input_power_MW_ren.l(interval,devices)) - Load_profile_ren.l(interval);
 curtailment_sum       = sum(interval, curtailment(interval) * interval_length );
 
 elec_in_MWh     = sum((interval,devices), input_power_MW.l(interval,devices)  * interval_length ) + sum(interval, Load_profile(interval) * interval_length ) ;
@@ -1452,7 +1471,7 @@ arbitrage_revenue_vec(devices) = sum(interval,
                         - VOM_cost * output_power_MW.l(interval,devices) * interval_length
                         );
 renewable_sales_vec(devices_ren) = sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) * interval_length );
-arbitrage_revenue = sum(devices, arbitrage_revenue_vec(devices));
+arbitrage_revenue = sum(devices, arbitrage_revenue_vec(devices)) - sum(interval,elec_purchase_price(interval) * Load_profile_non_ren.l(interval));
 renewable_sales = sum(devices_ren, renewable_sales_vec(devices_ren));
 
 ***** Have to add renewables that were sent through input devices
@@ -1651,7 +1670,7 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'startup cost ($/MW-start), ',      sum(devices, output_startup_cost(devices)):0:10 /;
                  put 'minimum run intervals, ',          min_output_on_intervals /;
                  put /;
-                 put 'Int, Elec Purchase ($/MWh), Elec Sale ($/MWh), Reg Up ($/MW), Reg Dn ($/MW), Spin Res ($/MW), Nonspin Res ($/MW), Nat Gas ($/MMBTU), H2 ($/kg), Renewable In (MW), Load Profile (MW), Input Cap, Output Cap, Meter ($/mth)' /;
+                 put 'Int,Elec Purchase ($/MWh),Elec Sale ($/MWh),Reg Up ($/MW),Reg Dn ($/MW),Spin Res ($/MW),Nonspin Res ($/MW),Nat Gas ($/MMBTU),H2 ($/kg),Renewable In (MW),Load Profile (MW),Input Cap, Output Cap,Meter ($/mth)' /;
 *                put 'Int, Elec Purchase ($/MWh), Elec Sale ($/MWh), Reg Up ($/MW), Reg Dn ($/MW), Spin Res ($/MW), Nonspin Res ($/MW), Nat Gas ($/MMBTU), H2 ($/kg), Renewable In (MW), Load Profile (MW), Meter ($/mth)' /;
                  loop(interval, put      ord(interval),',',
                                          elec_purchase_price(interval),',',
@@ -1669,7 +1688,7 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                                          meter_mnth_chg(interval) /;
                  );
 
-         if ( max_max_cap>100, results_file.nd = 2; else results_file.nd = 4; );
+         if ( max_max_cap>100, results_file.nd = 2; elseif max_max_cap>10, results_file.nd = 4; elseif max_max_cap>0.1, results_file.nd = 6; else results_file.nd = 8;);
          results_file.pw = 10000;
          put results_file;
                  PUT 'Run on a %system.filesys% machine on %system.date% %system.time%.' /;
@@ -1706,8 +1725,8 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'LCFS revenue ($), ',                       LCFS_revenue /;
                  put 'startup costs ($), ',                      startup_costs /;
                  put /;
-                 put 'Interval, Input Power (MW), Output Power (MW), Storage Level (MW-h), Input Reg Up (MW), Output Reg Up (MW), Input Reg Dn (MW), Output Reg Dn (MW), Input Spin (MW), Output Spin (MW), Input Nonspin (MW), Output Nonspin (MW),'
-                 put 'H2 Sold (kg), Non-Ren Import (MW), Renewable Input (MW), Renewables Sold (MW), Curtailment (MW)'/;
+                 put 'Interval,Input Power (MW),Output Power (MW),Storage Level (MW-h),Input Reg Up (MW),Output Reg Up (MW),Input Reg Dn (MW),Output Reg Dn (MW),Input Spin (MW),Output Spin (MW),Input Nonspin (MW),Output Nonspin (MW),'
+                 put 'H2 Sold (kg),Non-Ren Import (MW),Load Profile (MW),Renewable Input (MW),Renewables Sold (MW),Curtailment (MW)'/;
 *                 put 'Interval, In Pwr (MW), Out Pwr (MW), Storage Lvl (MW-h), In Reg Up (MW), Out Reg Up (MW), In Reg Dn (MW), Out Reg Dn (MW), In Spin (MW), Out Spin (MW), In Nonspin (MW), Out Nonspin (MW), H2 Out (kg), Non-Ren In (MW), Ren In (MW), Ren Sold (MW), Curt (MW)'/;
                  loop(interval, put      ord(interval),',',
                                          sum(devices, input_power_MW.l(interval,devices)),',',
@@ -1722,13 +1741,14 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                                          sum(devices, input_nonspinres_MW.l(interval,devices)),',',
                                          sum(devices, output_nonspinres_MW.l(interval,devices)),',',
                                          sum(devices, H2_sold.l(interval,devices)),',',
-                                         sum(devices, input_power_MW_non_ren.l(interval,devices)),',',
+                                         Import_elec_profile.l(interval),',',
+                                         Load_profile(interval),',',
                                          sum(devices_ren, Renewable_power(interval,devices_ren)),',',
                                          sum(devices_ren, renewable_power_MW_sold.l(interval,devices_ren)),',',
                                          curtailment(interval) /;
                  );
 
-         summary_file.nd = 4;
+         summary_file.nd = 8;
          put summary_file;
                  PUT 'Run on a %system.filesys% machine on %system.date% %system.time%.' /;
                  put 'Optimal solution found within time limit:,',
