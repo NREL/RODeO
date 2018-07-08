@@ -1,16 +1,16 @@
-Run on a MSNT machine on 07/06/18 14:34:06.
+Run on a MSNT machine on 07/07/18 18:56:08.
 Optimal solution found within time limit:,Yes
 
-Renewable Capacity (MW),     240.0000
-Renewable Penetration for Input (%),       0.4989
+Renewable Capacity (MW),     120.0000
+Renewable Penetration for Input (%),       0.3718
 interval length (hours),       1.0000
 operating period length (hours),    8760.0000
 additional look-ahead (hours),       0.0000
-output capacity (MW),     200.0000
-input capacity (MW),     300.0000
-storage capacity (hours),      16.0000
-input efficiency (%),       1.4137
-output efficiency (%),       1.2000
+output capacity (MW),     215.0000
+input capacity (MW),     315.0000
+storage capacity (hours),      24.0000
+input efficiency (%),       2.5110
+output efficiency (%),       2.2974
 input heat rate (MMBtu/MWh),       0.0000
 ouptut heat rate (MMBtu/MWh),       0.0000
 variable O&M cost,       0.0000
@@ -19,65 +19,65 @@ hydrogen use,       1.0000
 
 input
 LSL limit fraction,       0.0000
-reg up limit fraction,       0.0000
-reg down limit fraction,       0.0000
-spining reserve limit fraction,       0.0000
+reg up limit fraction,       2.0000
+reg down limit fraction,       2.0000
+spining reserve limit fraction,       2.0000
 startup cost ($/MW-start), 0.0000000000
 minimum run intervals,       0.0000
 
 output
-LSL limit fraction,       0.0000
-reg up limit fraction,       0.0000
-reg down limit fraction,       0.0000
-spining reserve limit fraction,       0.0000
+LSL limit fraction,       0.1000
+reg up limit fraction,       2.0000
+reg down limit fraction,       2.0000
+spining reserve limit fraction,       2.0000
 startup cost ($/MW-start), 0.0000000000
 minimum run intervals,       0.0000
 
-actual operating profit ($), -6.487542E+7
-total electricity input (MWh),  848455.6355
-total electricity output (MWh),   39488.7332
-output to input ratio,       0.0465
-input capacity factor,       0.3229
-output capacity factor,       0.0225
-average regup (MW),       0.0000
-average regdn (MW),       0.0000
-average spinres (MW),       0.0000
-average nonspinres (MW),       0.0000
-number of input power system starts,   17520.0000
-number of output power system starts,   17520.0000
-arbitrage revenue ($),-3.358687E+7
-regup revenue ($),       0.0000
-regdn revenue ($),       0.0000
-spinres revenue ($),       0.0000
-nonspinres revenue ($),       0.0000
+actual operating profit ($), -6.389119E+7
+total electricity input (MWh),  792779.7863
+total electricity output (MWh),    3936.1312
+output to input ratio,       0.0050
+input capacity factor,       0.2873
+output capacity factor,       0.0021
+average regup (MW),     106.4389
+average regdn (MW),     107.3052
+average spinres (MW),       1.2275
+average nonspinres (MW),     107.3590
+number of input power system starts,   26280.0000
+number of output power system starts,   26280.0000
+arbitrage revenue ($),-4.236637E+7
+regup revenue ($), 8301264.1486
+regdn revenue ($), 4629145.1028
+spinres revenue ($),   86301.0685
+nonspinres revenue ($),  114338.5500
 hydrogen revenue ($), 8.7116719E+7
-REC revenue ($), 2598721.9355
-LCFS revenue ($), 2.3615761E+7
+REC revenue ($),  102057.2234
+LCFS revenue ($), 2.1543984E+7
 startup costs ($),       0.0000
-Fixed demand charge ($), -1.853587E+7
+Fixed demand charge ($), -1.915141E+7
 Timed demand charge 1 ($),       0.0000
-Timed demand charge 2 ($),  -24757.7520
-Timed demand charge 3 ($),  -19553.7171
+Timed demand charge 2 ($),  -24906.5693
+Timed demand charge 3 ($), -516349.8519
 Timed demand charge 4 ($),       0.0000
 Timed demand charge 5 ($),       0.0000
 Timed demand charge 6 ($),       0.0000
 Meter cost ($),  -14390.1600
-Renewable annualized capital cost ($), -3.042473E+7
-Input annualized capital cost ($), -4.788553E+7
+Renewable annualized capital cost ($), -1.521236E+7
+Input annualized capital cost ($), -5.400219E+7
 Output annualized capital cost ($),       0.0000
 Hydrogen storage annualized cost ($), -1.251619E+6
-Renewable FOM cost ($), -271851.6261
-Input FOM cost ($), -5.314699E+7
+Renewable FOM cost ($), -135925.8131
+Input FOM cost ($), -5.341273E+7
 Output FOM cost ($),       0.0000
 Renewable VOM cost ($),       0.0000
 Input VOM cost ($),       0.0000
 Output VOM cost ($),       0.0000
-Renewable sales ($), 6955530.3828
-Renewable Penetration net meter (%),       0.7083
+Renewable sales ($),  303259.9814
+Renewable Penetration net meter (%),       0.3790
 Curtailment (MWh),       0.0000
-Storage revenue ($), -2.522098E+7
-Renewable only revenue ($), 2.1264988E+7
-Renewable max revenue ($), 1.0632494E+7
-Renewable Electricity Input (MWh),  600965.1597
-Electricity Import (MWh),  425201.9040
+Storage revenue ($), -2.576200E+7
+Renewable only revenue ($), 1.0632494E+7
+Renewable max revenue ($), 5316247.0735
+Renewable Electricity Input (MWh),  300482.5798
+Electricity Import (MWh),  497994.5502
 

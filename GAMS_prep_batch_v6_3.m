@@ -17,8 +17,9 @@ clear all, close all, clc
 disp(['Prepare data...'])
 
 % Project_name = 'Central_vs_distributed';
-Project_name = 'Solar_Hydrogen';
 % Project_name = 'Example';
+% Project_name = 'Solar_Hydrogen';
+Project_name = 'Test';
 
 dir1 = 'C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\';   % Set directory to send files
 dir2 = [dir1,'Projects\',Project_name,'\Batch_files\'];
@@ -62,7 +63,104 @@ files_add_load2=files_add_load2(find(load_file1));    clear load_file1 files_add
 
 %% SECTION 2: Set values to vary by scenario
 disp(['Set batch file values...'])
-if strcmp(Project_name,'Solar_Hydrogen')
+if strcmp(Project_name,'Test')
+%%% Test
+    Batch_header.elec_rate_instance.val = {'5a3430585457a3e3595c48a2_hourly'};
+    Batch_header.H2_consumed_instance.val = {'H2_consumption_flat_hourly'};        
+    Batch_header.baseload_pwr_instance.val = {'Input_power_baseload_hourly'};        
+    Batch_header.NG_price_instance.val = {'NG_price_Price1_hourly'};        
+    Batch_header.ren_prof_instance.val = {'renewable_profiles_PV_hourly'};
+    Batch_header.load_prof_instance.val = {'Additional_load_none_hourly'};
+    Batch_header.energy_price_inst.val = {'Energy_prices_Wholesale_MWh_hourly'};
+    Batch_header.AS_price_inst.val = {'Ancillary_services_PGE2014_hourly'};
+    [status,msg] = mkdir(outdir);       % Create output file if it doesn't exist yet  
+    Batch_header.outdir.val = {outdir}; % Reference is dynamic from location of batch file (i.e., exclude 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
+    Batch_header.indir.val = {indir};   % Reference is dynamic from location of batch file (i.e., exclude 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
+
+    Batch_header.gas_price_instance.val = {'NA'};
+    Batch_header.zone_instance.val = {'NA'};
+    Batch_header.year_instance.val = {'NA'};
+
+    Batch_header.input_cap_instance.val = {'0','100'};
+    Batch_header.output_cap_instance.val = {'0'};
+    Batch_header.price_cap_instance.val = {'10000'};
+
+    Batch_header.Apply_input_cap_inst.val = {'0'};
+    Batch_header.Apply_output_cap_inst.val = {'0'};
+    Batch_header.max_output_cap_inst.val = {'inf'};
+    Batch_header.allow_import_instance.val = {'1','0'};
+
+    Batch_header.input_LSL_instance.val = {'0.1'};
+    Batch_header.output_LSL_instance.val = {'0'};
+    Batch_header.Input_start_cost_inst.val = {'0'};
+    Batch_header.Output_start_cost_inst.val = {'0'};
+    Batch_header.input_efficiency_inst.val = {'0.613668913'};
+    Batch_header.output_efficiency_inst.val = {'1'};
+   
+    Batch_header.renew_cap_cost_inst.val = {'1343000'};
+    Batch_header.input_cap_cost_inst.val = {'1691000'};
+    Batch_header.output_cap_cost_inst.val = {'0'};
+    Batch_header.H2stor_cap_cost_inst.val = {'1000'};
+    Batch_header.renew_FOM_cost_inst.val = {'12000'};
+    Batch_header.input_FOM_cost_inst.val = {'93840'};
+    Batch_header.output_FOM_cost_inst.val = {'0'};
+    Batch_header.renew_VOM_cost_inst.val = {'0'};
+    Batch_header.input_VOM_cost_inst.val = {'0'};
+    Batch_header.output_VOM_cost_inst.val = {'0'};
+
+    Batch_header.renew_lifetime_inst.val = {'20'};
+    Batch_header.input_lifetime_inst.val = {'20'};
+    Batch_header.output_lifetime_inst.val = {'0'};
+    Batch_header.H2stor_lifetime_inst.val = {'20'};
+    Batch_header.interest_rate_inst.val = {'0.07'};
+    Batch_header.renew_interest_rate_inst.val = {'0.07'};
+    Batch_header.H2stor_interest_rate_inst.val = {'0.07'};
+
+    Batch_header.in_heat_rate_instance.val = {'0'};
+    Batch_header.out_heat_rate_instance.val = {'0'};
+
+    Batch_header.storage_cap_instance.val = {'8'};
+    Batch_header.storage_set_instance.val = {'1'};
+    Batch_header.storage_init_instance.val = {'0.5'};
+    Batch_header.storage_final_instance.val = {'0.5'};
+    Batch_header.reg_cost_instance.val = {'0'};
+    Batch_header.min_runtime_instance.val = {'0'};
+    Batch_header.ramp_penalty_instance.val = {'0'};
+
+    Batch_header.op_length_instance.val = {'8760'};
+    Batch_header.op_period_instance.val = {'8760'};
+    Batch_header.int_length_instance.val = {'1'};
+
+    Batch_header.lookahead_instance.val = {'0'};
+    Batch_header.energy_only_instance.val = {'1'};        
+    Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
+    
+    Batch_header.H2_consume_adj_inst.val = {'0.9'};
+    Batch_header.H2_price_instance.val = {'2','3','6'};
+    Batch_header.H2_use_instance.val = {'1'};
+    Batch_header.base_op_instance.val = {'0'};
+    Batch_header.NG_price_adj_instance.val = {'1'};
+    Batch_header.Renewable_MW_instance.val = {'0','200'};
+    Batch_header.REC_price_instance.val = {'12'};
+    
+    Batch_header.CF_opt_instance.val = {'0','1'};
+    Batch_header.run_retail_instance.val = {'1'};
+    Batch_header.one_active_device_inst.val = {'1'};
+
+    Batch_header.current_int_instance.val = {'-1'};
+    Batch_header.next_int_instance.val = {'1'};
+    Batch_header.current_stor_intance.val = {'0.5'};
+    Batch_header.current_max_instance.val = {'0.8'};
+    Batch_header.max_int_instance.val = {'Inf'};
+    Batch_header.read_MPC_file_instance.val = {'0'}; 
+    
+    Batch_header.H2_EneDens_instance.val = {'120'};
+    Batch_header.H2_Gas_ratio_instance.val = {'2.5'};
+    Batch_header.Grid_CarbInt_instance.val = {'105'};
+    Batch_header.CI_base_line_instance.val = {'92.5'};
+    Batch_header.LCFS_price_instance.val = {'125'};   
+
+elseif strcmp(Project_name,'Solar_Hydrogen')
 %%% Solar_Hydrogen
     Batch_header.elec_rate_instance.val = {'5a3430585457a3e3595c48a2_hourly'};
     Batch_header.H2_consumed_instance.val = {'H2_consumption_flat_hourly'};        
