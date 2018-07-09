@@ -81,12 +81,14 @@ if strcmp(Project_name,'Test')
     Batch_header.zone_instance.val = {'NA'};
     Batch_header.year_instance.val = {'NA'};
 
+    Batch_header.devices_instance.val = 1;
+    Batch_header.devices_ren_instance.val = 1;
+    Batch_header.val_from_batch_inst.val = 1;
+
     Batch_header.input_cap_instance.val = {'0','100'};
     Batch_header.output_cap_instance.val = {'0'};
     Batch_header.price_cap_instance.val = {'10000'};
 
-    Batch_header.Apply_input_cap_inst.val = {'0'};
-    Batch_header.Apply_output_cap_inst.val = {'0'};
     Batch_header.max_output_cap_inst.val = {'inf'};
     Batch_header.allow_import_instance.val = {'1','0'};
 
@@ -136,7 +138,7 @@ if strcmp(Project_name,'Test')
     Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
     
     Batch_header.H2_consume_adj_inst.val = {'0.9'};
-    Batch_header.H2_price_instance.val = {'2','3','6'};
+    Batch_header.H2_price_instance.val = {'6'};
     Batch_header.H2_use_instance.val = {'1'};
     Batch_header.base_op_instance.val = {'0'};
     Batch_header.NG_price_adj_instance.val = {'1'};
@@ -182,8 +184,6 @@ elseif strcmp(Project_name,'Solar_Hydrogen')
     Batch_header.output_cap_instance.val = {'0'};
     Batch_header.price_cap_instance.val = {'10000'};
 
-    Batch_header.Apply_input_cap_inst.val = {'0'};
-    Batch_header.Apply_output_cap_inst.val = {'0'};
     Batch_header.max_output_cap_inst.val = {'inf'};
     Batch_header.allow_import_instance.val = {'1','0'};
 
@@ -275,6 +275,10 @@ elseif strcmp(Project_name,'Central_vs_distributed')
     Batch_header.zone_instance.val = {'NA'};
     Batch_header.year_instance.val = {'NA'};
 
+    Batch_header.devices_instance.val = 1;
+    Batch_header.devices_ren_instance.val = 1;
+    Batch_header.val_from_batch_inst.val = 1;
+
     % Input capacity and location relationship
     [~,~,raw0]=xlsread([indir,'\Match_inputcap_station']);  % Load file(s) 
     header1 = raw0(1,:);                                    % Pull out header file
@@ -287,8 +291,6 @@ elseif strcmp(Project_name,'Central_vs_distributed')
     Batch_header.output_cap_instance.val = {'0'};
     Batch_header.price_cap_instance.val = {'10000'};
 
-    Batch_header.Apply_input_cap_inst.val = {'0'};
-    Batch_header.Apply_output_cap_inst.val = {'0'};
     Batch_header.max_output_cap_inst.val = {'inf'};
     Batch_header.allow_import_instance.val = {'1'};
 
@@ -371,6 +373,13 @@ elseif strcmp(Project_name,'Central_vs_distributed')
     Batch_header.current_max_instance.val = {'0.8'};
     Batch_header.max_int_instance.val = {'Inf'};
     Batch_header.read_MPC_file_instance.val = {'0'}; 
+
+    Batch_header.H2_EneDens_instance.val = {'120'};
+    Batch_header.H2_Gas_ratio_instance.val = {'2.5'};
+    Batch_header.Grid_CarbInt_instance.val = {'105'};
+    Batch_header.CI_base_line_instance.val = {'92.5'};
+    Batch_header.LCFS_price_instance.val = {'125'};   
+
 elseif strcmp(Project_name,'Example')
 %%% Example
     Batch_header.elec_rate_instance.val         = strrep(files_tariff2,'.txt','');
@@ -389,12 +398,14 @@ elseif strcmp(Project_name,'Example')
     Batch_header.zone_instance.val              = {'NA'};
     Batch_header.year_instance.val              = {'NA'};
 
+    Batch_header.devices_instance.val = 1;
+    Batch_header.devices_ren_instance.val = 1;
+    Batch_header.val_from_batch_inst.val = 1;
+
     Batch_header.input_cap_instance.val         = {'1300'}; %{'0','1300','2600','3900'};
     Batch_header.output_cap_instance.val        = {'0'};
     Batch_header.price_cap_instance.val         = {'10000'};
 
-    Batch_header.Apply_input_cap_inst.val       = {'0'};
-    Batch_header.Apply_output_cap_inst.val      = {'0'};
     Batch_header.max_output_cap_inst.val        = {'inf'};
     Batch_header.allow_import_instance.val      = {'1'};
 
@@ -449,6 +460,13 @@ elseif strcmp(Project_name,'Example')
     Batch_header.current_max_instance.val       = {'0.8'};
     Batch_header.max_int_instance.val           = {'Inf'};
     Batch_header.read_MPC_file_instance.val     = {'0'};
+
+    Batch_header.H2_EneDens_instance.val = {'120'};
+    Batch_header.H2_Gas_ratio_instance.val = {'2.5'};
+    Batch_header.Grid_CarbInt_instance.val = {'105'};
+    Batch_header.CI_base_line_instance.val = {'92.5'};
+    Batch_header.LCFS_price_instance.val = {'0'};   
+
 else
 %%% Default
     Batch_header.elec_rate_instance.val = strrep(files_tariff2,'.txt','');
@@ -468,12 +486,14 @@ else
     Batch_header.zone_instance.val = {'NA'};
     Batch_header.year_instance.val = {'NA'};
 
+    Batch_header.devices_instance.val = 1;
+    Batch_header.devices_ren_instance.val = 1;
+    Batch_header.val_from_batch_inst.val = 1;
+
     Batch_header.input_cap_instance.val = {'1000'};
     Batch_header.output_cap_instance.val = {'0'};
     Batch_header.price_cap_instance.val = {'10000'};
 
-    Batch_header.Apply_input_cap_inst.val = {'0'};
-    Batch_header.Apply_output_cap_inst.val = {'0'};
     Batch_header.max_output_cap_inst.val = {'inf'};
     Batch_header.allow_import_instance.val = {'1'};
 
@@ -528,6 +548,13 @@ else
     Batch_header.current_max_instance.val = {'0.8'};
     Batch_header.max_int_instance.val = {'Inf'};
     Batch_header.read_MPC_file_instance.val = {'0'};
+    
+    Batch_header.H2_EneDens_instance.val = {'120'};
+    Batch_header.H2_Gas_ratio_instance.val = {'2.5'};
+    Batch_header.Grid_CarbInt_instance.val = {'105'};
+    Batch_header.CI_base_line_instance.val = {'92.5'};
+    Batch_header.LCFS_price_instance.val = {'0'};   
+
 end
 fields1 = fieldnames(Batch_header);
 
