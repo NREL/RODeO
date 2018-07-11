@@ -1554,6 +1554,8 @@ storage_level_MWh_tot(interval,devices) = storage_level_MWh.l(interval,devices)+
 
 if (1=0,
 option decimals=8;
+display elec_in_MWh_vec;
+display elec_output_MWh_vec;
 display fuel_cost_vec;
 display elec_cost_vec;
 display H2_revenue_vec;
@@ -1562,6 +1564,7 @@ display regdn_revenue_vec;
 display spinres_revenue_vec;
 display nonspinres_revenue_vec;
 display arbitrage_revenue_vec;
+display actual_operating_profit_vec;
 display Hydrogen_fraction_val;
 display current_interval;
 display next_interval;
