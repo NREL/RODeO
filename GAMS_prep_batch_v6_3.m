@@ -16,10 +16,10 @@
 clear all, close all, clc
 disp(['Prepare data...'])
 
-% Project_name = 'Central_vs_distributed';
+Project_name = 'Central_vs_distributed';
 % Project_name = 'Example';
 % Project_name = 'Solar_Hydrogen';
-Project_name = 'Test';
+% Project_name = 'Test';
 
 dir1 = 'C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\';   % Set directory to send files
 dir2 = [dir1,'Projects\',Project_name,'\Batch_files\'];
@@ -260,7 +260,15 @@ elseif strcmp(Project_name,'Solar_Hydrogen')
 elseif strcmp(Project_name,'Central_vs_distributed')
 %%% Central_vs_distributed
     Batch_header.elec_rate_instance.val = strrep(files_tariff2,'.txt','');
-    Batch_header.H2_consumed_instance.val = {'H2_consumption_central_hourly','H2_consumption_centralEarly_hourly','H2_consumption_distributed_hourly','H2_consumption_distributedEarly_hourly'};        
+
+    % H2 Consumption
+    [~,~,raw1]=xlsread([indir,'\Match_load_H2Cons']);       % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    H2_consumed_instance_values = unique(raw1(:,2));        % Find unique capacity values
+    H2_consumed_instance_values(strcmp(H2_consumed_instance_values,'NaN')) = [];	% Removes NaNs                        
+
+    Batch_header.H2_consumed_instance.val = H2_consumed_instance_values';        
     Batch_header.baseload_pwr_instance.val = {'Input_power_baseload_hourly'};        
     Batch_header.NG_price_instance.val = {'NG_price_Price1_hourly'};        
     Batch_header.ren_prof_instance.val = {'renewable_profiles_none_hourly'};

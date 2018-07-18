@@ -9,7 +9,7 @@ dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_d
 
 dir1 = [dir2,'CSV_data\'];      % Input folder
 [status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
-dir0 = [dir2,'TXT_files_HighEarly\'];     % Output folder
+dir0 = [dir2,'TXT_files\'];     % Output folder
 [status0,msg0] = mkdir(dir0);   % Create directory if it doesn't exist
 cd(dir1);
 
@@ -20,6 +20,8 @@ interval_length = 1;    % used to create sub-hourly data files (1, 4, or 12)
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
 % DST_year_end = datenum([2015,11,1,2,0,0]);  %Daylight savings time
 month_vec = {'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'};
+repeat_ren_signals   = 20;  % Used to prepare GAMS files for multiple devices
+repeat_other_signals = 20;  % Used to prepare GAMS files for multiple devices
 
 disp('Loading Files...')
 % Electricity price data (input any number of regions/nodes)
@@ -426,7 +428,7 @@ for i0=1
         dlmwrite([dir0,'Ancillary_services',add_txt1,'.csv'],num21,'-append');
 end
 
-%%% Create files with renewable profiles
+%%% Create files for Natural Gas price profile
 for i0=1:length(txt31)
         cHeader = {'Interval',txt31{i0}};                       % header
         commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
@@ -444,7 +446,8 @@ end
 
 %%% Create files with renewable profiles
 for i0=1:length(txt41)
-        cHeader = {'Interval',txt41{i0}};                       % header
+        cHeader_int = repmat(txt41(i0),1,repeat_ren_signals);   % Repeat to allow for multiple renewable devices
+        cHeader = {'Interval',cHeader_int{:}};                  % header
         commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
         commaHeader = commaHeader(:)';
         textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
@@ -455,7 +458,7 @@ for i0=1:length(txt41)
         fclose(fid);
 
         %write data to end of file
-        dlmwrite([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num41(:,i0+1)]],'-append');
+        dlmwrite([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num41(:,i0+1), zeros(Year_length,repeat_ren_signals-1)]],'-append');
 end   
 
 %%% Create files with baseload mode profiles
@@ -492,7 +495,8 @@ end
 
 %%% Create files with H2 price profiles
 for i0=1:length(txt10B)
-        cHeader = {'Interval',txt10B{i0}};          % header
+        cHeader_int =repmat(txt10B(i0),1,repeat_other_signals); % Repeat to allow for multiple renewable devices
+        cHeader = {'Interval',cHeader_int{:}};                  % header
         commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
         commaHeader = commaHeader(:)';
         textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
@@ -503,12 +507,13 @@ for i0=1:length(txt10B)
         fclose(fid);
 
         %write data to end of file
-        dlmwrite([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num10B(:,i0+1)]],'-append');
+        dlmwrite([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num10B(:,i0+1), zeros(Year_length,repeat_ren_signals-1)]],'-append');
 end
 
 %%% Create files with H2 consumption profiles
 for i0=1:length(txt11B)
-        cHeader = {'Interval',txt11B{i0}};          % header
+        cHeader_int =repmat(txt11B(i0),1,repeat_other_signals); % Repeat to allow for multiple renewable devices
+        cHeader = {'Interval',cHeader_int{:}};          % header
         commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
         commaHeader = commaHeader(:)';
         textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
@@ -519,7 +524,7 @@ for i0=1:length(txt11B)
         fclose(fid);
 
         %write data to end of file
-        dlmwrite([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num11B(:,i0+1)]],'-append');
+        dlmwrite([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num11B(:,i0+1), zeros(Year_length,repeat_ren_signals-1)]],'-append');
 end
 
 %%% Create controller input file

@@ -374,7 +374,7 @@ $LOAD H2_consumed2
 $GDXIN
 ;
 $call CSV2GDX %indir%\%baseload_pwr_instance%.csv Output=%indir%\%baseload_pwr_instance%.gdx ID=input_power_baseload UseHeader=y Index=1 Values=2
-parameter input_power_baseload(interval)   "Profile of baseload consumption"
+parameter input_power_baseload(interval)   "Profile of baseload consumption (UNUSED)" 
 $GDXIN %indir%\%baseload_pwr_instance%.gdx
 $LOAD input_power_baseload
 $GDXIN
