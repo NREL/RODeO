@@ -129,7 +129,7 @@ num51 = num5;  num51(isnan(num51)) = 0;         % fixed demand
 num61 = num6;  num61(isnan(num61)) = 0;         % timed demand
 num71 = num7;  num71(isnan(num71)) = 0;         % baseload mode profile
 num81 = num8;  num81(isnan(num81)) = 0;         % fixed charge
-num91 = num9;  num91(isnan(num91)) = 0;         % Load profile
+num91 = num9(3:end,:);  num91(isnan(num91)) = 0;         % Load profile
 num10B = num10A;  num10B(isnan(num10B)) = 0;    % H2 price
 num11B = num11A;  num11B(isnan(num11B)) = 0;    % H2 consumed
 
