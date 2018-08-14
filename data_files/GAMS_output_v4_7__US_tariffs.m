@@ -4,8 +4,9 @@ clear all, close all, clc
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage_UK_Prices\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Wind_farm_plus_storage\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\data_files\Redispatch_hourly\'];
-dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_distributed\Data_files\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_distributed\Data_files\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Example\Data_files\'];
+dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\VTA_bus_project\Data_files\'];
 
 dir1 = [dir2,'CSV_data\'];      % Input folder
 [status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
@@ -16,7 +17,7 @@ cd(dir1);
 % Prompt for which files to output
 Year_select = 2018;     % select year to be analyzed
 Year_length = ceil((datenum(Year_select,12,31,23,59,59)-datenum(Year_select,1,1,0,0,0))*24);   %8784;     % length of year in hours
-interval_length = 1;    % used to create sub-hourly data files (1, 4, or 12)
+interval_length = 4;    % used to create sub-hourly data files (1, 4, or 12)
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
 % DST_year_end = datenum([2015,11,1,2,0,0]);  %Daylight savings time
 month_vec = {'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'};
@@ -102,13 +103,23 @@ clear num10int
 
 % Load file with hydrogen consumption profiles
 [num11int,txt11A,raw11A] = xlsread('GAMS_hydrogen_consumed');
-[m11,n11] = size(num11int);
-num11int2 = num11int;     % Initialize num4
+[~,n11] = size(num11int);
+num11int2 = num11int;     % Initialize num11
 for i0=2:n11
     num11int2(:,i0) = num11int(:,i0)/sum(num11int(:,i0))*Year_length/24;
 end
 num11A = interpolate_matrix(num11int2,Year_length,interval_length,2);
-clear num11int num11int2 m11 n11
+clear num11int num11int2 n11
+
+% Load file with Max_input_cap profiles
+[num12int,txt12A,raw12A] = xlsread('GAMS_Max_input_cap');
+num12A = interpolate_matrix(num12int,Year_length,interval_length,2);
+clear num12int
+
+% Load file with Max_input_cap profiles
+[num13int,txt13A,raw13A] = xlsread('GAMS_Max_output_cap');
+num13A = interpolate_matrix(num13int,Year_length,interval_length,2);
+clear num13int
 
 % Load tariff file names
 [numA,txtA,rawA] = xlsread('tariff_property_list.csv');   
@@ -119,8 +130,8 @@ num1A1 = num1;
 num1A1(:,find(isnan(sum(num1)))) = [];          % Remove incomplete energy price nodes
 num1A1(isnan(num1A1)) = 0;                      % Remove NaN values
 num1C = num1B;
-num1C(:,find(isnan(sum(num1B)))) = [];         % Remove incomplete energy price nodes
-num1C(isnan(num1C)) = 0;                       % Energy price
+num1C(:,find(isnan(sum(num1B)))) = [];          % Remove incomplete energy price nodes
+num1C(isnan(num1C)) = 0;                        % Energy price
 
 num21 = num2;  num21(isnan(num21)) = 0;         % AS
 num31 = num3;  num31(isnan(num31)) = 0;         % Fuel price
@@ -129,9 +140,11 @@ num51 = num5;  num51(isnan(num51)) = 0;         % fixed demand
 num61 = num6;  num61(isnan(num61)) = 0;         % timed demand
 num71 = num7;  num71(isnan(num71)) = 0;         % baseload mode profile
 num81 = num8;  num81(isnan(num81)) = 0;         % fixed charge
-num91 = num9(3:end,:);  num91(isnan(num91)) = 0;         % Load profile
+num91 = num9;  num91(isnan(num91)) = 0;         % Load profile
 num10B = num10A;  num10B(isnan(num10B)) = 0;    % H2 price
 num11B = num11A;  num11B(isnan(num11B)) = 0;    % H2 consumed
+num12B = num12A;  num12B(isnan(num12B)) = 0;    % Max input cap
+num13B = num13A;  num13B(isnan(num13B)) = 0;    % Max output cap
 
 
 %% Clean and prepare text
@@ -149,6 +162,8 @@ txt71 = txt7(2,3:end);          % Baseload mode profile
 txt91 = txt9(2,3:end);          % Load profile
 txt10B = txt10A(2,3:end);       % Hydrogen price
 txt11B = txt11A(2,3:end);       % Hydrogen consumption
+txt12B = txt12A(2,3:end);       % Max input cap
+txt13B = txt13A(2,3:end);       % Max output cap
 
 Scenarios1 = txt11(~cellfun('isempty',txt11));
 Category1 = unique(txt12);  % List of utilities
@@ -343,9 +358,11 @@ elseif interval_length == 12; add_txt1 = ['_5min'];
 else                          error('Need to define interval length')
 end
 init_val = 1;  % Used to adjust initial for loop value and for progress tracking
+dir3 = [dir0,'Tariff_files\'];  % Tariff folder
+[status1,msg1] = mkdir(dir3);   % Create directory if it doesn't exist
 for i5=init_val:length(Scenarios1)
     filename2_short = filename2{i5};        
-    fileID = fopen([dir0,char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
+    fileID = fopen([dir3,char(filename2_short(1:end-4)),add_txt1,'.txt'],'wt');
     data_most2 = [data11,data11B,data22];    % Combine energy price, AS price and other components listed in 'Inputs1'
     % data_most2(:,3:6,:) = 0;                        % AS     Remove AS prices
     % data_most2(:,[3,6],:) = 0;                      % REG    Remove SP NS prices
@@ -396,6 +413,15 @@ for i5=init_val:length(Scenarios1)
 end
 clear data_most2
 
+cHeader_int_ren = cell(1,repeat_ren_signals);       % Headers for GAMS renewable input files must match device_ren values
+for i1 = 1:repeat_ren_signals  % Repeat to allow for multiple renewable devices
+    cHeader_int_ren{i1} = num2str(i1);
+end
+cHeader_int_other = cell(1,repeat_other_signals);   % Headers for GAMS other input files match device values
+for i1 = 1:repeat_ren_signals  % Repeat to allow for multiple renewable devices
+    cHeader_int_other{i1} = num2str(i1);
+end
+
 %%% Create files for energy prices
 for i0=1:length(txt1C)
         cHeader = {'Interval','Energy Price'};          % header
@@ -410,6 +436,7 @@ for i0=1:length(txt1C)
 
         %write data to end of file
         dlmwrite([dir0,'Energy_prices_',txt1C{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num1C(:,i0+1)]],'-append');
+display(['Creating energy price files (',num2str(i0),' of ',num2str(length(txt1C)),')'])
 end
 
 %%% Create files with Ancillary_services
@@ -426,6 +453,7 @@ for i0=1
 
         %write data to end of file
         dlmwrite([dir0,'Ancillary_services',add_txt1,'.csv'],num21,'-append');
+display(['Creating AS price files (',num2str(i0),' of ',num2str(1),')'])
 end
 
 %%% Create files for Natural Gas price profile
@@ -442,12 +470,12 @@ for i0=1:length(txt31)
 
         %write data to end of file
         dlmwrite([dir0,'NG_price_',txt31{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num31(:,i0+1)]],'-append');
+display(['Creating NG price files (',num2str(i0),' of ',num2str(length(txt31)),')'])
 end 
 
 %%% Create files with renewable profiles
 for i0=1:length(txt41)
-        cHeader_int = repmat(txt41(i0),1,repeat_ren_signals);   % Repeat to allow for multiple renewable devices
-        cHeader = {'Interval',cHeader_int{:}};                  % header
+        cHeader = {'Interval',cHeader_int_ren{:}};                  % header
         commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
         commaHeader = commaHeader(:)';
         textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
@@ -458,8 +486,9 @@ for i0=1:length(txt41)
         fclose(fid);
 
         %write data to end of file
-        dlmwrite([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num41(:,i0+1), zeros(Year_length,repeat_ren_signals-1)]],'-append');
-end   
+        dlmwrite([dir0,'renewable_profiles_',txt41{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num41(:,i0+1), zeros(Year_length*interval_length,repeat_ren_signals-1)]],'-append');
+display(['Creating renewable signal files (',num2str(i0),' of ',num2str(length(txt41)),')'])
+end  
 
 %%% Create files with baseload mode profiles
 for i0=1:length(txt71)
@@ -475,6 +504,7 @@ for i0=1:length(txt71)
 
         %write data to end of file
         dlmwrite([dir0,'Input_power_',txt71{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num71(:,i0+1)]],'-append');
+display(['Creating baseload signal files (',num2str(i0),' of ',num2str(length(txt71)),')'])
 end
 
 %%% Create files with additional load profiles
@@ -491,12 +521,12 @@ for i0=1:length(txt91)
 
         %write data to end of file
         dlmwrite([dir0,'Additional_load_',txt91{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num91(:,i0+1)]],'-append');
+display(['Creating additional load signal files (',num2str(i0),' of ',num2str(length(txt91)),')'])
 end
 
 %%% Create files with H2 price profiles
 for i0=1:length(txt10B)
-        cHeader_int =repmat(txt10B(i0),1,repeat_other_signals); % Repeat to allow for multiple renewable devices
-        cHeader = {'Interval',cHeader_int{:}};                  % header
+        cHeader = {'Interval',cHeader_int_other{:}};            % header
         commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
         commaHeader = commaHeader(:)';
         textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
@@ -507,24 +537,65 @@ for i0=1:length(txt10B)
         fclose(fid);
 
         %write data to end of file
-        dlmwrite([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num10B(:,i0+1), zeros(Year_length,repeat_ren_signals-1)]],'-append');
+        dlmwrite([dir0,'H2_price_',txt10B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num10B(:,i0+1), ones(Year_length*interval_length,repeat_ren_signals-1)]],'-append');
+display(['Creating H2 price files (',num2str(i0),' of ',num2str(length(txt10B)),')'])
 end
 
 %%% Create files with H2 consumption profiles
+dir4 = [dir0,'H2_consumption\'];  % H2 consumption folder
+[status1,msg1] = mkdir(dir4);   % Create directory if it doesn't exist
 for i0=1:length(txt11B)
-        cHeader_int =repmat(txt11B(i0),1,repeat_other_signals); % Repeat to allow for multiple renewable devices
-        cHeader = {'Interval',cHeader_int{:}};          % header
+        cHeader = {'Interval',cHeader_int_other{:}};            % header
         commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
         commaHeader = commaHeader(:)';
         textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
 
         %write header to file
-        fid = fopen([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],'w'); 
+        fid = fopen([dir4,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],'w'); 
         fprintf(fid,'%s\n',textHeader);
         fclose(fid);
 
         %write data to end of file
-        dlmwrite([dir0,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num11B(:,i0+1), zeros(Year_length,repeat_ren_signals-1)]],'-append');
+        dlmwrite([dir4,'H2_consumption_',txt11B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num11B(:,i0+1), zeros(Year_length*interval_length,repeat_ren_signals-1)]],'-append');
+display(['Creating H2 consumption files (',num2str(i0),' of ',num2str(length(txt11B)),')'])
+end
+
+%%% Create files with Max input cap profiles
+dir5 = [dir0,'Input_cap\'];     % Input_cap folder
+[status1,msg1] = mkdir(dir5);   % Create directory if it doesn't exist
+for i0=1:length(txt12B)
+        cHeader = {'Interval',cHeader_int_other{:}};            % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir5,'Max_input_cap_',txt12B{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir5,'Max_input_cap_',txt12B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num12B(:,i0+1), ones(Year_length*interval_length,repeat_ren_signals-1)]],'-append');
+display(['Creating Max input cap files (',num2str(i0),' of ',num2str(length(txt12B)),')'])
+end
+
+%%% Create files with Max output cap profiles
+dir6 = [dir0,'Output_cap\'];    % Output_cap folder
+[status1,msg1] = mkdir(dir6);   % Create directory if it doesn't exist
+for i0=1:length(txt13B)
+        cHeader = {'Interval',cHeader_int_other{:}};            % header
+        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
+        commaHeader = commaHeader(:)';
+        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
+
+        %write header to file
+        fid = fopen([dir6,'Max_output_cap_',txt13B{i0},add_txt1,'.csv'],'w'); 
+        fprintf(fid,'%s\n',textHeader);
+        fclose(fid);
+
+        %write data to end of file
+        dlmwrite([dir6,'Max_output_cap_',txt13B{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num13B(:,i0+1), ones(Year_length*interval_length,repeat_ren_signals-1)]],'-append');
+display(['Creating Max output cap files (',num2str(i0),' of ',num2str(length(txt13B)),')'])
 end
 
 %%% Create controller input file
@@ -541,6 +612,7 @@ for i0=1
 
         %write data to end of file
         dlmwrite([dir0,'controller_input_values.csv'],[-1,1,0.5,0.8],'-append');
+display(['Creating controller input files (',num2str(i0),' of ',num2str(1),')'])
 end
 
 

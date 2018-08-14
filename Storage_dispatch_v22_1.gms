@@ -15,21 +15,24 @@ Notes:
 To run as DR device set output values to 0 except output_eff which must be >0
 To run as storage device set values for input and output as desired
 To run as baseload DR device setup same as for DR device and set base_op_instance=1
+When loading files with multiple devices, each column header entry must match the device number
 
 $OffText
 
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     5a330a215457a35d4b5c48a8_hourly_PGE_A-6
-$if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_Price1_v2_hourly
-$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_flat_v2_hourly
-$if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_hourly
-$if not set NG_price_instance      $set NG_price_instance      NG_price_Price1_v2_hourly
-$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_PV_v2_hourly
-$if not set load_prof_instance     $set load_prof_instance     Additional_load_none_hourly
-$if not set energy_price_inst      $set energy_price_inst      Energy_prices_Wholesale_MWh_hourly
-$if not set AS_price_inst          $set AS_price_inst          Ancillary_services_PGE2014_hourly
+$if not set elec_rate_instance     $set elec_rate_instance     5a33088e5457a305325c48a1_15min
+$if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_Price1_15min
+$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_Block198_15min
+$if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_15min
+$if not set NG_price_instance      $set NG_price_instance      NG_price_Price1_15min
+$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_PV_15min
+$if not set load_prof_instance     $set load_prof_instance     Additional_load_Station1_15min
+$if not set energy_price_inst      $set energy_price_inst      Energy_prices_Wholesale_MWh_15min
+$if not set AS_price_inst          $set AS_price_inst          Ancillary_services_15min
+$if not set Max_input_prof_inst    $set Max_input_prof_inst    Max_input_cap_Block198_15min
+$if not set Max_output_prof_inst   $set Max_output_prof_inst   Max_output_cap_ones_15min
 $if not set outdir                 $set outdir                 RODeO\Projects\VTA_bus_project\Output
 $if not set indir                  $set indir                  RODeO\Projects\VTA_bus_project\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
@@ -41,7 +44,7 @@ $if not set year_instance          $set year_instance          NA
 $if not set devices_instance       $set devices_instance       1
 $if not set devices_ren_instance   $set devices_ren_instance   1
 $if not set val_from_batch_inst    $set val_from_batch_inst    1
-$if not set input_cap_instance     $set input_cap_instance     1
+$if not set input_cap_instance     $set input_cap_instance     0.050
 $if not set output_cap_instance    $set output_cap_instance    0
 
 * Set the limiting price (must be less than infinity)
@@ -57,15 +60,15 @@ $if not set input_LSL_instance     $set input_LSL_instance     0
 $if not set output_LSL_instance    $set output_LSL_instance    0
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0
 $if not set Output_start_cost_inst $set Output_start_cost_inst 0
-$if not set input_efficiency_inst  $set input_efficiency_inst  0.613668913
-$if not set output_efficiency_inst $set output_efficiency_inst 0.4
+$if not set input_efficiency_inst  $set input_efficiency_inst  0.95
+$if not set output_efficiency_inst $set output_efficiency_inst 0.95
 
-$if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1343000
-$if not set input_cap_cost_inst    $set input_cap_cost_inst    1691000
+$if not set renew_cap_cost_inst    $set renew_cap_cost_inst    0
+$if not set input_cap_cost_inst    $set input_cap_cost_inst    0
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
-$if not set H2stor_cap_cost_inst   $set H2stor_cap_cost_inst   1000
-$if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    12000
-$if not set input_FOM_cost_inst    $set input_FOM_cost_inst    93840
+$if not set H2stor_cap_cost_inst   $set H2stor_cap_cost_inst   0
+$if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    0
+$if not set input_FOM_cost_inst    $set input_FOM_cost_inst    0
 $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
 $if not set renew_VOM_cost_inst    $set renew_VOM_cost_inst    0
 $if not set input_VOM_cost_inst    $set input_VOM_cost_inst    0
@@ -79,39 +82,39 @@ $if not set renew_interest_inst    $set renew_interest_inst    0.07
 $if not set H2stor_interest_inst   $set H2stor_interest_inst   0.07
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   8
+$if not set storage_cap_instance   $set storage_cap_instance   7.0
 $if not set storage_set_instance   $set storage_set_instance   1
-$if not set storage_init_instance  $set storage_init_instance  0.5
-$if not set storage_final_instance $set storage_final_instance 0.5
+$if not set storage_init_instance  $set storage_init_instance  1
+$if not set storage_final_instance $set storage_final_instance 0
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
 $if not set ramp_penalty_instance  $set ramp_penalty_instance  0
 
 * Next two values change the resoultion of the optimization
 *    hourly: 8760, 1     15min: 35040, 0.25       5min: 105120, 0.08333333333
-$if not set op_length_instance     $set op_length_instance     8760
-$if not set op_period_instance     $set op_period_instance     8760
-$if not set int_length_instance    $set int_length_instance    1
+$if not set op_length_instance     $set op_length_instance     35040
+$if not set op_period_instance     $set op_period_instance     35040
+$if not set int_length_instance    $set int_length_instance    0.25
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set file_name_instance     $set file_name_instance     "Test2_A-6_oneDEV_wholesale"
-$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
-$if not set H2_price_instance      $set H2_price_instance      6.0
+$if not set file_name_instance     $set file_name_instance     "Test1"
+$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    1.22
+$if not set H2_price_instance      $set H2_price_instance      0
 $if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  0.849
 $if not set REC_price_inst         $set REC_price_inst         0
 $if not set CF_opt_instance        $set CF_opt_instance        0
-$if not set run_retail_instance    $set run_retail_instance    0
+$if not set run_retail_instance    $set run_retail_instance    1
 $if not set one_active_device_inst $set one_active_device_inst 1
 
 * Next values are used to initialize for real-time operation and shorten the run-time
 *    To turn off set current_int = -1, next_int = 1 and max_int_instance = Inf
 $if not set current_int_instance   $set current_int_instance   -1
 $if not set next_int_instance      $set next_int_instance      1
-$if not set current_stor_intance   $set current_stor_intance   0.5
+$if not set current_stor_instance  $set current_stor_instance  0.5
 $if not set current_max_instance   $set current_max_instance   0.8
 $if not set max_int_instance       $set max_int_instance       Inf
 $if not set read_MPC_file_instance $set read_MPC_file_instance 0
@@ -233,7 +236,7 @@ Parameters
 ;
 
 * Adjust the files that are loaded
-$include /%indir%\%elec_rate_instance%.txt
+$include /%indir%\Tariff_files\%elec_rate_instance%.txt
 
 
 Scalars
@@ -262,7 +265,7 @@ Scalars
 
          current_interval        'current interval for real-time optimization runs'                              /%current_int_instance%/
          next_interval           'next interval for real-time optimization runs'                                 /%next_int_instance%/
-         current_storage_lvl     'current storage level for real-time optimization runs (0-100%, 0-1)'           /%current_stor_intance%/
+         current_storage_lvl     'current storage level for real-time optimization runs (0-100%, 0-1)'           /%current_stor_instance%/
          current_monthly_max     'current monthly maximum demand for real-time optimization runs (0-100%, 0-1)'  /%current_max_instance%/
          max_interval            'maximum interval for real-time optimization runs'                              /%max_int_instance%/
          read_MPC_file           'read controller values from excel file'                                        /%read_MPC_file_instance%/
@@ -367,14 +370,14 @@ $GDXIN %indir%\%H2_price_prof_instance%.gdx
 $LOAD H2_price2
 $GDXIN
 ;
-$call CSV2GDX %indir%\%H2_consumed_instance%.csv Output=%indir%\%H2_consumed_instance%.gdx ID=H2_consumed2 UseHeader=y Index=1 Values=(2..LastCol)
+$call CSV2GDX %indir%\H2_consumption\%H2_consumed_instance%.csv Output=%indir%\H2_consumption\%H2_consumed_instance%.gdx ID=H2_consumed2 UseHeader=y Index=1 Values=(2..LastCol)
 parameter H2_consumed2(interval,devices_load)   "Profile of hydrogen consumption for each interval (kg)"
-$GDXIN %indir%\%H2_consumed_instance%.gdx
+$GDXIN %indir%\H2_consumption\%H2_consumed_instance%.gdx
 $LOAD H2_consumed2
 $GDXIN
 ;
 $call CSV2GDX %indir%\%baseload_pwr_instance%.csv Output=%indir%\%baseload_pwr_instance%.gdx ID=input_power_baseload UseHeader=y Index=1 Values=2
-parameter input_power_baseload(interval)   "Profile of baseload consumption (UNUSED)" 
+parameter input_power_baseload(interval)   "Profile of baseload consumption (UNUSED)"
 $GDXIN %indir%\%baseload_pwr_instance%.gdx
 $LOAD input_power_baseload
 $GDXIN
@@ -397,15 +400,15 @@ $GDXIN %indir%\%ren_prof_instance%.gdx
 $LOAD renewable_signal2
 $GDXIN
 ;
-$call CSV2GDX %indir%\Max_input_cap.csv Output=%indir%\Max_input_cap.gdx ID=Max_input_cap2 UseHeader=y Index=1 Values=(2..LastCol)
+$call CSV2GDX %indir%\Input_cap\%Max_input_prof_inst%.csv Output=%indir%\Input_cap\%Max_input_prof_inst%.gdx ID=Max_input_cap2 UseHeader=y Index=1 Values=(2..LastCol)
 parameter Max_input_cap2(interval,devices_load)
-$GDXIN %indir%\Max_input_cap.gdx
+$GDXIN %indir%\Input_cap\%Max_input_prof_inst%.gdx
 $LOAD Max_input_cap2
 $GDXIN
 ;
-$call CSV2GDX %indir%\Max_output_cap.csv Output=%indir%\Max_output_cap.gdx ID=Max_output_cap2 UseHeader=y Index=1 Values=(2..LastCol)
+$call CSV2GDX %indir%\Output_cap\%Max_output_prof_inst%.csv Output=%indir%\Output_cap\%Max_output_prof_inst%.gdx ID=Max_output_cap2 UseHeader=y Index=1 Values=(2..LastCol)
 parameter Max_output_cap2(interval,devices_load)
-$GDXIN %indir%\Max_output_cap.gdx
+$GDXIN %indir%\Output_cap\%Max_output_prof_inst%.gdx
 $LOAD Max_output_cap2
 $GDXIN
 ;
@@ -501,6 +504,9 @@ if (read_MPC_file=1,
 
 * Remove all GDX files after loading data
 $call rm -rf %indir%\*.gdx
+$call rm -rf %indir%\H2_consumption\*.gdx
+$call rm -rf %indir%\Input_cap\*.gdx
+$call rm -rf %indir%\Output_cap\*.gdx
 
 *reseed the random number generator
 execseed = 1 + gmillisec(jnow);
@@ -1570,59 +1576,7 @@ display current_monthly_max;
 display max_interval;
 );
 
-$ontext
-* Debug separated renewable / non-renewable calculations
-Scalars
-         In1
-         In1_non_ren
-         In1_ren
-         Out1
-         Out1_non_ren
-         Out1_ren
-         Stor1
-         Stor1_ren
-         H2_tot
-         H2_non_ren
-         H2_ren
-;
 
-In1 = sum(interval, input_power_MW.l(interval));
-In1_non_ren = sum(interval, input_power_MW_non_ren.l(interval));
-In1_ren = sum(interval, input_power_MW_ren.l(interval));
-Out1 = sum(interval, output_power_MW.l(interval));
-Out1_non_ren = sum(interval, output_power_MW_non_ren.l(interval));
-Out1_ren = sum(interval, output_power_MW_ren.l(interval));
-Stor1 = sum(interval, storage_level_MWh.l(interval));
-Stor1_ren = sum(interval, storage_level_MWh_ren.l(interval));
-H2_tot = sum(interval, H2_sold.l(interval));
-H2_non_ren = sum(interval, H2_sold_non_ren.l(interval));
-H2_ren = sum(interval, H2_sold_ren.l(interval));
-
-display In1, In1_non_ren, In1_ren, Out1, Out1_non_ren, Out1_ren, Stor1, Stor1_ren, H2_tot, H2_non_ren, H2_ren, Electricity_import;
-display storage_level_MWh.l, storage_level_MWh_ren.l, Renewable_power;
-
-         results_file.pw = 10000;
-         put results_file;
-                 put 'Interval, Input Pwr (MW), Input nonren (MW), Input ren (MW), Output Pwr (MW), Output nonren (MW), Output ren (MW), Storage Lvl (MW-h), Storage Lvl ren (MW-h),'
-                 put 'H2 Out (kg), H2 nonren (kg), H2 ren (kg), Non-Ren In (MW), Ren In (MW), Ren Sold (MW), Curt (MW)' /;
-                 loop(interval, put      ord(interval),',',
-                                         input_power_MW.l(interval),',',
-                                         input_power_MW_non_ren.l(interval),',',
-                                         input_power_MW_ren.l(interval),',',
-                                         output_power_MW.l(interval),',',
-                                         output_power_MW_non_ren.l(interval),',',
-                                         output_power_MW_ren.l(interval),',',
-                                         storage_level_MWh.l(interval),',',
-                                         storage_level_MWh_ren.l(interval),',',
-                                         H2_sold.l(interval),',',
-                                         H2_sold_non_ren.l(interval),',',
-                                         H2_sold_ren.l(interval),',',
-                                         input_power_MW_non_ren.l(interval),',',
-                                         Renewable_power(interval),',',
-                                         renewable_power_MW_sold.l(interval),',',
-                                         curtailment(interval) /;
-                 );
-$offtext
 
 * - - - - write output to files - - - -
 scalar max_max_cap; max_max_cap = max(smax(devices,input_capacity_MW(devices)),smax(devices,output_capacity_MW(devices)));

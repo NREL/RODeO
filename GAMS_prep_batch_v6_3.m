@@ -16,6 +16,7 @@
 clear all, close all, clc
 disp(['Prepare data...'])
 
+% Project_name = 'VTA_bus_project';
 Project_name = 'Central_vs_distributed';
 % Project_name = 'Example';
 % Project_name = 'Solar_Hydrogen';
@@ -37,6 +38,7 @@ indir  = ['Projects\',Project_name,'\Data_files\TXT_files'];
 
 % Load filenames
 files_tariff = dir([dir1,indir]);
+% % % files_tariff = dir([dir1,indir,'\Tariff_files']);
 files_tariff2={files_tariff.name}';             % Identify files in a folder    
 load_file1 = zeros(1,length(files_tariff2));    % Initialize matrix
 for i0=1:length(files_tariff2)                  % Remove items from list that do not fit criteria
@@ -474,6 +476,137 @@ elseif strcmp(Project_name,'Example')
     Batch_header.Grid_CarbInt_instance.val = {'105'};
     Batch_header.CI_base_line_instance.val = {'92.5'};
     Batch_header.LCFS_price_instance.val = {'0'};   
+
+elseif strcmp(Project_name,'VTA_bus_project')
+%%% VTA_bus_project
+    Batch_header.elec_rate_instance.val = strrep(files_tariff2,'.txt','');
+
+    % H2 Consumption
+    [~,~,raw1]=xlsread([indir,'\Match_load_H2Cons']);       % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    H2_consumed_instance_values = unique(raw1(:,2));        % Find unique capacity values
+    H2_consumed_instance_values(strcmp(H2_consumed_instance_values,'NaN')) = [];	% Removes NaNs                        
+
+    Batch_header.H2_consumed_instance.val = H2_consumed_instance_values';        
+    Batch_header.baseload_pwr_instance.val = {'Input_power_baseload_hourly'};        
+    Batch_header.NG_price_instance.val = {'NG_price_Price1_hourly'};        
+    Batch_header.ren_prof_instance.val = {'renewable_profiles_none_hourly'};
+    Batch_header.load_prof_instance.val = strrep(files_add_load2,'.csv','');
+    Batch_header.energy_price_inst.val = {'Energy_prices_empty_hourly'};
+    Batch_header.AS_price_inst.val = {'Ancillary_services_hourly'};
+    [status,msg] = mkdir(outdir);       % Create output file if it doesn't exist yet  
+    Batch_header.outdir.val = {outdir}; % Reference is dynamic from location of batch file (i.e., exclue 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
+    Batch_header.indir.val = {indir};   % Reference is dynamic from location of batch file (i.e., exclue 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
+
+    Batch_header.gas_price_instance.val = {'NA'};
+    Batch_header.zone_instance.val = {'NA'};
+    Batch_header.year_instance.val = {'NA'};
+
+    Batch_header.devices_instance.val = 1;
+    Batch_header.devices_ren_instance.val = 1;
+    Batch_header.val_from_batch_inst.val = 1;
+
+    % Input capacity and location relationship
+    [~,~,raw0]=xlsread([indir,'\Match_inputcap_station']);  % Load file(s) 
+    header1 = raw0(1,:);                                    % Pull out header file
+    raw0 = raw0(2:end,:);                                   % Remove first row
+    raw0 = cellfun(@num2str,raw0,'UniformOutput',false);    % Convert any numbers to strings
+    input_cap_instance_values = unique(raw0(:,1));          % Find unique capacity values
+    input_cap_instance_values(strcmp(input_cap_instance_values,'NaN')) = [];    % Removes NaNs                        
+    
+    Batch_header.input_cap_instance.val = input_cap_instance_values';
+    Batch_header.output_cap_instance.val = {'0'};
+    Batch_header.price_cap_instance.val = {'10000'};
+
+    Batch_header.max_output_cap_inst.val = {'inf'};
+    Batch_header.allow_import_instance.val = {'1'};
+
+    Batch_header.input_LSL_instance.val = {'0.1'};
+    Batch_header.output_LSL_instance.val = {'0'};
+    Batch_header.Input_start_cost_inst.val = {'0'};
+    Batch_header.Output_start_cost_inst.val = {'0'};
+    Batch_header.input_efficiency_inst.val = {'0.613668913'};
+    Batch_header.output_efficiency_inst.val = {'1'};
+
+    % Input capacity and location relationship
+    [~,~,raw1]=xlsread([indir,'\Match_capcost_FOM']);       % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    input_cap_cost_inst_values = unique(raw1(:,1));         % Find unique capacity values
+    input_FOM_cost_inst_values = unique(raw1(:,2));         % Find unique capacity values
+    
+    Batch_header.input_cap_cost_inst.val = input_cap_cost_inst_values;
+    Batch_header.output_cap_cost_inst.val = {'0'};
+    Batch_header.input_FOM_cost_inst.val = input_FOM_cost_inst_values;
+    Batch_header.output_FOM_cost_inst.val = {'0'};
+    Batch_header.input_VOM_cost_inst.val = {'0'};
+    Batch_header.output_VOM_cost_inst.val = {'0'};
+    
+    % Input capacity and location relationship
+    [~,~,raw1]=xlsread([indir,'\Match_inputcap_lifetime']); % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    input_lifetime_inst_values = unique(raw1(:,2));         % Find unique capacity values
+    
+    Batch_header.input_lifetime_inst.val = input_lifetime_inst_values;      % Blank, Central, Forecourt
+    Batch_header.output_lifetime_inst.val = {'0'};
+    Batch_header.interest_rate_inst.val = {'0.07'};
+
+    Batch_header.in_heat_rate_instance.val = {'0'};
+    Batch_header.out_heat_rate_instance.val = {'0'};
+
+    % Storage capacity matrix
+    [~,~,raw1]=xlsread([indir,'\Match_load_storagecap']);   % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    storage_cap_instance_values = unique(raw1(:,2));        % Find unique storage capacity values
+        
+    Batch_header.storage_cap_instance.val = storage_cap_instance_values;
+    Batch_header.storage_set_instance.val = {'1'};
+    Batch_header.storage_init_instance.val = {'0.5'};
+    Batch_header.storage_final_instance.val = {'0.5'};
+    Batch_header.reg_cost_instance.val = {'0'};
+    Batch_header.min_runtime_instance.val = {'0'};
+    Batch_header.ramp_penalty_instance.val = {'0'};
+
+    Batch_header.op_length_instance.val = {'8760'};
+    Batch_header.op_period_instance.val = {'8760'};
+    Batch_header.int_length_instance.val = {'1'};
+
+    Batch_header.lookahead_instance.val = {'0'};
+    Batch_header.energy_only_instance.val = {'1'};        
+    Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
+    
+    % Capacity Factor
+    [~,~,raw1]=xlsread([indir,'\Match_inputcap_CF']);       % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    H2_consume_adj_inst_values = unique(raw1(:,2));         % Find unique CF values
+
+    Batch_header.H2_consume_adj_inst.val = H2_consume_adj_inst_values;
+    Batch_header.H2_price_instance.val = {'0'};
+    Batch_header.H2_use_instance.val = {'1'};
+    Batch_header.base_op_instance.val = {'0'};
+    Batch_header.NG_price_adj_instance.val = {'1'};
+    Batch_header.Renewable_MW_instance.val = {'0'};
+
+    Batch_header.CF_opt_instance.val = {'0'};
+    Batch_header.run_retail_instance.val = {'1'};
+    Batch_header.one_active_device_inst.val = {'1'};
+
+    Batch_header.current_int_instance.val = {'-1'};
+    Batch_header.next_int_instance.val = {'1'};
+    Batch_header.current_stor_intance.val = {'0.5'};
+    Batch_header.current_max_instance.val = {'0.8'};
+    Batch_header.max_int_instance.val = {'Inf'};
+    Batch_header.read_MPC_file_instance.val = {'0'}; 
+
+    Batch_header.H2_EneDens_instance.val = {'120'};
+    Batch_header.H2_Gas_ratio_instance.val = {'2.5'};
+    Batch_header.Grid_CarbInt_instance.val = {'105'};
+    Batch_header.CI_base_line_instance.val = {'92.5'};
+    Batch_header.LCFS_price_instance.val = {'125'};   
 
 else
 %%% Default
