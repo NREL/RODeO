@@ -24,14 +24,14 @@ $OffText
 
 $if not set elec_rate_instance     $set elec_rate_instance     5a33088e5457a305325c48a1_15min
 $if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_Price1_15min
-$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_Block198_15min
+$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_Block476_15min
 $if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_15min
 $if not set NG_price_instance      $set NG_price_instance      NG_price_Price1_15min
 $if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_PV_15min
 $if not set load_prof_instance     $set load_prof_instance     Additional_load_Station1_15min
 $if not set energy_price_inst      $set energy_price_inst      Energy_prices_Wholesale_MWh_15min
-$if not set AS_price_inst          $set AS_price_inst          Ancillary_services_15min
-$if not set Max_input_prof_inst    $set Max_input_prof_inst    Max_input_cap_Block198_15min
+$if not set AS_price_inst          $set AS_price_inst          Ancillary_services_PGE2017_15min
+$if not set Max_input_prof_inst    $set Max_input_prof_inst    Max_input_cap_Block476_15min
 $if not set Max_output_prof_inst   $set Max_output_prof_inst   Max_output_cap_ones_15min
 $if not set outdir                 $set outdir                 RODeO\Projects\VTA_bus_project\Output
 $if not set indir                  $set indir                  RODeO\Projects\VTA_bus_project\Data_files\TXT_files
@@ -83,9 +83,9 @@ $if not set H2stor_interest_inst   $set H2stor_interest_inst   0.07
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
 $if not set storage_cap_instance   $set storage_cap_instance   7.0
-$if not set storage_set_instance   $set storage_set_instance   1
-$if not set storage_init_instance  $set storage_init_instance  1
-$if not set storage_final_instance $set storage_final_instance 0
+$if not set storage_set_instance   $set storage_set_instance   0
+$if not set storage_init_instance  $set storage_init_instance  0.5
+$if not set storage_final_instance $set storage_final_instance 0.5
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
 $if not set ramp_penalty_instance  $set ramp_penalty_instance  0
@@ -98,8 +98,8 @@ $if not set int_length_instance    $set int_length_instance    0.25
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set file_name_instance     $set file_name_instance     "Test1"
-$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    1.22
+$if not set file_name_instance     $set file_name_instance     "__Test_476"
+$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.307440589544598
 $if not set H2_price_instance      $set H2_price_instance      0
 $if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
@@ -1034,7 +1034,7 @@ storage_level_accounting_init_eqn(interval,devices)$(rolling_window_min_index <=
 * LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
 storage_level_accounting_final_eqn(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices) > 0 and baseload_operation(devices)=0 and ord(interval)=operating_period_length and storage_set_final(devices)=1)..
-         storage_level_MWh(interval,devices)+storage_level_MWh_ren(interval,devices) =g= storage_final(devices)*storage_capacity_hours(devices)*input_capacity_MW(devices);
+         storage_level_MWh(interval,devices)+storage_level_MWh_ren(interval,devices) =e= storage_final(devices)*storage_capacity_hours(devices)*input_capacity_MW(devices);
 * LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
 storage_level_accounting_eqn(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices) > 0 and baseload_operation(devices)=0 and ord(interval)>current_interval and ord(interval)<max_interval and ord(interval)>1)..
@@ -1372,6 +1372,7 @@ Scalars
          Renewable_max_revenue    Calculate the maximum revenue from renewables without any storage installed ($)
          Renewable_electricity_in Calculate the amount of renewable electricity coming in for sale and storage (MWh)
          Electricity_import       Calculate the amount of imported electricity (MWh)
+         Total_elec_consumed      Calculate the total amount of electricity consumed (MWh)
 ;
 
 Parameters
@@ -1419,7 +1420,7 @@ Parameters
          Renewable_only_revenue_vec(devices)   Track the revenue portion from renewables ($)
          Renewable_max_revenue_vec(devices_ren)    Calculate the maximum revenue from renewables without any storage installed ($)
          Renewable_electricity_in_vec(devices_ren) Calculate the amount of renewable electricity coming in for sale and storage (MWh)
-         Electricity_import_vec(devices)       Calculate the amount of imported electricity (MWh)
+         Input_elec_import_vec(devices)       Calculate the amount of imported electricity to the input devices (MWh)
 
          curtailment(interval)                 calculate renewable curtialment (MW)
          curtailment_vec(interval,devices_ren) calculate renewable curtialment (MW)
@@ -1489,11 +1490,11 @@ arbitrage_revenue_vec(devices) = sum(interval,
                         - VOM_cost * output_power_MW.l(interval,devices) * interval_length
                         );
 renewable_sales_vec(devices_ren) = sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) * interval_length );
-arbitrage_revenue = sum(devices, arbitrage_revenue_vec(devices)) - sum(interval,elec_purchase_price(interval) * Load_profile_non_ren.l(interval));
+arbitrage_revenue = sum(devices, arbitrage_revenue_vec(devices)) - sum(interval,elec_purchase_price(interval) * Load_profile_non_ren.l(interval))* interval_length;
 renewable_sales = sum(devices_ren, renewable_sales_vec(devices_ren));
 
 ***** Have to add renewables that were sent through input devices
-REC_revenue = sum(interval, REC_price * (sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)) + sum(devices,output_power_MW_ren.l(interval,devices))) * interval_length );
+REC_revenue = sum(interval, REC_price * (sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)) * interval_length + sum(devices,output_power_MW_ren.l(interval,devices))) * interval_length );
 LCFS_revenue = sum((interval,devices),(CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency(devices))*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold.l(interval,devices)
                         + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold_ren.l(interval,devices) );
 
@@ -1513,7 +1514,7 @@ renew_FOM_cost2 = sum(devices_ren, renew_FOM_cost2_vec(devices_ren));
 input_FOM_cost2 = sum(devices, input_FOM_cost2_vec(devices));
 output_FOM_cost2 = sum(devices, output_FOM_cost2_vec(devices));
 
-renew_VOM_cost2_vec(devices_ren) = renew_VOM_cost(devices_ren)  * sum(interval, (renewable_signal(interval,devices_ren) * Renewable_MW(devices_ren)));
+renew_VOM_cost2_vec(devices_ren) = renew_VOM_cost(devices_ren)  * sum(interval, (renewable_signal(interval,devices_ren) * interval_length * Renewable_MW(devices_ren)));
 renew_VOM_cost2  = sum(devices_ren, renew_VOM_cost2_vec(devices_ren));
 input_VOM_cost2  = -elec_in_MWh     * sum(devices, input_VOM_cost(devices));
 output_VOM_cost2 = -elec_output_MWh * sum(devices, output_VOM_cost(devices));
@@ -1549,13 +1550,15 @@ if (Renewable_pen_input_net>1,
          Renewable_pen_input_net=1;
 );
 
-Storage_revenue_vec(devices) = sum(interval,(output_power_MW.l(interval,devices) - input_power_MW.l(interval,devices))*elec_sale_price(interval));
+Storage_revenue_vec(devices) = sum(interval,(output_power_MW.l(interval,devices) - input_power_MW.l(interval,devices)) * interval_length * elec_sale_price(interval));
 Storage_revenue = sum(devices, Storage_revenue_vec(devices));
-Renewable_only_revenue = sum(interval, (sum(devices,input_power_MW.l(interval,devices) - input_power_MW_non_ren.l(interval,devices))+sum(devices_ren, renewable_power_MW_sold.l(interval,devices_ren))) * elec_sale_price(interval));
-Renewable_max_revenue    = sum(interval,( sum(devices_ren,renewable_signal(interval,devices_ren)*Renewable_MW(devices_ren)) - (abs(sum(devices_ren,renewable_signal(interval,devices_ren)*Renewable_MW(devices_ren))-max_sys_output_cap)-max_sys_output_cap) )/2 * elec_sale_price(interval));
-Renewable_electricity_in = sum(interval, sum(devices,input_power_MW_ren.l(interval,devices)) + sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)) );
-Electricity_import_vec(devices) = sum(interval,input_power_MW_non_ren.l(interval,devices));
-Electricity_import = sum(devices, Electricity_import_vec(devices));
+Renewable_only_revenue = sum(interval, (sum(devices,input_power_MW.l(interval,devices) - input_power_MW_non_ren.l(interval,devices))+sum(devices_ren, renewable_power_MW_sold.l(interval,devices_ren))) * interval_length  * elec_sale_price(interval));
+Renewable_max_revenue    = sum(interval,( sum(devices_ren,renewable_signal(interval,devices_ren)*Renewable_MW(devices_ren)) - (abs(sum(devices_ren,renewable_signal(interval,devices_ren)*Renewable_MW(devices_ren))-max_sys_output_cap)-max_sys_output_cap) )/2 * interval_length  * elec_sale_price(interval));
+Renewable_electricity_in = sum(interval, sum(devices,input_power_MW_ren.l(interval,devices)) + sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)) ) * interval_length;
+Input_elec_import_vec(devices) = sum(interval,input_power_MW_non_ren.l(interval,devices)) * interval_length;
+Electricity_import = sum(interval, Import_elec_profile.l(interval)) * interval_length;
+Total_elec_consumed = sum(interval, sum(devices,input_power_MW.l(interval,devices)) + Load_profile(interval)) * interval_length;
+
 storage_level_MWh_tot(interval,devices) = storage_level_MWh.l(interval,devices)+storage_level_MWh_ren.l(interval,devices);
 
 if (1=0,
@@ -1797,8 +1800,10 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Renewable max revenue ($), ',              Renewable_max_revenue /;
                  put 'Renewable Electricity Input (MWh), ',      Renewable_electricity_in /;
                  put 'Electricity Import (MWh), ',               Electricity_import /;
+                 put 'Total Electricity Consumed (MWh), ',       Total_elec_consumed /;
                  put /;
 
+$ontext
          if ( max_max_cap>100, results_file_devices.nd = 2; elseif max_max_cap>10, results_file_devices.nd = 4; elseif max_max_cap>0.1, results_file_devices.nd = 6; else results_file_devices.nd = 8;);
          results_file_devices.pw = 10000;
          put results_file_devices;
@@ -1908,8 +1913,9 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Renewable only revenue ($), ',             Renewable_only_revenue /;
                  put 'Renewable max revenue ($), ',              Renewable_max_revenue /;
                  put 'Renewable Electricity Input (MWh), ',      Renewable_electricity_in /;
-                 put 'Electricity Import (MWh), ',               loop(devices, put Electricity_import_vec(devices),',');         put /;
+                 put 'Input Electricity Import (MWh), ',         loop(devices, put Input_elec_import_vec(devices),',');         put /;
                  put /;
+$offtext
 
          if (next_interval>1,
                  RT_out_file.nd = 4;

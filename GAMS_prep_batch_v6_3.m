@@ -16,8 +16,8 @@
 clear all, close all, clc
 disp(['Prepare data...'])
 
-% Project_name = 'VTA_bus_project';
-Project_name = 'Central_vs_distributed';
+Project_name = 'VTA_bus_project';       % For Blocks add 'Block' to section 6, For general remove 'Block' and switch match files
+% Project_name = 'Central_vs_distributed';
 % Project_name = 'Example';
 % Project_name = 'Solar_Hydrogen';
 % Project_name = 'Test';
@@ -27,18 +27,20 @@ dir2 = [dir1,'Projects\',Project_name,'\Batch_files\'];
 cd(dir1); 
 
 % Define overall properties
-GAMS_loc = 'C:\GAMS\win64\24.8\gams.exe';
+files_to_create = 8;    % Select the number of batch files to create
+Copy_folder = 0;        % Copy TXT_files for running multiple batch files (1=yes, 0=no)
+GAMS_version = '24.7';
+GAMS_loc = ['C:\GAMS\win64\',GAMS_version,'\gams.exe'];
 GAMS_file= {'Storage_dispatch_v22_1'};      % Define below for each utility (3 file options)
-GAMS_lic = 'license=C:\GAMS\win64\24.8\gamslice.txt';
-files_to_create = 2;  % Select the number of batch files to create
+GAMS_lic = ['license=C:\GAMS\win64\',GAMS_version,'\gamslice.txt'];
 
 outdir = ['Projects\',Project_name,'\Output'];
 indir  = ['Projects\',Project_name,'\Data_files\TXT_files'];
 % % % indir  = ['Projects\',Project_name,'\Data_files\TXT_files_HighEarly'];
 
 % Load filenames
-files_tariff = dir([dir1,indir]);
-% % % files_tariff = dir([dir1,indir,'\Tariff_files']);
+% files_tariff = dir([dir1,indir]);
+files_tariff = dir([dir1,indir,'\Tariff_files']);
 files_tariff2={files_tariff.name}';             % Identify files in a folder    
 load_file1 = zeros(1,length(files_tariff2));    % Initialize matrix
 for i0=1:length(files_tariff2)                  % Remove items from list that do not fit criteria
@@ -83,9 +85,9 @@ if strcmp(Project_name,'Test')
     Batch_header.zone_instance.val = {'NA'};
     Batch_header.year_instance.val = {'NA'};
 
-    Batch_header.devices_instance.val = 1;
-    Batch_header.devices_ren_instance.val = 1;
-    Batch_header.val_from_batch_inst.val = 1;
+    Batch_header.devices_instance.val = {'1'};
+    Batch_header.devices_ren_instance.val = {'1'};
+    Batch_header.val_from_batch_inst.val = {'1'};
 
     Batch_header.input_cap_instance.val = {'0','100'};
     Batch_header.output_cap_instance.val = {'0'};
@@ -285,9 +287,9 @@ elseif strcmp(Project_name,'Central_vs_distributed')
     Batch_header.zone_instance.val = {'NA'};
     Batch_header.year_instance.val = {'NA'};
 
-    Batch_header.devices_instance.val = 1;
-    Batch_header.devices_ren_instance.val = 1;
-    Batch_header.val_from_batch_inst.val = 1;
+    Batch_header.devices_instance.val = {'1'};
+    Batch_header.devices_ren_instance.val = {'1'};
+    Batch_header.val_from_batch_inst.val = {'1'};
 
     % Input capacity and location relationship
     [~,~,raw0]=xlsread([indir,'\Match_inputcap_station']);  % Load file(s) 
@@ -408,9 +410,9 @@ elseif strcmp(Project_name,'Example')
     Batch_header.zone_instance.val              = {'NA'};
     Batch_header.year_instance.val              = {'NA'};
 
-    Batch_header.devices_instance.val = 1;
-    Batch_header.devices_ren_instance.val = 1;
-    Batch_header.val_from_batch_inst.val = 1;
+    Batch_header.devices_instance.val = {'1'};
+    Batch_header.devices_ren_instance.val = {'1'};
+    Batch_header.val_from_batch_inst.val = {'1'};
 
     Batch_header.input_cap_instance.val         = {'1300'}; %{'0','1300','2600','3900'};
     Batch_header.output_cap_instance.val        = {'0'};
@@ -479,40 +481,81 @@ elseif strcmp(Project_name,'Example')
 
 elseif strcmp(Project_name,'VTA_bus_project')
 %%% VTA_bus_project
-    Batch_header.elec_rate_instance.val = strrep(files_tariff2,'.txt','');
+    % Electric rate relationship
+    [~,~,raw0]=xlsread([indir,'\Match_elecrate_outputpwr']);  % Load file(s) 
+    header1 = raw0(1,:);                                    % Pull out header file
+    raw0 = raw0(2:end,:);                                   % Remove first row
+    raw0 = cellfun(@num2str,raw0,'UniformOutput',false);    % Convert any numbers to strings
+    elecrate_instance_values = unique(raw0(:,1));           % Find unique capacity values
+    elecrate_instance_values(strcmp(elecrate_instance_values,'NaN')) = [];    % Removes NaNs                        
 
+    Batch_header.elec_rate_instance.val = elecrate_instance_values; % All files: strrep(files_tariff2,'.txt','');
+    
+    % Find H2 Consumption and max input file names
+    files_H2cons  = dir([dir1,indir,'\H2_consumption']);
+    files_H2cons2 = {files_H2cons.name}';               % Identify files in a folder    
+    for i0=fliplr(1:length(files_H2cons2))              
+        if isempty(strfind(files_H2cons2{i0},'.csv'));  % Find only csv files
+            files_H2cons2(i0) = [];
+        end
+    end    
+    files_H2cons2   = strrep(files_H2cons2,'.csv','');
+
+    files_MaxInput  = dir([dir1,indir,'\Input_cap']);
+    files_MaxInput2 = {files_MaxInput.name}';               % Identify files in a folder    
+    for i0=fliplr(1:length(files_MaxInput2))              
+        if isempty(strfind(files_MaxInput2{i0},'.csv'));  % Find only csv files
+            files_MaxInput2(i0) = [];
+        end
+    end    
+    files_MaxInput2   = strrep(files_MaxInput2,'.csv','');
+   
     % H2 Consumption
-    [~,~,raw1]=xlsread([indir,'\Match_load_H2Cons']);       % Load file(s) 
+    [~,~,raw1]=xlsread([indir,'\Match_H2cons_CF']);        % Load file(s) 
     raw1 = raw1(2:end,:);                                   % Remove first row
     raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
-    H2_consumed_instance_values = unique(raw1(:,2));        % Find unique capacity values
-    H2_consumed_instance_values(strcmp(H2_consumed_instance_values,'NaN')) = [];	% Removes NaNs                        
+    H2_consumed_instance_values = unique(raw1(:,1));         % Find unique values
+    H2_consume_adj_inst_values = unique(raw1(:,2));         % Find unique values
+    Batch_header.H2_consumed_instance.val = H2_consumed_instance_values;        
+    Batch_header.baseload_pwr_instance.val = {'Input_power_baseload_15min'};        
+    Batch_header.NG_price_instance.val = {'NG_price_Price1_15min'};        
 
-    Batch_header.H2_consumed_instance.val = H2_consumed_instance_values';        
-    Batch_header.baseload_pwr_instance.val = {'Input_power_baseload_hourly'};        
-    Batch_header.NG_price_instance.val = {'NG_price_Price1_hourly'};        
-    Batch_header.ren_prof_instance.val = {'renewable_profiles_none_hourly'};
-    Batch_header.load_prof_instance.val = strrep(files_add_load2,'.csv','');
-    Batch_header.energy_price_inst.val = {'Energy_prices_empty_hourly'};
-    Batch_header.AS_price_inst.val = {'Ancillary_services_hourly'};
+	% Renewable file name
+    [~,~,raw1]=xlsread([indir,'\Match_Renfile_Renpower']);  % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    ren_prof_instance_values = unique(raw1(:,1));           % Find unique values
+    Renewable_MW_instance_values = unique(raw1(:,2));       % Find unique values
+    Batch_header.ren_prof_instance.val = ren_prof_instance_values;
+    Batch_header.load_prof_instance.val = strrep(files_add_load2(1),'.csv','');
+    Batch_header.energy_price_inst.val = {'Energy_prices_Wholesale_MWh_15min'};
+    
+    % AS file name
+    [~,~,raw1]=xlsread([indir,'\Match_ASprice_runretail']);  % Load file(s) 
+    raw1 = raw1(2:end,:);                                   % Remove first row
+    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
+    AS_price_inst_values = unique(raw1(:,1));           % Find unique values    
+    Batch_header.AS_price_inst.val = AS_price_inst_values;
+    Batch_header.Max_input_prof_inst.val  = files_MaxInput2;
+    Batch_header.Max_output_prof_inst.val = {'Max_output_cap_ones_15min'};
     [status,msg] = mkdir(outdir);       % Create output file if it doesn't exist yet  
     Batch_header.outdir.val = {outdir}; % Reference is dynamic from location of batch file (i.e., exclue 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
     Batch_header.indir.val = {indir};   % Reference is dynamic from location of batch file (i.e., exclue 'RODeO\' in the filename for batch runs but include for runs within GAMS GUI)
-
+    
     Batch_header.gas_price_instance.val = {'NA'};
     Batch_header.zone_instance.val = {'NA'};
     Batch_header.year_instance.val = {'NA'};
 
-    Batch_header.devices_instance.val = 1;
-    Batch_header.devices_ren_instance.val = 1;
-    Batch_header.val_from_batch_inst.val = 1;
+    Batch_header.devices_instance.val = {'1'};
+    Batch_header.devices_ren_instance.val = {'1'};
+    Batch_header.val_from_batch_inst.val = {'1'};
 
     % Input capacity and location relationship
-    [~,~,raw0]=xlsread([indir,'\Match_inputcap_station']);  % Load file(s) 
+    [~,~,raw0]=xlsread([indir,'\Match_H2cons_inputpwr']);  % Load file(s) 
     header1 = raw0(1,:);                                    % Pull out header file
     raw0 = raw0(2:end,:);                                   % Remove first row
     raw0 = cellfun(@num2str,raw0,'UniformOutput',false);    % Convert any numbers to strings
-    input_cap_instance_values = unique(raw0(:,1));          % Find unique capacity values
+    input_cap_instance_values = unique(raw0(:,2));          % Find unique capacity values
     input_cap_instance_values(strcmp(input_cap_instance_values,'NaN')) = [];    % Removes NaNs                        
     
     Batch_header.input_cap_instance.val = input_cap_instance_values';
@@ -522,77 +565,68 @@ elseif strcmp(Project_name,'VTA_bus_project')
     Batch_header.max_output_cap_inst.val = {'inf'};
     Batch_header.allow_import_instance.val = {'1'};
 
-    Batch_header.input_LSL_instance.val = {'0.1'};
+    Batch_header.input_LSL_instance.val = {'0'};
     Batch_header.output_LSL_instance.val = {'0'};
     Batch_header.Input_start_cost_inst.val = {'0'};
     Batch_header.Output_start_cost_inst.val = {'0'};
-    Batch_header.input_efficiency_inst.val = {'0.613668913'};
-    Batch_header.output_efficiency_inst.val = {'1'};
-
-    % Input capacity and location relationship
-    [~,~,raw1]=xlsread([indir,'\Match_capcost_FOM']);       % Load file(s) 
-    raw1 = raw1(2:end,:);                                   % Remove first row
-    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
-    input_cap_cost_inst_values = unique(raw1(:,1));         % Find unique capacity values
-    input_FOM_cost_inst_values = unique(raw1(:,2));         % Find unique capacity values
-    
-    Batch_header.input_cap_cost_inst.val = input_cap_cost_inst_values;
+    Batch_header.input_efficiency_inst.val = {'0.95'};
+    Batch_header.output_efficiency_inst.val = {'0.95'};
+   
+    Batch_header.renew_cap_cost_inst.val = {'0'};
+    Batch_header.input_cap_cost_inst.val = {'0'};
     Batch_header.output_cap_cost_inst.val = {'0'};
-    Batch_header.input_FOM_cost_inst.val = input_FOM_cost_inst_values;
+    Batch_header.H2stor_cap_cost_inst.val = {'0'};
+    Batch_header.renew_FOM_cost_inst.val = {'0'};
+    Batch_header.input_FOM_cost_inst.val = {'0'};
     Batch_header.output_FOM_cost_inst.val = {'0'};
+    Batch_header.renew_VOM_cost_inst.val = {'0'};
     Batch_header.input_VOM_cost_inst.val = {'0'};
     Batch_header.output_VOM_cost_inst.val = {'0'};
-    
-    % Input capacity and location relationship
-    [~,~,raw1]=xlsread([indir,'\Match_inputcap_lifetime']); % Load file(s) 
-    raw1 = raw1(2:end,:);                                   % Remove first row
-    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
-    input_lifetime_inst_values = unique(raw1(:,2));         % Find unique capacity values
-    
-    Batch_header.input_lifetime_inst.val = input_lifetime_inst_values;      % Blank, Central, Forecourt
+        
+    Batch_header.renew_lifetime_inst.val = {'0'};
+    Batch_header.input_lifetime_inst.val = {'0'};
     Batch_header.output_lifetime_inst.val = {'0'};
+    Batch_header.H2stor_lifetime_inst.val = {'0'};
     Batch_header.interest_rate_inst.val = {'0.07'};
-
+    Batch_header.renew_interest_inst.val = {'0.07'};
+    Batch_header.H2stor_interest_inst.val = {'0.07'};
+    
     Batch_header.in_heat_rate_instance.val = {'0'};
     Batch_header.out_heat_rate_instance.val = {'0'};
-
-    % Storage capacity matrix
-    [~,~,raw1]=xlsread([indir,'\Match_load_storagecap']);   % Load file(s) 
-    raw1 = raw1(2:end,:);                                   % Remove first row
-    raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
-    storage_cap_instance_values = unique(raw1(:,2));        % Find unique storage capacity values
         
-    Batch_header.storage_cap_instance.val = storage_cap_instance_values;
-    Batch_header.storage_set_instance.val = {'1'};
+    Batch_header.storage_cap_instance.val = {'7'};
+    Batch_header.storage_set_instance.val = {'0'};
     Batch_header.storage_init_instance.val = {'0.5'};
     Batch_header.storage_final_instance.val = {'0.5'};
     Batch_header.reg_cost_instance.val = {'0'};
     Batch_header.min_runtime_instance.val = {'0'};
     Batch_header.ramp_penalty_instance.val = {'0'};
 
-    Batch_header.op_length_instance.val = {'8760'};
-    Batch_header.op_period_instance.val = {'8760'};
-    Batch_header.int_length_instance.val = {'1'};
+    Batch_header.op_length_instance.val = {'35040'};
+    Batch_header.op_period_instance.val = {'35040'};
+    Batch_header.int_length_instance.val = {'0.25'};
 
     Batch_header.lookahead_instance.val = {'0'};
-    Batch_header.energy_only_instance.val = {'1'};        
-    Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
     
-    % Capacity Factor
-    [~,~,raw1]=xlsread([indir,'\Match_inputcap_CF']);       % Load file(s) 
+    % Energy Only
+    [~,~,raw1]=xlsread([indir,'\Match_eonly_runretail']);   % Load file(s) 
     raw1 = raw1(2:end,:);                                   % Remove first row
     raw1 = cellfun(@num2str,raw1,'UniformOutput',false);    % Convert any numbers to strings
-    H2_consume_adj_inst_values = unique(raw1(:,2));         % Find unique CF values
-
+    energy_only_instance_values = unique(raw1(:,1));        % Find unique values
+    run_retail_instance_values = unique(raw1(:,2));         % Find unique values
+    Batch_header.energy_only_instance.val = energy_only_instance_values;        
+    Batch_header.file_name_instance.val = {'0'};    % 'file_name_instance' created in a later section (default value of 0)
+    
     Batch_header.H2_consume_adj_inst.val = H2_consume_adj_inst_values;
     Batch_header.H2_price_instance.val = {'0'};
     Batch_header.H2_use_instance.val = {'1'};
     Batch_header.base_op_instance.val = {'0'};
     Batch_header.NG_price_adj_instance.val = {'1'};
-    Batch_header.Renewable_MW_instance.val = {'0'};
-
+    
+    Batch_header.Renewable_MW_instance.val = Renewable_MW_instance_values;
+    Batch_header.REC_price_inst.val = {'0'};
     Batch_header.CF_opt_instance.val = {'0'};
-    Batch_header.run_retail_instance.val = {'1'};
+    Batch_header.run_retail_instance.val = run_retail_instance_values;
     Batch_header.one_active_device_inst.val = {'1'};
 
     Batch_header.current_int_instance.val = {'-1'};
@@ -606,7 +640,7 @@ elseif strcmp(Project_name,'VTA_bus_project')
     Batch_header.H2_Gas_ratio_instance.val = {'2.5'};
     Batch_header.Grid_CarbInt_instance.val = {'105'};
     Batch_header.CI_base_line_instance.val = {'92.5'};
-    Batch_header.LCFS_price_instance.val = {'125'};   
+    Batch_header.LCFS_price_instance.val = {'0'};   
 
 else
 %%% Default
@@ -627,9 +661,9 @@ else
     Batch_header.zone_instance.val = {'NA'};
     Batch_header.year_instance.val = {'NA'};
 
-    Batch_header.devices_instance.val = 1;
-    Batch_header.devices_ren_instance.val = 1;
-    Batch_header.val_from_batch_inst.val = 1;
+    Batch_header.devices_instance.val = {'1'};
+    Batch_header.devices_ren_instance.val = {'1'};
+    Batch_header.val_from_batch_inst.val = {'1'};
 
     Batch_header.input_cap_instance.val = {'1000'};
     Batch_header.output_cap_instance.val = {'0'};
@@ -721,6 +755,13 @@ elseif strcmp(Project_name,'Central_vs_distributed')
     Batch_header = load_relation_file(load_files1,indir,Batch_header);  % Run function file load_relation_file
 elseif strcmp(Project_name,'Example')
 %%% Example
+elseif strcmp(Project_name,'VTA_bus_project')
+%%% VTA_bus_project
+    % Each file constructs relationship between two fields (field names should be in first row)
+    load_files1 = {'Match_elecrate_outputpwr','Match_eonly_runretail','Match_H2cons_CF',...
+                   'Match_H2cons_inputpwr','Match_H2cons_maxinput','Match_Renfile_Renpower',...    % );
+                   'Match_ASprice_runretail'};    
+    Batch_header = load_relation_file(load_files1,indir,Batch_header);  % Run function file load_relation_file
 else   
 %%% Default
 end
@@ -916,6 +957,45 @@ elseif strcmp(Project_name,'Central_vs_distributed')
         end
         relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3,'_',interim4,'_',interim5);
     end
+    
+elseif strcmp(Project_name,'VTA_bus_project')
+%%% VTA_bus_project     
+    Index_file_name = strfind(fields1,'file_name_instance');    Index_file_name = find(not(cellfun('isempty',Index_file_name)));
+    Index_elec_rate = strfind(fields1,'elec_rate_instance');    Index_elec_rate = find(not(cellfun('isempty',Index_elec_rate)));
+    Index_H2_cons = strfind(fields1,'H2_consumed_instance');    Index_H2_cons = find(not(cellfun('isempty',Index_H2_cons)));
+    Index_AS_inst = strfind(fields1,'AS_price_inst');           Index_AS_inst = find(not(cellfun('isempty',Index_AS_inst)));
+    Index_Renewable = strfind(fields1,'Renewable_MW_instance'); Index_Renewable = find(not(cellfun('isempty',Index_Renewable)));
+    
+    % Scenario Name
+    [~,~,scenario_name1] = xlsread([indir,'\','Match_H2cons_CF']);              % Load file(s) 
+    scenario_name1 = scenario_name1(2:end,3);                                   % Pull out header file
+    scenario_name1 = cellfun(@num2str,scenario_name1,'UniformOutput',false);    % Convert any numbers to strings
+    scenario_name1 = unique(scenario_name1);                                    % Find unique capacity values
+    
+    % Rate Name
+    [~,~,rate_name1] = xlsread([indir,'\','Match_elecrate_outputpwr']);         % Load file(s) 
+    rate_name1 = rate_name1(2:end,3);                                           % Pull out header file
+    rate_name1 = cellfun(@num2str,rate_name1,'UniformOutput',false);            % Convert any numbers to strings
+    rate_name1 = unique(rate_name1);                                    % Find unique capacity values
+
+    % Services Name
+    [~,~,services_name1] = xlsread([indir,'\','Match_ASprice_runretail']);      % Load file(s) 
+    services_name1 = services_name1(2:end,3);                                   % Pull out header file
+    services_name1 = cellfun(@num2str,services_name1,'UniformOutput',false);    % Convert any numbers to strings
+    services_name1 = unique(services_name1);                                    % Find unique capacity values
+    
+    for i0=1:M0    
+        interim1 = ['PGE',rate_name1{relationship_matrix(i0,Index_elec_rate)}];
+        interim2 = ['Block',scenario_name1{relationship_matrix(i0,Index_H2_cons)}];    % ['Block',scenario_name1{relationship_matrix(i0,Index_H2_cons)}];
+        interim3 = services_name1{relationship_matrix(i0,Index_AS_inst)};
+        if str2num(relationship_matrix_final{i0,Index_Renewable})>0
+            interim4 = 'Ren';
+        else
+            interim4 = 'NonRen';
+        end
+        relationship_matrix_final{i0,Index_file_name} = horzcat(interim1,'_',interim2,'_',interim3,'_',interim4);
+    end
+    
 elseif strcmp(Project_name,'Example')
 %%% Example
     Index_file_name = strfind(fields1,'file_name_instance');    Index_file_name = find(not(cellfun('isempty',Index_file_name)));
@@ -963,7 +1043,7 @@ GAMS_batch_init = ['"',GAMS_loc,'" "',GAMS_file,'" ',GAMS_lic];
             %%% Create new file and copy contents
             fclose(fileID);
             c2=c2+1;
-            if exist(horzcat(indir,num2str(c2)))>0            
+            if (exist(horzcat(indir,num2str(c2)))>0 || Copy_folder==0)            
             else
                 if size(dir(indir),1)>1000
                     disp(['Folder to copy has many files'])
@@ -980,8 +1060,8 @@ GAMS_batch_init = ['"',GAMS_loc,'" "',GAMS_file,'" ',GAMS_lic];
             end
             
             Index_indir = strfind(fields1,'indir');     Index_indir = find(not(cellfun('isempty',Index_indir)));    % Find index of 'indir'
-            for i1=1:M0
-                relationship_matrix_final(i1,Index_indir) = {horzcat(relationship_matrix_final{i1,Index_indir},num2str(c2))};
+            for i2=i0+1:min(i0+ceil(M0/files_to_create),M0)     % Increment the next set of input file names
+                relationship_matrix_final(i2,Index_indir) = {horzcat(relationship_matrix_final{i2,Index_indir},num2str(c2))};
             end            
             fileID = fopen([dir2,['RODeO_batch',num2str(c2),'.bat']],'wt');
         end

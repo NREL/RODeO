@@ -8,9 +8,7 @@ Created on Thu Feb 23 17:51:07 2017
 import fnmatch
 import os
 import sqlite3
-import numpy as np
 import pandas as pd
-import re
 import warnings 
 warnings.simplefilter("ignore",UserWarning)
 
@@ -162,23 +160,23 @@ for files2load in os.listdir(dir1):
             files2load_input[c0[0]] = files2load
             int1 = files2load.split("_")
             int1 = int1[3:]
-            int1[2] = int1[2].replace('.csv', '')
+            int1[3] = int1[3].replace('.csv', '')
             files2load_input_title[c0[0]] = int1
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_results_*'):
             c0[1]=c0[1]+1
             files2load_results[c0[1]] = files2load
             int1 = files2load.split("_")
             int1 = int1[3:]
-            int1[2] = int1[2].replace('.csv', '')
+            int1[3] = int1[3].replace('.csv', '')
             files2load_results_title[c0[1]] = int1
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_summary_*'):
             c0[2]=c0[2]+1
             files2load_summary[c0[2]] = files2load
             int1 = files2load.split("_")
             int1 = int1[3:]
-            int1[2] = int1[2].replace('.csv', '')
+            int1[3] = int1[3].replace('.csv', '')
             files2load_summary_title[c0[2]] = int1
-        files2load_title_header = ['Utility','Block','Services']
+        files2load_title_header = ['Utility','Block','Services','Renewable']
 
 # Connecting to the database file
 ### conn.close()
@@ -342,71 +340,48 @@ if 1==1:            # This section captures the summary files
     
     
    
-if 1==0:            # This section captures a subset of the results files 
-    # Print Results data   
-    c.execute('''CREATE TABLE Results ('Scenario' integer,
-                                       'Interval' integer,
-                                       'In Pwr (MW)' real,
-                                       'Storage Level (MW-h)' real,                                  
-                                       'H2 Out (kg)' real,
-                                       'Non-Renwable Input (MW)' real)''')
-    
-    sql = "INSERT INTO Results VALUES (?,?,?,?,?,?)"
-    for i0 in range(len(files2load_results)):
-        #if (i0==1):
-        #    results_data_headers = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(str), delimiter=",",invalid_raise = False,skip_header=29, max_rows=1)   
-        results_data0 = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(float), delimiter=",",invalid_raise = False,skip_header=30)
-        results_data = np.delete(results_data0, np.s_[2,4,5,6,7,8,9,10,11,14,15,16], axis=1)
-        results_data_size = results_data.shape
-        results_data2 = np.zeros((results_data_size[0],results_data_size[1]+1))
-        results_data2[:,1:] = results_data
-        results_data2[:,0] =np.ones((1,results_data_size[0]))*(i0+1)
-        params = tuple(map(tuple, results_data2))
-    #    results_data2 = np.transpose(results_data)
-    #    params = [ results_data2.tolist()+files2load_summary_title[i0+1] ]
-        print('Results Data: '+str(i0+1)+' of '+str(len(files2load_summary)))
-        c.executemany(sql, params)
-        conn.commit()
+if 1==1:            # This section captures a subset of the results files 
+    # Creating Results Table
+    for i0 in range(len(files2load_results_title)):
+        # Creating Results Table header
+        files2load_results_data = pd.read_csv(dir0+files2load_results[i0+1],sep=',',header=25,skiprows=[24])
+        for i1 in range(len(files2load_title_header)):
+            files2load_results_data[files2load_title_header[i1]] = files2load_results_title[i0+1][i1]
+        if i0==0:
+            files2load_results_data_all = files2load_results_data
+        else:
+            files2load_results_data_all = files2load_results_data_all.append(files2load_results_data, ignore_index=True)
+        print('Combining Data: '+str(i0+1)+' of '+str(len(files2load_results_title)))
+        
+    # Create database table for each column
+    files2load_results_header = files2load_results_data_all.columns.tolist()
+    files2load_results_data_types = files2load_results_data_all.dtypes
+    execute_text = 'CREATE TABLE Results (\''
+    sql = "INSERT INTO results VALUES ("
+    for i0 in range(len(files2load_results_header)):
+        if i0==len(files2load_results_header)-1:
+            if files2load_results_data_types[i0]=='object':
+                execute_text = execute_text+files2load_results_header[i0]+'\' text)'
+            elif files2load_results_data_types[i0]=='float64':
+                execute_text = execute_text+files2load_results_header[i0]+'\' real)'
+            sql = sql+'?)'
+        else:
+            if files2load_results_data_types[i0]=='object':
+                execute_text = execute_text+files2load_results_header[i0]+'\' text,\''
+            elif files2load_results_data_types[i0]=='float64':
+                execute_text = execute_text+files2load_results_header[i0]+'\' real,\''
+            sql = sql+'?,'
+    c.execute(execute_text)
 
-    
-if 1==0:            # This section creates the entire results files 
-    # Print Results data   
-    c.execute('''CREATE TABLE Results ('Scenario' integer,
-                                       'Interval' integer,
-                                       'In Pwr (MW)' real,
-                                       'Out Pwr (MW)' real,
-                                       'Storage Level (MW-h)' real,
-                                       'In Reg Up (MW)' real,
-                                       'Out Reg Up (MW)' real,
-                                       'In Reg Dn (MW)' real,
-                                       'Out Reg Dn (MW)' real,
-                                       'In Spin Res (MW)' real,
-                                       'Out Spin Res (MW)' real,
-                                       'In Nonspin (MW)' real,
-                                       'Out Nonspin (MW)' real,
-                                       'H2 Out (kg)' real,
-                                       'Nonrenewable Input (MW)' real,
-                                       'Renewable Input (MW)' real,
-                                       'Renewable Sold (MW)' real,
-                                       'Curtailment (MW)' real)''')
-    
-    sql = "INSERT INTO Results VALUES (?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?)"
-    for i0 in range(len(files2load_results)):
-        if (i0==1):
-            results_data_headers = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(str), delimiter=",",invalid_raise = False,skip_header=29, max_rows=1)   
-        results_data = np.genfromtxt(dir1+files2load_results[i0+1], dtype=(float), delimiter=",",invalid_raise = False,skip_header=30)
-        results_data_size = results_data.shape
-        results_data2 = np.zeros((results_data_size[0],results_data_size[1]+1))
-        results_data2[:,1:] = results_data
-        results_data2[:,0] =np.ones((1,results_data_size[0]))*(i0+1)
-        params = tuple(map(tuple, results_data2))
-    #    results_data2 = np.transpose(results_data)
-    #    params = [ results_data2.tolist()+files2load_summary_title[i0+1] ]
-        print('Results Data: '+str(i0+1)+' of '+str(len(files2load_summary)))
-        c.executemany(sql, params)
-        conn.commit()
+    # Committing changes and closing the connection to the database file
+    params=list()
+    for i0 in range(len(files2load_results_data_all)):
+        params.insert(i0,tuple(files2load_results_data_all.loc[i0,:].tolist()))
+        if (i0%10000)==0:
+            print('Creating Output: '+str(i0)+' of '+str(len(files2load_results_data_all)))
+    c.executemany(sql, params)
+    conn.commit()
 
-    
-    
+        
 conn.close()
 
