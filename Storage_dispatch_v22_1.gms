@@ -22,19 +22,19 @@ $OffText
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance     $set elec_rate_instance     5a33088e5457a305325c48a1_15min
-$if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_Price1_15min
-$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_Block476_15min
-$if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_15min
-$if not set NG_price_instance      $set NG_price_instance      NG_price_Price1_15min
-$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_PV_15min
-$if not set load_prof_instance     $set load_prof_instance     Additional_load_Station1_15min
-$if not set energy_price_inst      $set energy_price_inst      Energy_prices_Wholesale_MWh_15min
-$if not set AS_price_inst          $set AS_price_inst          Ancillary_services_PGE2017_15min
-$if not set Max_input_prof_inst    $set Max_input_prof_inst    Max_input_cap_Block476_15min
-$if not set Max_output_prof_inst   $set Max_output_prof_inst   Max_output_cap_ones_15min
-$if not set outdir                 $set outdir                 RODeO\Projects\VTA_bus_project\Output
-$if not set indir                  $set indir                  RODeO\Projects\VTA_bus_project\Data_files\TXT_files
+$if not set elec_rate_instance     $set elec_rate_instance     5a3430585457a3e3595c48a2_hourly
+$if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_Price1_hourly
+$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_flat_hourly
+$if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload_hourly
+$if not set NG_price_instance      $set NG_price_instance      NG_price_Price1_hourly
+$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_PV_hourly
+$if not set load_prof_instance     $set load_prof_instance     Additional_load_none_hourly
+$if not set energy_price_inst      $set energy_price_inst      Energy_prices_Wholesale_MWh_hourly
+$if not set AS_price_inst          $set AS_price_inst          Ancillary_services_hourly
+$if not set Max_input_prof_inst    $set Max_input_prof_inst    Max_input_cap_ones_hourly
+$if not set Max_output_prof_inst   $set Max_output_prof_inst   Max_output_cap_ones_hourly
+$if not set outdir                 $set outdir                 RODeO\Projects\Solar_Hydrogen\Output
+$if not set indir                  $set indir                  RODeO\Projects\Solar_Hydrogen\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
@@ -44,7 +44,7 @@ $if not set year_instance          $set year_instance          NA
 $if not set devices_instance       $set devices_instance       1
 $if not set devices_ren_instance   $set devices_ren_instance   1
 $if not set val_from_batch_inst    $set val_from_batch_inst    1
-$if not set input_cap_instance     $set input_cap_instance     0.050
+$if not set input_cap_instance     $set input_cap_instance     0
 $if not set output_cap_instance    $set output_cap_instance    0
 
 * Set the limiting price (must be less than infinity)
@@ -54,21 +54,21 @@ $if not set price_cap_instance     $set price_cap_instance     10000
 * do the calculation with renewables inside and instead create a "max_output_cap_inst"
 * which constraints the maximum system output (left "Apply_..." values for future work)
 $if not set max_output_cap_inst    $set max_output_cap_inst    Inf
-$if not set allow_import_instance  $set allow_import_instance  1
+$if not set allow_import_instance  $set allow_import_instance  0
 
 $if not set input_LSL_instance     $set input_LSL_instance     0
 $if not set output_LSL_instance    $set output_LSL_instance    0
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0
 $if not set Output_start_cost_inst $set Output_start_cost_inst 0
-$if not set input_efficiency_inst  $set input_efficiency_inst  0.95
-$if not set output_efficiency_inst $set output_efficiency_inst 0.95
+$if not set input_efficiency_inst  $set input_efficiency_inst  0.613668913
+$if not set output_efficiency_inst $set output_efficiency_inst 1
 
-$if not set renew_cap_cost_inst    $set renew_cap_cost_inst    0
-$if not set input_cap_cost_inst    $set input_cap_cost_inst    0
+$if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1745900
+$if not set input_cap_cost_inst    $set input_cap_cost_inst    1691000
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
-$if not set H2stor_cap_cost_inst   $set H2stor_cap_cost_inst   0
-$if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    0
-$if not set input_FOM_cost_inst    $set input_FOM_cost_inst    0
+$if not set H2stor_cap_cost_inst   $set H2stor_cap_cost_inst   1000
+$if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    15600
+$if not set input_FOM_cost_inst    $set input_FOM_cost_inst    93840
 $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
 $if not set renew_VOM_cost_inst    $set renew_VOM_cost_inst    0
 $if not set input_VOM_cost_inst    $set input_VOM_cost_inst    0
@@ -82,8 +82,8 @@ $if not set renew_interest_inst    $set renew_interest_inst    0.07
 $if not set H2stor_interest_inst   $set H2stor_interest_inst   0.07
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   7.0
-$if not set storage_set_instance   $set storage_set_instance   0
+$if not set storage_cap_instance   $set storage_cap_instance   8
+$if not set storage_set_instance   $set storage_set_instance   1
 $if not set storage_init_instance  $set storage_init_instance  0.5
 $if not set storage_final_instance $set storage_final_instance 0.5
 $if not set reg_cost_instance      $set reg_cost_instance      0
@@ -92,24 +92,25 @@ $if not set ramp_penalty_instance  $set ramp_penalty_instance  0
 
 * Next two values change the resoultion of the optimization
 *    hourly: 8760, 1     15min: 35040, 0.25       5min: 105120, 0.08333333333
-$if not set op_length_instance     $set op_length_instance     35040
-$if not set op_period_instance     $set op_period_instance     35040
-$if not set int_length_instance    $set int_length_instance    0.25
+$if not set op_length_instance     $set op_length_instance     8760
+$if not set op_period_instance     $set op_period_instance     8760
+$if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set file_name_instance     $set file_name_instance     "__Test_476"
-$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.307440589544598
-$if not set H2_price_instance      $set H2_price_instance      0
+$if not set file_name_instance     $set file_name_instance     "4.0_Scenario_Vaca_Dixon"
+$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
+$if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
-$if not set Renewable_MW_instance  $set Renewable_MW_instance  0.849
-$if not set REC_price_inst         $set REC_price_inst         0
-$if not set CF_opt_instance        $set CF_opt_instance        0
-$if not set run_retail_instance    $set run_retail_instance    1
-$if not set one_active_device_inst $set one_active_device_inst 1
+$if not set Renewable_MW_instance  $set Renewable_MW_instance  2
+$if not set REC_price_inst         $set REC_price_inst         12
 
+$if not set CF_opt_instance        $set CF_opt_instance        0
+$if not set run_retail_instance    $set run_retail_instance    0
+$if not set one_active_device_inst $set one_active_device_inst 1
+$if not set ITC_inst               $set ITC_inst               0.3
 * Next values are used to initialize for real-time operation and shorten the run-time
 *    To turn off set current_int = -1, next_int = 1 and max_int_instance = Inf
 $if not set current_int_instance   $set current_int_instance   -1
@@ -124,7 +125,7 @@ $if not set H2_EneDens_inst        $set H2_EneDens_inst        120
 $if not set H2_Gas_ratio_inst      $set H2_Gas_ratio_inst      2.5
 $if not set Grid_CarbInt_inst      $set Grid_CarbInt_inst      105
 $if not set CI_base_line_inst      $set CI_base_line_inst      92.5
-$if not set LCFS_price_inst        $set LCFS_price_inst        0
+$if not set LCFS_price_inst        $set LCFS_price_inst        125
 
 
 *        energy_only_instance = 0, 1 (1 = Energy only operation, 0 = All ancillary services included)
@@ -236,7 +237,7 @@ Parameters
 ;
 
 * Adjust the files that are loaded
-$include /%indir%\Tariff_files\%elec_rate_instance%.txt
+$include /%indir%\%elec_rate_instance%.txt
 
 
 Scalars
@@ -281,6 +282,7 @@ Scalars
          LCFS_price              "Low Carbon Fuel Standard (LCFS) credit prices ($ per credit)"                  /%LCFS_price_inst%/
 
          val_from_batch          "Set values from GUI input or batch file (yes=1, no=2) (works with 1 device & 1 renewable)"  /%val_from_batch_inst%/
+         ITC                     "Business Energy Investment Tax Credit (ITC) (fraction between 0 and 1)" /%ITC_inst%/
 ;
 
 Sets
@@ -370,9 +372,9 @@ $GDXIN %indir%\%H2_price_prof_instance%.gdx
 $LOAD H2_price2
 $GDXIN
 ;
-$call CSV2GDX %indir%\H2_consumption\%H2_consumed_instance%.csv Output=%indir%\H2_consumption\%H2_consumed_instance%.gdx ID=H2_consumed2 UseHeader=y Index=1 Values=(2..LastCol)
+$call CSV2GDX %indir%\%H2_consumed_instance%.csv Output=%indir%\%H2_consumed_instance%.gdx ID=H2_consumed2 UseHeader=y Index=1 Values=(2..LastCol)
 parameter H2_consumed2(interval,devices_load)   "Profile of hydrogen consumption for each interval (kg)"
-$GDXIN %indir%\H2_consumption\%H2_consumed_instance%.gdx
+$GDXIN %indir%\%H2_consumed_instance%.gdx
 $LOAD H2_consumed2
 $GDXIN
 ;
@@ -400,15 +402,15 @@ $GDXIN %indir%\%ren_prof_instance%.gdx
 $LOAD renewable_signal2
 $GDXIN
 ;
-$call CSV2GDX %indir%\Input_cap\%Max_input_prof_inst%.csv Output=%indir%\Input_cap\%Max_input_prof_inst%.gdx ID=Max_input_cap2 UseHeader=y Index=1 Values=(2..LastCol)
+$call CSV2GDX %indir%\%Max_input_prof_inst%.csv Output=%indir%\%Max_input_prof_inst%.gdx ID=Max_input_cap2 UseHeader=y Index=1 Values=(2..LastCol)
 parameter Max_input_cap2(interval,devices_load)
-$GDXIN %indir%\Input_cap\%Max_input_prof_inst%.gdx
+$GDXIN %indir%\%Max_input_prof_inst%.gdx
 $LOAD Max_input_cap2
 $GDXIN
 ;
-$call CSV2GDX %indir%\Output_cap\%Max_output_prof_inst%.csv Output=%indir%\Output_cap\%Max_output_prof_inst%.gdx ID=Max_output_cap2 UseHeader=y Index=1 Values=(2..LastCol)
+$call CSV2GDX %indir%\%Max_output_prof_inst%.csv Output=%indir%\%Max_output_prof_inst%.gdx ID=Max_output_cap2 UseHeader=y Index=1 Values=(2..LastCol)
 parameter Max_output_cap2(interval,devices_load)
-$GDXIN %indir%\Output_cap\%Max_output_prof_inst%.gdx
+$GDXIN %indir%\%Max_output_prof_inst%.gdx
 $LOAD Max_output_cap2
 $GDXIN
 ;
@@ -854,7 +856,7 @@ operating_profit_eqn..
                  - sum(months, cap_5(months) * Timed_dem("5"))
                  - sum(months, cap_6(months) * Timed_dem("6"))
                  - meter_mnth_chg("1") * 12
-                 - sum(devices_ren,(renew_cap_cost(devices_ren)+renew_FOM_cost(devices_ren)*renew_lifetime(devices_ren)) * Renewable_MW(devices_ren) * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1))))
+                 - sum(devices_ren,((1-ITC)*renew_cap_cost(devices_ren)+renew_FOM_cost(devices_ren)*renew_lifetime(devices_ren)) * Renewable_MW(devices_ren) * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1))))
                  - sum(devices,(input_cap_cost(devices)+input_FOM_cost(devices)*input_lifetime(devices)) * input_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1))))
                  - sum(devices,(output_cap_cost(devices)+output_FOM_cost(devices)*output_lifetime(devices)) * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1))))
                  - sum(devices,H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours(devices)* (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1))))
@@ -1498,7 +1500,7 @@ REC_revenue = sum(interval, REC_price * (sum(devices_ren,renewable_power_MW_sold
 LCFS_revenue = sum((interval,devices),(CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency(devices))*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold.l(interval,devices)
                         + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold_ren.l(interval,devices) );
 
-renew_cap_cost2_vec(devices_ren) = -renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)   * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1)));
+renew_cap_cost2_vec(devices_ren) = -(1-ITC)*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)   * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1)));
 input_cap_cost2_vec(devices)     = -input_cap_cost(devices)     * input_capacity_MW(devices)  * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1)));
 output_cap_cost2_vec(devices)    = -output_cap_cost(devices)    * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1)));
 H2stor_cap_cost2_vec(devices)    = -H2stor_cap_cost(devices)    * input_capacity_MW(devices)  * (input_efficiency(devices) / H2_LHV ) * (H2_consumed_adj(devices) * (1-CF_opt) + CF_opt * Hydrogen_fraction.l) * storage_capacity_hours(devices) * (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1)));
