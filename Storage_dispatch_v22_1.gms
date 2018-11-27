@@ -33,8 +33,8 @@ $if not set energy_price_inst      $set energy_price_inst      Energy_prices_Who
 $if not set AS_price_inst          $set AS_price_inst          Ancillary_services_hourly
 $if not set Max_input_prof_inst    $set Max_input_prof_inst    Max_input_cap_ones_hourly
 $if not set Max_output_prof_inst   $set Max_output_prof_inst   Max_output_cap_ones_hourly
-$if not set outdir                 $set outdir                 RODeO\Projects\Solar_Hydrogen\Output
-$if not set indir                  $set indir                  RODeO\Projects\Solar_Hydrogen\Data_files\TXT_files
+$if not set outdir                 $set outdir                 Projects\Solar_Hydrogen\Output
+$if not set indir                  $set indir                  Projects\Solar_Hydrogen\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
