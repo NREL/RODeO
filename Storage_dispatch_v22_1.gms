@@ -18,7 +18,12 @@ To run as baseload DR device setup same as for DR device and set base_op_instanc
 When loading files with multiple devices, each column header entry must match the device number
 
 $OffText
-
+*===============================================================================
+* Delete after finilising the financial model updates. This switch activates or deactivates equations used in the versions before and after updating the finances
+$if not set new_finance_model      $set new_finance_model   1
+* Delete after finishing with sensitivity checks ever. This toggle switches an iteration mode which updates the hydrogen break-even cost
+$if not set run_sensitivity        $set run_sensitivity     0
+*===============================================================================
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
@@ -44,7 +49,7 @@ $if not set year_instance          $set year_instance          NA
 $if not set devices_instance       $set devices_instance       1
 $if not set devices_ren_instance   $set devices_ren_instance   1
 $if not set val_from_batch_inst    $set val_from_batch_inst    1
-$if not set input_cap_instance     $set input_cap_instance     0
+$if not set input_cap_instance     $set input_cap_instance     1
 $if not set output_cap_instance    $set output_cap_instance    0
 
 * Set the limiting price (must be less than infinity)
@@ -54,7 +59,7 @@ $if not set price_cap_instance     $set price_cap_instance     10000
 * do the calculation with renewables inside and instead create a "max_output_cap_inst"
 * which constraints the maximum system output (left "Apply_..." values for future work)
 $if not set max_output_cap_inst    $set max_output_cap_inst    Inf
-$if not set allow_import_instance  $set allow_import_instance  0
+$if not set allow_import_instance  $set allow_import_instance  1
 
 $if not set input_LSL_instance     $set input_LSL_instance     0
 $if not set output_LSL_instance    $set output_LSL_instance    0
@@ -90,6 +95,17 @@ $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
 $if not set ramp_penalty_instance  $set ramp_penalty_instance  0
 
+$if not set wacc_instance          $set wacc_instance          0.028
+* combined federal and local taxes
+*$if not set cftr_instance          $set cftr_instance          0.28
+* for debugging, deactivate the depreciation rate by setting one of the multipliers, i.e. cftr = 0
+$if not set cftr_instance          $set cftr_instance          0.28
+$if not set depr_basis_instance    $set depr_basis_instance    0.85
+* present value of depreciation
+$if not set pvd_instance           $set pvd_instance           0.7568
+$if not set input_pvd_instance     $set input_pvd_instance     0.8349
+$if not set depr_bonus_instance    $set depr_bonus_instance    0.5
+
 * Next two values change the resoultion of the optimization
 *    hourly: 8760, 1     15min: 35040, 0.25       5min: 105120, 0.08333333333
 $if not set op_length_instance     $set op_length_instance     8760
@@ -108,7 +124,7 @@ $if not set Renewable_MW_instance  $set Renewable_MW_instance  2
 $if not set REC_price_inst         $set REC_price_inst         12
 
 $if not set CF_opt_instance        $set CF_opt_instance        0
-$if not set run_retail_instance    $set run_retail_instance    0
+$if not set run_retail_instance    $set run_retail_instance    2
 $if not set one_active_device_inst $set one_active_device_inst 1
 $if not set ITC_inst               $set ITC_inst               0.3
 * Next values are used to initialize for real-time operation and shorten the run-time
@@ -125,7 +141,7 @@ $if not set H2_EneDens_inst        $set H2_EneDens_inst        120
 $if not set H2_Gas_ratio_inst      $set H2_Gas_ratio_inst      2.5
 $if not set Grid_CarbInt_inst      $set Grid_CarbInt_inst      105
 $if not set CI_base_line_inst      $set CI_base_line_inst      96.5
-$if not set LCFS_price_inst        $set LCFS_price_inst        125
+$if not set LCFS_price_inst        $set LCFS_price_inst        180
 
 
 *        energy_only_instance = 0, 1 (1 = Energy only operation, 0 = All ancillary services included)
@@ -239,6 +255,21 @@ Parameters
 * Adjust the files that are loaded
 $include /%indir%\%elec_rate_instance%.txt
 
+Scalar
+         epsilon                 convergence tolerance between two iterations  /2/
+         LCFS_FCEV               "LCFS costs [$/kg]" /0/
+         Energy_charge           "Energy charge [$/kg]" /0/
+         Fixed_demand_charge     "Fixed demand charges [$/kg]" /0/
+         Timed_demand_charge     "Timed demand charges [$/kg]" /0/
+         Meters_cost             "Meter cost [$/kg]" /0/
+         Storage_cost            "Storage cost [$/kg]" /0/
+         Electrolyzer_CAPEX      "Input capital investment [$/kg]" /0/
+         Electrolyzer_FOM        "Input fixed operating cost [$/kg]" /0/
+         PV_cost                 "Cost of photovoltaics [$/kg]" /0/
+         H2_break_even_cost      "Hydrogen break even cost [$/kg]" /0/
+         LCFS_revenue            LCFS revenue  /0/
+         H2_revenue              operating profits due to selling hydrogen (dollars)  /0/
+;
 
 Scalars
          interval_length length of each interval (hours) /%int_length_instance%/
@@ -282,7 +313,13 @@ Scalars
          LCFS_price              "Low Carbon Fuel Standard (LCFS) credit prices ($ per credit)"                  /%LCFS_price_inst%/
 
          val_from_batch          "Set values from GUI input or batch file (yes=1, no=2) (works with 1 device & 1 renewable)"  /%val_from_batch_inst%/
-         ITC                     "Business Energy Investment Tax Credit (ITC) (fraction between 0 and 1)" /%ITC_inst%/
+         ITC                     "Business Energy Investment Tax Credit (ITC) (fraction between 0 and 1)"        /%ITC_inst%/
+         wacc                    "Weighted average capital cost (wacc) [-]"                                      /%wacc_instance%/
+         cftr                    "Combined federal and local taxes     [-]"                                      /%cftr_instance%/
+         depr_basis              "Depreciation basis             [-]"                                            /%depr_basis_instance%/
+         pvd                     "Present value of depreciation for PV  [-]"                                     /%pvd_instance%/
+         input_pvd               "Present value of depreciation for input [-]"                                   /%input_pvd_instance%/
+         depr_bonus              "Depreciation bonus [-]"                                                        /%depr_bonus_instance%/
 ;
 
 Sets
@@ -856,9 +893,12 @@ operating_profit_eqn..
                  - sum(months, cap_5(months) * Timed_dem("5"))
                  - sum(months, cap_6(months) * Timed_dem("6"))
                  - meter_mnth_chg("1") * 12
-                 - sum(devices_ren,((1-ITC)*renew_cap_cost(devices_ren)+renew_FOM_cost(devices_ren)*renew_lifetime(devices_ren)) * Renewable_MW(devices_ren) * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1))))
-                 - sum(devices,(input_cap_cost(devices)+input_FOM_cost(devices)*input_lifetime(devices)) * input_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1))))
-                 - sum(devices,(output_cap_cost(devices)+output_FOM_cost(devices)*output_lifetime(devices)) * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1))))
+                 - sum(devices_ren,((1-ITC)*renew_cap_cost(devices_ren)+renew_FOM_cost(devices_ren)*renew_lifetime(devices_ren)) * Renewable_MW(devices_ren) * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1))))*(1-%new_finance_model%)
+                 - sum(devices_ren,(((1-ITC-cftr*pvd*depr_basis*(1-depr_bonus))*renew_cap_cost(devices_ren) + renew_FOM_cost(devices_ren)*renew_lifetime(devices_ren)) * Renewable_MW(devices_ren) * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1))))*(%new_finance_model%)
+                 - sum(devices,(input_cap_cost(devices)+input_FOM_cost(devices)*input_lifetime(devices)) * input_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1))))*(1-%new_finance_model%)
+                 - sum(devices,(((1-ITC-cftr*input_pvd*depr_basis*(1-depr_bonus))*input_cap_cost(devices)+input_FOM_cost(devices)*input_lifetime(devices)) * input_capacity_MW(devices) * (wacc*(1+wacc)**input_lifetime(devices)/((1+wacc)**input_lifetime(devices) - 1))))*(%new_finance_model%)
+                 - sum(devices,(output_cap_cost(devices)+output_FOM_cost(devices)*output_lifetime(devices)) * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1))))*(1-%new_finance_model%)
+                 - sum(devices,(((output_cap_cost(devices)+output_FOM_cost(devices)*output_lifetime(devices)) * output_capacity_MW(devices) * (wacc*(1+wacc)**output_lifetime(devices)/((1+wacc)**output_lifetime(devices) - 1)))))*(%new_finance_model%)
                  - sum(devices,H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours(devices)* (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1))))
                  ;
 
@@ -1500,9 +1540,16 @@ REC_revenue = sum(interval, REC_price * (sum(devices_ren,renewable_power_MW_sold
 LCFS_revenue = sum((interval,devices),(CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency(devices))*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold.l(interval,devices)
                         + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold_ren.l(interval,devices) );
 
-renew_cap_cost2_vec(devices_ren) = -(1-ITC)*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)   * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1)));
-input_cap_cost2_vec(devices)     = -input_cap_cost(devices)     * input_capacity_MW(devices)  * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1)));
-output_cap_cost2_vec(devices)    = -output_cap_cost(devices)    * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1)));
+if (%new_finance_model%=0,
+         renew_cap_cost2_vec(devices_ren) = -(1-ITC)*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)   * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1)));
+         input_cap_cost2_vec(devices)     = -input_cap_cost(devices)     * input_capacity_MW(devices)  * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1)));
+         output_cap_cost2_vec(devices)    = -output_cap_cost(devices)    * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1)));
+elseif %new_finance_model%=1,
+         renew_cap_cost2_vec(devices_ren) = -(1-ITC-cftr*pvd*depr_basis*(1-depr_bonus))*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren) * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1)) ;
+         input_cap_cost2_vec(devices)     = -input_cap_cost(devices)     * input_capacity_MW(devices)  *  (wacc*(1+wacc)**input_lifetime(devices)/((1+wacc)**input_lifetime(devices) - 1));
+         output_cap_cost2_vec(devices)    = -output_cap_cost(devices)    * output_capacity_MW(devices) *  (wacc*(1+wacc)**output_lifetime(devices)/((1+wacc)**output_lifetime(devices) - 1));
+);;
+
 H2stor_cap_cost2_vec(devices)    = -H2stor_cap_cost(devices)    * input_capacity_MW(devices)  * (input_efficiency(devices) / H2_LHV ) * (H2_consumed_adj(devices) * (1-CF_opt) + CF_opt * Hydrogen_fraction.l) * storage_capacity_hours(devices) * (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1)));
 renew_cap_cost2 = sum(devices_ren, renew_cap_cost2_vec(devices_ren));
 input_cap_cost2 = sum(devices, input_cap_cost2_vec(devices));

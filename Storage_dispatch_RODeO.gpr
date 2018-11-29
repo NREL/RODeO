@@ -1,0 +1,15 @@
+[PROJECT]
+
+[RP:STORAGE_DISPATCH_V22_1]
+1=
+
+[OPENWINDOW_1]
+MAXIM=0
+TOP=50
+LEFT=50
+HEIGHT=400
+WIDTH=400
+
+[MRUFILES]
+1=C:\Users\MKOLEVA\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.lst
+2=C:\Users\MKOLEVA\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
