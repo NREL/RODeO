@@ -72,6 +72,7 @@ $if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1745900
 $if not set input_cap_cost_inst    $set input_cap_cost_inst    1691000
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
 $if not set H2stor_cap_cost_inst   $set H2stor_cap_cost_inst   1000
+$if not set H2comp_cap_cost_inst   $set H2comp_cap_cost_inst   8800
 $if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    15600
 $if not set input_FOM_cost_inst    $set input_FOM_cost_inst    93840
 $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
@@ -82,9 +83,11 @@ $if not set renew_lifetime_inst    $set renew_lifetime_inst    20
 $if not set input_lifetime_inst    $set input_lifetime_inst    20
 $if not set output_lifetime_inst   $set output_lifetime_inst   20
 $if not set H2stor_lifetime_inst   $set H2stor_lifetime_inst   20
+$if not set H2comp_lifetime_inst   $set H2comp_lifetime_inst   20
 $if not set interest_rate_inst     $set interest_rate_inst     0.07
 $if not set renew_interest_inst    $set renew_interest_inst    0.07
 $if not set H2stor_interest_inst   $set H2stor_interest_inst   0.07
+$if not set H2comp_interest_inst   $set H2comp_interest_inst   0.07
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
 $if not set storage_cap_instance   $set storage_cap_instance   8
@@ -226,6 +229,7 @@ Parameters
          input_cap_cost(devices)                 "upfront capital cost ($/MW)"                           /1 %input_cap_cost_inst%/
          output_cap_cost(devices)                "upfront capital cost ($/MW)"                           /1 %output_cap_cost_inst%/
          H2stor_cap_cost(devices)                "upfront capital cost ($/kg)"                           /1 %H2stor_cap_cost_inst%/
+         H2comp_cap_cost(devices)                "upfront hydrogen compressor capital cost ($/kg/h)"     /1 %H2comp_cap_cost_inst%/
          renew_FOM_cost(devices_ren)             "upfront FOM cost ($/MW-year)"                          /1 %renew_FOM_cost_inst%/
          input_FOM_cost(devices)                 "upfront FOM cost ($/MW-year)"                          /1 %input_FOM_cost_inst%/
          output_FOM_cost(devices)                "upfront FOM cost ($/MW-year)"                          /1 %output_FOM_cost_inst%/
@@ -237,10 +241,12 @@ Parameters
          input_lifetime(devices)                 "equipment lifetime (years)"                            /1 %input_lifetime_inst%/
          output_lifetime(devices)                "equipment lifetime (years)"                            /1 %output_lifetime_inst%/
          H2stor_lifetime(devices)                "equipment lifetime (years)"                            /1 %H2stor_lifetime_inst%/
+         H2comp_lifetime(devices)                "equipment lifetime (years) - compressor"               /1 %H2comp_lifetime_inst%/
 
          interest_rate(devices)                  "interest rate on debt"                                 /1 %interest_rate_inst%/
          renew_interest_rate(devices_ren)        "interest rate on debt for renewables"                  /1 %renew_interest_inst%/
          H2stor_interest_rate(devices)           "interest rate on debt for storage"                     /1 %H2stor_interest_inst%/
+         H2comp_interest_rate(devices)           "interest rate on debt for storage - compressor"        /1 %H2comp_interest_inst%/
 
          H2_use(devices)                         "Determines if Hydrogen outputted as a product or not (toggle)" /1 %H2_use_instance%/
          H2_price_adj(devices)                   "Determines if Hydrogen outputted as a product or not"          /1 %H2_price_instance%/
@@ -899,7 +905,8 @@ operating_profit_eqn..
                  - sum(devices,(((1-ITC-cftr*input_pvd*depr_basis*(1-depr_bonus))*input_cap_cost(devices)+input_FOM_cost(devices)*input_lifetime(devices)) * input_capacity_MW(devices) * (wacc*(1+wacc)**input_lifetime(devices)/((1+wacc)**input_lifetime(devices) - 1))))*(%new_finance_model%)
                  - sum(devices,(output_cap_cost(devices)+output_FOM_cost(devices)*output_lifetime(devices)) * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1))))*(1-%new_finance_model%)
                  - sum(devices,(((output_cap_cost(devices)+output_FOM_cost(devices)*output_lifetime(devices)) * output_capacity_MW(devices) * (wacc*(1+wacc)**output_lifetime(devices)/((1+wacc)**output_lifetime(devices) - 1)))))*(%new_finance_model%)
-                 - sum(devices,H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours(devices)* (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1))))
+                 - sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours(devices)* (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1))))
+                 - sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ) * (H2comp_interest_rate(devices)+(H2comp_interest_rate(devices)/(power((1+H2comp_interest_rate(devices)),H2comp_lifetime(devices))-1))))
                  ;
 
 system_power_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
@@ -1405,6 +1412,7 @@ Scalars
          input_VOM_cost2          Annualized VOM cost
          output_VOM_cost2         Annualized VOM cost
          H2stor_cap_cost2         Annualized hydrogen storage cost
+         H2comp_cap_cost2         Annualized hydrogen compressor cost
          Hydrogen_fraction_val    Optimized Capacity Factor (%)
          renewable_sales          Revenue from renewables sales ($)
          curtailment_sum          Sum of curtailment over the region
@@ -1455,6 +1463,7 @@ Parameters
          input_VOM_cost2_vec(devices)          Annualized VOM cost
          output_VOM_cost2_vec(devices)         Annualized VOM cost
          H2stor_cap_cost2_vec(devices)         Annualized hydrogen storage cost
+         H2comp_cap_cost2_vec(devices)         Annualized hydrogen storage cost  
          renewable_sales_vec(devices_ren)      Revenue from renewables sales ($)
          curtailment_sum_vec(devices)          Sum of curtailment over the region
 
@@ -1551,10 +1560,12 @@ elseif %new_finance_model%=1,
 );;
 
 H2stor_cap_cost2_vec(devices)    = -H2stor_cap_cost(devices)    * input_capacity_MW(devices)  * (input_efficiency(devices) / H2_LHV ) * (H2_consumed_adj(devices) * (1-CF_opt) + CF_opt * Hydrogen_fraction.l) * storage_capacity_hours(devices) * (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1)));
+H2comp_cap_cost2_vec(devices)    = - H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ) * (H2comp_interest_rate(devices)+(H2comp_interest_rate(devices)/(power((1+H2comp_interest_rate(devices)),H2comp_lifetime(devices))-1))) ;
 renew_cap_cost2 = sum(devices_ren, renew_cap_cost2_vec(devices_ren));
 input_cap_cost2 = sum(devices, input_cap_cost2_vec(devices));
 output_cap_cost2 = sum(devices, output_cap_cost2_vec(devices));
 H2stor_cap_cost2 = sum(devices, H2stor_cap_cost2_vec(devices));
+H2comp_cap_cost2 = sum(devices, H2comp_cap_cost2_vec(devices));
 
 renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren) * Renewable_MW(devices_ren)   * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1)));
 input_FOM_cost2_vec(devices)     = -input_FOM_cost(devices)     * input_capacity_MW(devices)  * input_lifetime(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1)));
@@ -1584,7 +1595,7 @@ H2_revenue         = sum(devices, H2_revenue_vec(devices));
 actual_operating_profit = arbitrage_revenue + regup_revenue + regdn_revenue + spinres_revenue + nonspinres_revenue + H2_revenue - startup_costs
                         + Fixed_dem_charge_cost + Timed_dem_1_cost + Timed_dem_2_cost + Timed_dem_3_cost + Timed_dem_4_cost + Timed_dem_5_cost + Timed_dem_6_cost + Meter_cost
                         + input_cap_cost2 + output_cap_cost2 + input_FOM_cost2 + output_FOM_cost2 + input_VOM_cost2 + output_VOM_cost2 + renewable_sales
-                        + renew_cap_cost2 + renew_FOM_cost2 + renew_VOM_cost2 + H2stor_cap_cost2 + REC_revenue + LCFS_revenue;
+                        + renew_cap_cost2 + renew_FOM_cost2 + renew_VOM_cost2 + H2stor_cap_cost2 + H2comp_cap_cost2 + REC_revenue + LCFS_revenue;
 
 Hydrogen_fraction_val = Hydrogen_fraction.l*100;
 
@@ -1835,6 +1846,7 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Input annualized capital cost ($), ',      input_cap_cost2 /;
                  put 'Output annualized capital cost ($), ',     output_cap_cost2 /;
                  put 'Hydrogen storage annualized cost ($), ',   H2stor_cap_cost2 /;
+                 put 'Hydrogen compressor annualized cost ($), ' H2comp_cap_cost2 /;
                  put 'Renewable FOM cost ($), ',                 renew_FOM_cost2 /;
                  put 'Input FOM cost ($), ',                     input_FOM_cost2 /;
                  put 'Output FOM cost ($), ',                    output_FOM_cost2 /;
