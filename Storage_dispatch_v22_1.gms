@@ -65,14 +65,15 @@ $if not set input_LSL_instance     $set input_LSL_instance     0
 $if not set output_LSL_instance    $set output_LSL_instance    0
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0
 $if not set Output_start_cost_inst $set Output_start_cost_inst 0
-$if not set input_efficiency_inst  $set input_efficiency_inst  0.613668913
+* Efficiency takes into account compressor. Otherwise, take 0.613669
+$if not set input_efficiency_inst  $set input_efficiency_inst  0.601484
 $if not set output_efficiency_inst $set output_efficiency_inst 1
 
 $if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1745900
 $if not set input_cap_cost_inst    $set input_cap_cost_inst    1691000
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
-$if not set H2stor_cap_cost_inst   $set H2stor_cap_cost_inst   1000
-$if not set H2comp_cap_cost_inst   $set H2comp_cap_cost_inst   8800
+$if not set H2stor_cap_cost_inst   $set H2stor_cap_cost_inst   822
+$if not set H2comp_cap_cost_inst   $set H2comp_cap_cost_inst   17420
 $if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    15600
 $if not set input_FOM_cost_inst    $set input_FOM_cost_inst    93840
 $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
@@ -117,7 +118,7 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set file_name_instance     $set file_name_instance     "4.0_Scenario_Vaca_Dixon"
+$if not set file_name_instance     $set file_name_instance     "4.0_Scenario_Vaca_Dixon_itc30"
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
 $if not set H2_price_instance      $set H2_price_instance      6
 $if not set H2_use_instance        $set H2_use_instance        1
@@ -126,10 +127,10 @@ $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  2
 $if not set REC_price_inst         $set REC_price_inst         12
 
-$if not set CF_opt_instance        $set CF_opt_instance        0
+$if not set CF_opt_instance        $set CF_opt_instance        1
 $if not set run_retail_instance    $set run_retail_instance    2
 $if not set one_active_device_inst $set one_active_device_inst 1
-$if not set ITC_inst               $set ITC_inst               0.3
+$if not set ITC_inst               $set ITC_inst               0
 * Next values are used to initialize for real-time operation and shorten the run-time
 *    To turn off set current_int = -1, next_int = 1 and max_int_instance = Inf
 $if not set current_int_instance   $set current_int_instance   -1
@@ -1463,7 +1464,7 @@ Parameters
          input_VOM_cost2_vec(devices)          Annualized VOM cost
          output_VOM_cost2_vec(devices)         Annualized VOM cost
          H2stor_cap_cost2_vec(devices)         Annualized hydrogen storage cost
-         H2comp_cap_cost2_vec(devices)         Annualized hydrogen storage cost  
+         H2comp_cap_cost2_vec(devices)         Annualized hydrogen storage cost
          renewable_sales_vec(devices_ren)      Revenue from renewables sales ($)
          curtailment_sum_vec(devices)          Sum of curtailment over the region
 
