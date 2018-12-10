@@ -313,18 +313,18 @@ Parameters
          curtailment_vec(interval,devices_ren) calculate renewable curtialment (MW)
          storage_level_MWh_tot(interval,devices) combined renewable and non-renewable storage level
 
-         LCFS_revenue_vec(devices)
-         LCFS_FCEV(devices)
-         Energy_charge(devices)
-         Fixed_demand_charge(devices)
-         Timed_demand_charge(devices)
-         Meters_cost(devices)
-         Storage_cost(devices)
-         Compressor_cost(devices)
-         input_cap_costH2(devices)
-         input_FOM_costH2(devices)
-         PV_cost(devices)
-         H2_break_even_cost(devices)
+         LCFS_revenue_vec(devices)             Low Carbon Fuel Standard (LCFS) credit revenue ($)
+         LCFS_FCEV(devices)                    Low Carbon Fuel Standard (LCFS) credit revenue per kg of hydrogen ($ per kg)
+         Energy_charge(devices)                Energy charges per kg of hydrogen ($ per kg)
+         Fixed_demand_charge(devices)          Fixed demand charges per kg of hydrogen ($ per kg)
+         Timed_demand_charge(devices)          Timed demand charges per kg of hydrogen ($ per kg)
+         Meters_cost(devices)                  Meters cost per kg of hydrogen ($ per kg)
+         Storage_cost(devices)                 Storage cost per kg of hydrogen ($ per kg)
+         Compressor_cost(devices)              Compressor cost per kg of hydrogen ($ per kg)
+         input_cap_costH2(devices)             Input capital cost per kg of hydrogen ($ per kg)
+         input_FOM_costH2(devices)             Input fixed operating cost per kg of hydrogen ($ per kg)
+         Renewable_cost(devices)               Renewable total cost per kg of hydrogen ($ per kg)
+         H2_break_even_cost(devices)           Hydrogen break-even cost ($ per kg)
 ;
 
 * Adjust the files that are loaded
@@ -1451,7 +1451,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                        renew_cap_cost2_vec(devices_ren) = -(1-ITC)*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren) * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1)) ;
                        renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren) * Renewable_MW(devices_ren)   * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1));
                        elec_cost_ren_vec(devices_ren)   = sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) );
-                       PV_cost(devices)                 = sum(devices_ren,(renew_cap_cost2_vec(devices_ren)
+                       Renewable_cost(devices)          = sum(devices_ren,(renew_cap_cost2_vec(devices_ren)
                                                         + renew_FOM_cost2_vec(devices_ren)
                                                         + elec_cost_ren_vec(devices_ren)
                                                         + sum(interval, REC_price * renewable_power_MW_sold.l(interval,devices_ren) * interval_length + output_power_MW_ren.l(interval,devices)) * interval_length ))
@@ -1972,7 +1972,7 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Compressor cost (US$/kg),',                sum(devices,Compressor_cost(devices)) /;
                  put 'Input CAPEX (US$/kg),',                    sum(devices,input_cap_costH2(devices)) /;
                  put 'Input FOM (US$/kg),',                      sum(devices,input_FOM_costH2(devices)) /;
-                 put 'PV cost (US$/kg),',                        sum(devices,PV_cost(devices)) /;
+                 put 'Renewable cost (US$/kg),',                 sum(devices,Renewable_cost(devices)) /;
                  put 'H2 break-even cost (US$/kg),',             sum(devices,H2_break_even_cost(devices)) / ;
                  put /;
 
