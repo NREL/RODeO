@@ -22,7 +22,7 @@ $OffText
 * Delete after finilising the financial model updates. This switch activates or deactivates equations used in the versions before and after updating the finances
 $if not set new_finance_model      $set new_finance_model   1
 * Delete after finishing with sensitivity checks ever. This toggle switches an iteration mode which updates the hydrogen break-even cost
-$if not set run_sensitivity        $set run_sensitivity     1
+$if not set run_opt_breakeven        $set run_opt_breakeven     0
 *===============================================================================
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
@@ -1404,7 +1404,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
 *=====================================================================================================================
 * run a RODeO run with updating the hydrogen cost
 *=====================================================================================================================
-         %run_sensitivity% = 1,
+         %run_opt_breakeven% = 1,
 
                  while(
                        (abs(epsilon) gt 0.1),
@@ -1435,7 +1435,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                        Timed_demand_charge(devices)     = (-sum(months, cap_1.l(months) * Timed_dem("1"))-sum(months, cap_2.l(months) * Timed_dem("2"))-sum(months, cap_3.l(months) * Timed_dem("3"))
                                                            -sum(months, cap_4.l(months) * Timed_dem("4"))-sum(months, cap_5.l(months) * Timed_dem("5"))-sum(months, cap_6.l(months) * Timed_dem("6")))
                                                            /(H2_revenue_vec(devices)/H2_price_adj(devices));
-                       Meters_cost(devices)             =  -(meter_mnth_chg("1") * 12)/(H2_revenue_vec(devices)/H2_price_adj(devices));
+                       Meters_cost(devices)             =  -(meter_mnth_chg("1") * 12*allow_import)/(H2_revenue_vec(devices)/H2_price_adj(devices));
 
                        H2stor_cap_cost2_vec(devices)    = -H2stor_cap_cost(devices)    * input_capacity_MW(devices)  * (input_efficiency(devices) / H2_LHV ) * (wacc*(1+wacc)**H2stor_lifetime(devices)/((1+wacc)**H2stor_lifetime(devices) - 1));
                        Storage_cost(devices)            = H2stor_cap_cost2_vec(devices)/(H2_revenue_vec(devices)/H2_price_adj(devices));
@@ -1458,7 +1458,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                                                         /(H2_revenue_vec(devices)/H2_price_adj(devices));
 
                        H2_break_even_cost(devices)      = LCFS_FCEV(devices) + Energy_charge(devices) + Fixed_demand_charge(devices) + Timed_demand_charge(devices) + Meters_cost(devices) +
-                                                          Storage_cost(devices) + Compressor_cost(devices) +  input_cap_costH2(devices) + input_FOM_costH2(devices) + PV_cost(devices) ;
+                                                          Storage_cost(devices) + Compressor_cost(devices) +  input_cap_costH2(devices) + input_FOM_costH2(devices) + Renewable_cost(devices) ;
 
                        epsilon = sum(devices,H2_price_adj(devices) + H2_break_even_cost(devices))/sum(devices$(ord(devices) <= %devices_instance%),1) ;
 
@@ -1480,7 +1480,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                            );
 * closing the while loop
                  );;
-         elseif %run_sensitivity% = 0,
+         elseif %run_opt_breakeven% = 0,
 
                  Solve arbitrage_and_AS using MIP maximizing operating_profit;
 * closing the 'if sensitivity' condition for updating hydrogen break even cost
@@ -1580,7 +1580,7 @@ Timed_dem_3_cost = -sum(months, cap_3.l(months) * Timed_dem("3"));
 Timed_dem_4_cost = -sum(months, cap_4.l(months) * Timed_dem("4"));
 Timed_dem_5_cost = -sum(months, cap_5.l(months) * Timed_dem("5"));
 Timed_dem_6_cost = -sum(months, cap_6.l(months) * Timed_dem("6"));
-Meter_cost = -(meter_mnth_chg("1") * 12);
+Meter_cost = -(meter_mnth_chg("1") * 12)*allow_import;
 
 
 curtailment(interval) = sum(devices_ren, Renewable_power(interval,devices_ren) - renewable_power_MW_sold.l(interval,devices_ren)) - sum(devices,input_power_MW_ren.l(interval,devices)) - Load_profile_ren.l(interval);
