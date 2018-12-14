@@ -22,7 +22,7 @@ $OffText
 * Delete after finilising the financial model updates. This switch activates or deactivates equations used in the versions before and after updating the finances
 $if not set new_finance_model      $set new_finance_model   1
 * Delete after finishing with sensitivity checks ever. This toggle switches an iteration mode which updates the hydrogen break-even cost
-$if not set run_opt_breakeven        $set run_opt_breakeven     0
+$if not set run_opt_breakeven      $set run_opt_breakeven   0
 *===============================================================================
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
@@ -323,6 +323,9 @@ Parameters
          Compressor_cost(devices)              Compressor cost per kg of hydrogen ($ per kg)
          input_cap_costH2(devices)             Input capital cost per kg of hydrogen ($ per kg)
          input_FOM_costH2(devices)             Input fixed operating cost per kg of hydrogen ($ per kg)
+         Renewable_cap_costH2(devices)         Renewable capital cost per kg of hydrogen ($ per kg)
+         Renewable_FOM_costH2(devices)         Renewable FOM per kg of hydrogen ($ per kg)
+         Renewable_revenueH2(devices)          Renewable revenue per kg of hydrogen ($ per kg)
          Renewable_cost(devices)               Renewable total cost per kg of hydrogen ($ per kg)
          H2_break_even_cost(devices)           Hydrogen break-even cost ($ per kg)
 ;
@@ -1451,6 +1454,10 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                        renew_cap_cost2_vec(devices_ren) = -(1-ITC)*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren) * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1)) ;
                        renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren) * Renewable_MW(devices_ren)   * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1));
                        elec_cost_ren_vec(devices_ren)   = sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) );
+                       Renewable_cap_costH2(devices)    = sum(devices_ren,renew_cap_cost2_vec(devices_ren))/(H2_revenue_vec(devices)/H2_price_adj(devices));
+                       Renewable_FOM_costH2(devices)    = sum(devices_ren,renew_FOM_cost2_vec(devices_ren))/(H2_revenue_vec(devices)/H2_price_adj(devices));
+                       Renewable_revenueH2(devices)     = sum(devices_ren,(elec_cost_ren_vec(devices_ren)+ sum(interval, REC_price * renewable_power_MW_sold.l(interval,devices_ren) * interval_length + output_power_MW_ren.l(interval,devices)) * interval_length ))
+                                                          /(H2_revenue_vec(devices)/H2_price_adj(devices));
                        Renewable_cost(devices)          = sum(devices_ren,(renew_cap_cost2_vec(devices_ren)
                                                         + renew_FOM_cost2_vec(devices_ren)
                                                         + elec_cost_ren_vec(devices_ren)
@@ -1719,6 +1726,30 @@ Electricity_import = sum(interval, Import_elec_profile.l(interval)) * interval_l
 Total_elec_consumed = sum(interval, sum(devices,input_power_MW.l(interval,devices)) + Load_profile(interval)) * interval_length;
 
 storage_level_MWh_tot(interval,devices) = storage_level_MWh.l(interval,devices)+storage_level_MWh_ren.l(interval,devices);
+LCFS_revenue_vec(devices)        = sum((interval),(CI_base_line*H2_Gas_ratio - Grid_CarbInt/input_efficiency(devices))*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold.l(interval,devices)
+                                 + Grid_CarbInt*LCFS_price*H2_EneDens*(power(10,-6)) * H2_sold_ren.l(interval,devices) );
+LCFS_FCEV(devices)               =  LCFS_revenue_vec(devices)/sum(interval,H2_sold.l(interval,devices));
+Energy_charge(devices)           =  arbitrage_revenue_vec(devices) /sum(interval,H2_sold.l(interval,devices));
+Fixed_demand_charge(devices)     =  -sum(months, Fixed_cap.l(months) * Fixed_dem(months))/sum(interval,H2_sold.l(interval,devices));
+Timed_demand_charge(devices)     = (-sum(months, cap_1.l(months) * Timed_dem("1"))-sum(months, cap_2.l(months) * Timed_dem("2"))-sum(months, cap_3.l(months) * Timed_dem("3"))
+                                   -sum(months, cap_4.l(months) * Timed_dem("4"))-sum(months, cap_5.l(months) * Timed_dem("5"))-sum(months, cap_6.l(months) * Timed_dem("6")))
+                                   /sum(interval,H2_sold.l(interval,devices));
+Meters_cost(devices)             =  -(meter_mnth_chg("1") * 12*allow_import)/sum(interval,H2_sold.l(interval,devices));
+Storage_cost(devices)            = H2stor_cap_cost2_vec(devices)/sum(interval,H2_sold.l(interval,devices));
+Compressor_cost(devices)         = H2comp_cap_cost2_vec(devices)/sum(interval,H2_sold.l(interval,devices));
+input_cap_costH2(devices)        = input_cap_cost2_vec(devices)/sum(interval,H2_sold.l(interval,devices));
+input_FOM_costH2(devices)        = input_FOM_cost2_vec(devices)/sum(interval,H2_sold.l(interval,devices));
+Renewable_cap_costH2(devices)    = sum(devices_ren,renew_cap_cost2_vec(devices_ren))/sum(interval,H2_sold.l(interval,devices));
+Renewable_FOM_costH2(devices)    = sum(devices_ren,renew_FOM_cost2_vec(devices_ren))/sum(interval,H2_sold.l(interval,devices));
+Renewable_revenueH2(devices)     = sum(devices_ren,(elec_cost_ren_vec(devices_ren)+ sum(interval, REC_price * renewable_power_MW_sold.l(interval,devices_ren) * interval_length + output_power_MW_ren.l(interval,devices)) * interval_length ))
+                                   /sum(interval,H2_sold.l(interval,devices));
+Renewable_cost(devices)          = sum(devices_ren,(renew_cap_cost2_vec(devices_ren)
+                                   + renew_FOM_cost2_vec(devices_ren)
+                                   + elec_cost_ren_vec(devices_ren)
+                                   + sum(interval, REC_price * renewable_power_MW_sold.l(interval,devices_ren) * interval_length + output_power_MW_ren.l(interval,devices)) * interval_length ))
+                                   /sum(interval,H2_sold.l(interval,devices));
+H2_break_even_cost(devices)      = LCFS_FCEV(devices) + Energy_charge(devices) + Fixed_demand_charge(devices) + Timed_demand_charge(devices) + Meters_cost(devices) +
+                                   Storage_cost(devices) + Compressor_cost(devices) +  input_cap_costH2(devices) + input_FOM_costH2(devices) + Renewable_cost(devices) ;
 
 if (1=0,
 option decimals=8;
@@ -1974,6 +2005,11 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Input FOM (US$/kg),',                      sum(devices,input_FOM_costH2(devices)) /;
                  put 'Renewable cost (US$/kg),',                 sum(devices,Renewable_cost(devices)) /;
                  put 'H2 break-even cost (US$/kg),',             sum(devices,H2_break_even_cost(devices)) / ;
+                 put /
+                 put 'Renewable cost breakdown (US$/kg)' /;
+                 put 'Renewable capital cost per kg H2 (US$/kg),', sum(devices, Renewable_cap_costH2(devices)) /;
+                 put 'Renewable FOM per kg H2 (US$/kg),',          sum(devices, Renewable_FOM_costH2(devices)) /;
+                 put 'Renewable revenue per kg H2 (US$/kg),',      sum(devices, Renewable_revenueH2(devices))  /;
                  put /;
 
 $ontext
