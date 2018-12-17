@@ -558,8 +558,8 @@ Parameter   H2_price_init(interval,devices) ;
 H2_price_init(interval,devices) =  H2_price(interval,devices) ;
 
 if (run_retail=0,
-         elec_purchase_price(interval) = elec_purchase_price_interim(interval);
-         elec_sale_price(interval)     = elec_purchase_price(interval);
+         elec_sale_price(interval)     = elec_purchase_price_interim(interval);
+         elec_purchase_price(interval) = elec_purchase_price(interval);
          regup_price(interval)         = regup_price_interim(interval);
          regdn_price(interval)         = regdn_price_interim(interval);
          spinres_price(interval)       = spinres_price_interim(interval);
@@ -2011,22 +2011,18 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Total Electricity Consumed (MWh), ',       Total_elec_consumed /;
                  put /
                  put 'Hydrogen cost breakdown (US$/kg)' /;
-                 put 'LCFS_FCEV (US$/kg),',                      sum(devices,LCFS_FCEV(devices)) /;
-                 put 'Energy charge (US$/kg),',                  sum(devices,Energy_Charge(devices)) /;
-                 put 'Fixed demand charge (US$/kg),',            sum(devices,Fixed_demand_charge(devices)) /;
-                 put 'Timed demand charge (US$/kg),',            sum(devices,Timed_demand_charge(devices)) /;
-                 put 'Meters cost (US$/kg),',                    sum(devices,Meters_cost(devices)) /;
-                 put 'Storage cost (US$/kg),',                   sum(devices,Storage_cost(devices)) /;
-                 put 'Compressor cost (US$/kg),',                sum(devices,Compressor_cost(devices)) /;
-                 put 'Input CAPEX (US$/kg),',                    sum(devices,input_cap_costH2(devices)) /;
-                 put 'Input FOM (US$/kg),',                      sum(devices,input_FOM_costH2(devices)) /;
-                 put 'Renewable cost (US$/kg),',                 sum(devices,Renewable_cost(devices)) /;
-                 put 'H2 break-even cost (US$/kg),',             sum(devices,H2_break_even_cost(devices)) / ;
-                 put /
-                 put 'Renewable cost breakdown (US$/kg)' /;
-                 put 'Renewable capital cost per kg H2 (US$/kg),', sum(devices, Renewable_cap_costH2(devices)) /;
-                 put 'Renewable FOM per kg H2 (US$/kg),',          sum(devices, Renewable_FOM_costH2(devices)) /;
-                 put 'Renewable revenue per kg H2 (US$/kg),',      sum(devices, Renewable_revenueH2(devices))  /;
+                 put 'LCFS_FCEV (US$/kg),',                      sum(devices,-LCFS_FCEV(devices)) /;
+                 put 'Renewable revenue(US$/kg),',               sum(devices,-Renewable_revenueH2(devices))  /;
+                 put 'Energy charge (US$/kg),',                  sum(devices,-Energy_Charge(devices)) /;
+                 put 'Fixed demand charge (US$/kg),',            sum(devices,-Fixed_demand_charge(devices)) /;
+                 put 'Timed demand charge (US$/kg),',            sum(devices,-Timed_demand_charge(devices)) /;
+                 put 'Meters cost (US$/kg),',                    sum(devices,-Meters_cost(devices)) /;
+                 put 'Storage & compression cost (US$/kg),',     sum(devices,-(Storage_cost(devices)+Compressor_cost(devices))) /;
+                 put 'Input CAPEX (US$/kg),',                    sum(devices,-input_cap_costH2(devices)) /;
+                 put 'Input FOM (US$/kg),',                      sum(devices,-input_FOM_costH2(devices)) /;
+                 put 'Renewable capital cost (US$/kg),',         sum(devices,-Renewable_cap_costH2(devices)) /;
+                 put 'Renewable FOM (US$/kg),',                  sum(devices,-Renewable_FOM_costH2(devices)) /;
+                 put 'H2 break-even cost (US$/kg),',             sum(devices,-H2_break_even_cost(devices)) / ;
                  put /;
 
 $ontext
