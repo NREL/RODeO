@@ -285,7 +285,7 @@ clear i4 i5 i6 i7 Y1 M1 D1 H1 MN1 S1 c1 c2 interim1 interim2 col1
 
 %%% Create matrix to separate hours for each month, TOU bin and utility (for energy charges)            
 Month_to_hour = {};
-% % % TOU_energy = {};      % Removed this representation of TOU_energy (if you uncomment, double check that num1int is calculated correctly)
+% % % TOU_energy = {};
 for i4=1:length(Scenarios1)
     count1 = 1;   % Initialize counter
 % % %     count2 = 1;   % Initialize counter
@@ -321,21 +321,21 @@ for i4=1:length(Scenarios1)
     end
 end
 
-%%% Create matrix (TOU_bin,interval) to separate hours for each month, TOU bin and utility (for energy charges)            
+
 TOU_energy2 = {};
 for i4=1:length(Scenarios1)
-    count2 = 1;   % Initialize counter
+    count2 = ones(max(num1int)+1,1);   % Initialize counter
     i5=1;
     TOUe_interval1 = i5; TOUe_interval2 = i5; TOUe_bin = num1int(i5);
     while i5<length(interval1)+1
         if (i5-TOUe_interval2==1 && TOUe_bin==num1int(i5))
             TOUe_interval2 = i5;
             if i5==length(interval1)  % Capture last item 
-                TOU_energy2{count2,i4} = strcat([num2str(TOUe_bin+1),'.',num2str(TOUe_interval1),'*',num2str(TOUe_interval2)]);
+                TOU_energy2{count2,i4} = strcat([num2str(TOUe_interval1),'*',num2str(TOUe_interval2),' ',num2str(num1int(i5)+1)]);
             end
         else
             if i5~=1
-                TOU_energy2{count2,i4} = strcat([num2str(TOUe_bin+1),'.',num2str(TOUe_interval1),'*',num2str(TOUe_interval2)]);
+                TOU_energy2{count2,i4} = strcat([num2str(TOUe_interval1),'*',num2str(TOUe_interval2),' ',num2str(num1int(i5)+1)]);
                 count2 = count2+1;
             end
             TOUe_interval1 = i5; TOUe_interval2 = i5; TOUe_bin = num1int(i5);
@@ -469,11 +469,11 @@ for i5=init_val:length(Scenarios1)
     end
     fprintf(fileID,'\n');
     %TOU energy bins
-    [TOU1,~] = size(TOU_energy2);
+    [TOU1,~] = size(TOU_energy);
     for i6=1:TOU1
-        if i6==1,           fprintf(fileID,'\t%s\t%s\t%s%s%s','elec_TOU_bins(TOU_energy_period,interval)','Energy TOU bins for retail electricity','/ ',TOU_energy2{i6,i5},',');
-        elseif i6==TOU1,    fprintf(fileID,'%s%s\n',TOU_energy2{i6,i5},' /');
-        else                fprintf(fileID,'%s%s',TOU_energy2{i6,i5},',');            
+        if i6==1,           fprintf(fileID,'\t%s\t%s\t%s%s%s','elec_TOU_bins(months,interval)','Energy TOU bins for retail electricity','/ ',TOU_energy{i6,i5},',');
+        elseif i6==TOU1,    fprintf(fileID,'%s%s\n',TOU_energy{i6,i5},' /');
+        else                fprintf(fileID,'%s%s',TOU_energy{i6,i5},',');            
         end
     end  
     fprintf(fileID,'\n');

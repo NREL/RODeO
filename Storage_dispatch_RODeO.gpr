@@ -3,13 +3,23 @@
 [RP:STORAGE_DISPATCH_V22_1]
 1=
 
-[OPENWINDOW_1]
-MAXIM=0
-TOP=50
-LEFT=50
-HEIGHT=400
-WIDTH=400
+[RP:UNTITLED_11]
+1=
+
+[RP:UNTITLED_4]
+1=
 
 [MRUFILES]
 1=C:\Users\MKOLEVA\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.lst
 2=C:\Users\MKOLEVA\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+
+[OPENWINDOW_1]
+FILE0=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+FILE1=C:\Users\jeichman\Documents\gamsdir\projdir\Untitled_11.gms
+FILE2=C:\Users\jeichman\Documents\gamsdir\projdir\Untitled_4.gms
+FILE3=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+MAXIM=0
+TOP=2
+LEFT=6
+HEIGHT=710
+WIDTH=1342
