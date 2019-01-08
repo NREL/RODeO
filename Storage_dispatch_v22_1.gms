@@ -1006,10 +1006,9 @@ H2_CF_eqn3$(CF_opt=0).. Hydrogen_fraction =e= 1;
 *** Cost function: Elec sale price, elec purchase price, regup, regdown, spin, nonspin, NGout/in, unused VOM cost, startup cost, H2 price, VOM cost, demand charge (fixed and timed), meter cost, cap and FOM cost, etc.
 operating_profit_eqn..
          operating_profit =e= sum( (interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ),
-*                   (elec_sale_price_forecast(interval) * (sum(devices,output_power_MW(interval,devices))+sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))) * interval_length)
-*                 +
-                 REC_price * (sum(devices_ren,renewable_power_MW_sold(interval,devices_ren)) + sum(devices,output_power_MW_ren(interval,devices))) * interval_length
-*                 - (elec_purchase_price_forecast(interval) * Import_elec_profile(interval) * interval_length)
+                   (elec_sale_price_forecast(interval) * (sum(devices,output_power_MW(interval,devices))+sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))) * interval_length)*(1-%NEM_nscr%)
+                 + REC_price * (sum(devices_ren,renewable_power_MW_sold(interval,devices_ren)) + sum(devices,output_power_MW_ren(interval,devices))) * interval_length
+                 - (elec_purchase_price_forecast(interval) * Import_elec_profile(interval) * interval_length)*(1-%NEM_nscr%)
                  + ( regup_price(interval) - reg_cost ) * ( sum(devices,output_regup_MW(interval,devices) + input_regup_MW(interval,devices)) ) * interval_length
                  + ( regdn_price(interval) - reg_cost ) * ( sum(devices,output_regdn_MW(interval,devices) + input_regdn_MW(interval,devices)) ) * interval_length
                  + spinres_price(interval) * ( sum(devices,output_spinres_MW(interval,devices) + input_spinres_MW(interval,devices)) ) * interval_length
@@ -1047,12 +1046,15 @@ operating_profit_eqn..
                  - sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ) * (wacc*(1+wacc)**H2comp_lifetime(devices)/((1+wacc)**H2comp_lifetime(devices) - 1)))*(%new_finance_model%)
 
 * Having negative TOU_energy_prices made electricity surplus go to 0.
-                 + sum((months,TOU_energy_period),(NSCR(months)-TOU_energy_prices(TOU_energy_period))*electricity_surplus(months,TOU_energy_period) )
+                 + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus(months,TOU_energy_period))*(%NEM_nscr%)
+                 + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period))*sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval))))*(%NEM_nscr%)
+;
 * Adding positive benefit for electricity surplus encourages it to be used
 **                 + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus(months,TOU_energy_period) )
 
 * Can't figure out how to integrate NBC without a conditional (maybe  sum(sum(ren_sale+output)-electricity_surplus)*NBC  )
 * Included output_power_MW_ren because NEM credits are only for renewable and not for the sale of imported electricity
+
 
 lin1(months,TOU_energy_period)$(%NEM_nscr%=1)..
                  electricity_surplus(months,TOU_energy_period) - sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval)))
