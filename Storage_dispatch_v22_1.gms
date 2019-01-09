@@ -825,6 +825,7 @@ Equations
          lin2 linearization equation for expressing net surplus
          lin3 linearization equation for expressing net surplus
          lin4 linearization equation for expressing net surplus
+         lin5 linearization equation for expressing net surplus
 
          output_pwr_eqn2(interval,devices)               equation that defines the relationship between renewable and non-renewable output power
          output_LSL_eqn(interval,devices)                equation that limits the lower sustainable limit for the output of the facility
@@ -1061,11 +1062,14 @@ lin1(months,TOU_energy_period)$(%NEM_nscr%=1)..
                  electricity_surplus(months,TOU_energy_period) - sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval)))
                  =g= -big_M*(1-esurplus_active(months,TOU_energy_period));
 lin2(months,TOU_energy_period)$(%NEM_nscr%=1)..
-                 electricity_surplus(months,TOU_energy_period) =l= big_M*esurplus_active(months,TOU_energy_period);
+                 electricity_surplus(months,TOU_energy_period) - sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval)))
+                 =l= big_M*(1-esurplus_active(months,TOU_energy_period));
 lin3(months,TOU_energy_period)$(%NEM_nscr%=1)..
+                 electricity_surplus(months,TOU_energy_period)  =l= big_M*esurplus_active(months,TOU_energy_period);
+lin4(months,TOU_energy_period)$(%NEM_nscr%=1)..
                  sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval)))
                  =g= -big_M*(1-esurplus_active(months,TOU_energy_period)) + small_M*esurplus_active(months,TOU_energy_period);
-lin4(months,TOU_energy_period)$(%NEM_nscr%=1)..
+lin5(months,TOU_energy_period)$(%NEM_nscr%=1)..
                  sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval)))
                  =l= big_M*esurplus_active(months,TOU_energy_period);
 
