@@ -752,7 +752,8 @@ Scalars
          operating_period_max_index      value of last index in current operating period
          rolling_window_min_index        value of first index in current rolling window
          rolling_window_max_index        value of last index in current rolling window
-         big_M                           big number for linearisation of net surplus electricity compensation constraints /200/
+         big_M                           big number for linearisation of net surplus electricity compensation constraints /170/
+         small_M                         small number for linearization of net surplus electricity compensation constraints /0.05/
 ;
 
 Positive Variables
@@ -772,8 +773,6 @@ Positive Variables
          input_nonspinres_MW(interval,devices)   input capacity committed for nonspinning reserve ancillary service (MW)
          input_power_MW_ren(interval,devices)    actual amount of renewable generation used (MWh)
          input_power_MW_non_ren(interval,devices)  actual amount of non renewable generation used (MWh)
-
-         electricity_surplus(months,TOU_energy_period) "net electricity surplus (MWh)"
 
          storage_level_MWh(interval,devices)     amount of non-renewable energy stored at the end of each interval (MWh)
          storage_level_MWh_ren(interval,devices) amount of renewable energy stored at the end of each interval (MWh)
@@ -801,6 +800,8 @@ Positive Variables
          Import_elec_profile(interval)     "Imported electricity"
          Load_profile_non_ren(interval)    Track non-renewable electricity used to meet the load profile (MW)
          Load_profile_ren(interval)        Track renewable electricity used to meet the load profile (MW)
+
+         electricity_surplus(months,TOU_energy_period) "net electricity surplus (MWh)"
 ;
 
 Binary Variables
@@ -1046,8 +1047,8 @@ operating_profit_eqn..
                  - sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ) * (wacc*(1+wacc)**H2comp_lifetime(devices)/((1+wacc)**H2comp_lifetime(devices) - 1)))*(%new_finance_model%)
 
 * Having negative TOU_energy_prices made electricity surplus go to 0.
-                 + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus(months,TOU_energy_period))*(%NEM_nscr%)
-                 + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period))*sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval))))*(%NEM_nscr%)
+                 + sum((months,TOU_energy_period),(NSCR(months)-TOU_energy_prices(TOU_energy_period))*electricity_surplus(months,TOU_energy_period))*(%NEM_nscr%)
+                 + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period))*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval)))])*(%NEM_nscr%)
 ;
 * Adding positive benefit for electricity surplus encourages it to be used
 **                 + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus(months,TOU_energy_period) )
@@ -1058,14 +1059,15 @@ operating_profit_eqn..
 
 lin1(months,TOU_energy_period)$(%NEM_nscr%=1)..
                  electricity_surplus(months,TOU_energy_period) - sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval)))
-                 =l= big_M*(1-esurplus_active(months,TOU_energy_period));
+                 =g= -big_M*(1-esurplus_active(months,TOU_energy_period));
 lin2(months,TOU_energy_period)$(%NEM_nscr%=1)..
                  electricity_surplus(months,TOU_energy_period) =l= big_M*esurplus_active(months,TOU_energy_period);
 lin3(months,TOU_energy_period)$(%NEM_nscr%=1)..
                  sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval)))
-                 =g= -big_M*(1-esurplus_active(months,TOU_energy_period));
+                 =g= -big_M*(1-esurplus_active(months,TOU_energy_period)) + small_M*esurplus_active(months,TOU_energy_period);
 lin4(months,TOU_energy_period)$(%NEM_nscr%=1)..
-                 sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval))) =l= big_M*esurplus_active(months,TOU_energy_period);
+                 sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW_ren(interval,devices))-Import_elec_profile(interval)))
+                 =l= big_M*esurplus_active(months,TOU_energy_period);
 
 system_power_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          sum(devices, output_power_MW(interval,devices)) + sum(devices_ren, renewable_power_MW_sold(interval,devices_ren)) =l= max_sys_output_cap;
@@ -1759,6 +1761,7 @@ parameter
          test2(months,TOU_energy_period)
          test3(months,TOU_energy_period)
          test4(months,TOU_energy_period)
+         test5(months,TOU_energy_period)
 ;
 
 test1(months,TOU_energy_period) = sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval)),(Import_elec_profile.l(interval)*elec_purchase_price(interval) + electricity_surplus.l(months,TOU_energy_period)*NSCR(months)))$(esurplus_active.l(months,TOU_energy_period)=1)*%NEM_nscr%;
@@ -1768,10 +1771,13 @@ test2(months,TOU_energy_period) = sum(interval$(month_interval(months,interval) 
 test3(months,TOU_energy_period) = (NSCR(months)-TOU_energy_prices(TOU_energy_period))*esurplus_active.l(months,TOU_energy_period);
 test4(months,TOU_energy_period) = (NSCR(months))*esurplus_active.l(months,TOU_energy_period);
 
+test5(months,TOU_energy_period) = sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren))+sum(devices,output_power_MW_ren.l(interval,devices))-Import_elec_profile.l(interval)));
+
 display test1;
 display test2;
 display test3;
 display test4;
+display test5;
 
 
 $ontext
