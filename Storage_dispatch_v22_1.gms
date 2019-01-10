@@ -1748,24 +1748,59 @@ num_output_starts = sum(devices, num_output_starts_vec(devices));
       fuel_cost_vec(devices) = sum(interval,- output_heat_rate(devices) * NG_price(interval) * output_power_MW.l(interval,devices) * interval_length
                                             - input_heat_rate(devices)  * NG_price(interval) * input_power_MW.l(interval,devices)  * interval_length);
 *     Does not include load profile
-      elec_cost_vec(devices) = sum(interval,((elec_sale_price(interval)     * output_power_MW.l(interval,devices))
-                                           - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval,devices))) * interval_length);
+*      elec_cost_vec(devices) = sum(interval,((elec_sale_price(interval)     * output_power_MW.l(interval,devices))
+*                                           - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval,devices))) * interval_length);
+$ontext
+* Option 1:
+      elec_cost_vec(devices) = sum(interval,((elec_sale_price(interval)     * (output_power_MW_non_ren.l(interval,devices) + output_power_MW_ren.l(interval,devices)*(1-%NEM_nscr%)))
+                                           - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval,devices)*(1-%NEM_nscr%))) * interval_length);
+$offtext
+* Option 2:
+      elec_cost_vec(devices) =   sum(interval,((elec_sale_price(interval)     * output_power_MW.l(interval,devices))
+                               - (elec_purchase_price(interval) * input_power_MW_non_ren.l(interval,devices))) * interval_length)*(1 - %NEM_nscr%)
+                               + sum((interval,months,TOU_energy_period)$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval)),(elec_sale_price(interval)   * (output_power_MW_non_ren.l(interval,devices)
+                               + output_power_MW_ren.l(interval,devices)*(1-esurplus_active.l(months,TOU_energy_period)))
+                               - elec_purchase_price(interval) * input_power_MW_non_ren.l(interval,devices)*(1-esurplus_active.l(months,TOU_energy_period))) * interval_length)*(%NEM_nscr%);
+
 *     NOT CORRECT (need to deal with NSCR and export credits for NEM) (open question as to whether that should be in the elec_cost_ren or in elec_cost)
 *     Also repeat with renewables_sales_vec and simlar repeat with elec_cost_ren and renewables sales
       elec_cost_ren_vec(devices_ren) = sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) * interval_length);
 *
       fuel_cost = sum(devices, fuel_cost_vec(devices));
       elec_cost = sum(devices, elec_cost_vec(devices));
+$ontext
       elec_cost_ren = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
                     + sum((months,TOU_energy_period),sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval)),(Import_elec_profile.l(interval)*elec_purchase_price(interval) + electricity_surplus.l(months,TOU_energy_period)*NSCR(months)))$(esurplus_active.l(months,TOU_energy_period)=1))*%NEM_nscr%
                     + sum((months,TOU_energy_period),sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval)),(sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren))*elec_sale_price(interval)))$(esurplus_active.l(months,TOU_energy_period)=0))*%NEM_nscr%;
-
+$offtext
+$ontext
+* Option 1
+      elec_cost_ren = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
+                     + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
+                     + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period)*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),
+                     interval_length*(sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren))+sum(devices,output_power_MW_ren.l(interval,devices))-Import_elec_profile.l(interval)))])$(esurplus_active.l(months,TOU_energy_period)=0))*(%NEM_nscr%)
+                      ;
+$offtext
+* Option 2
+      elec_cost_ren = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
+                     + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
+                     + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period)*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),
+                     interval_length*(sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren))))])$(esurplus_active.l(months,TOU_energy_period)=0))*(%NEM_nscr%)
+                      ;
 parameter
          test1(months,TOU_energy_period)
          test2(months,TOU_energy_period)
          test3(months,TOU_energy_period)
          test4(months,TOU_energy_period)
          test5(months,TOU_energy_period)
+         test6
+         test7
+         test8
+         test9
+         test10
+         test11
+         test12
+         test13
 ;
 
 test1(months,TOU_energy_period) = sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval)),(Import_elec_profile.l(interval)*elec_purchase_price(interval) + electricity_surplus.l(months,TOU_energy_period)*NSCR(months)))$(esurplus_active.l(months,TOU_energy_period)=1)*%NEM_nscr%;
@@ -1810,7 +1845,14 @@ $offtext
 
       arbitrage_revenue_vec(devices) = elec_cost_vec(devices) + fuel_cost_vec(devices) + sum(interval,- VOM_cost * output_power_MW.l(interval,devices) * interval_length);
       renewable_sales_vec(devices_ren) = sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) * interval_length );
-      arbitrage_revenue = sum(devices, arbitrage_revenue_vec(devices)) - sum(interval,elec_purchase_price(interval) * Load_profile_non_ren.l(interval))* interval_length;
+$ontext
+* Option 1
+      arbitrage_revenue = sum(devices, arbitrage_revenue_vec(devices)) - sum(interval,elec_purchase_price(interval) * Load_profile_non_ren.l(interval)*(1-%NEM_nscr%))* interval_length;
+$offtext
+* Option 2
+      arbitrage_revenue = sum(devices, arbitrage_revenue_vec(devices))
+                        - sum(interval,elec_purchase_price(interval) * Load_profile_non_ren.l(interval)*(1-%NEM_nscr%))* interval_length
+                        - sum((interval,months,TOU_energy_period)$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval)),elec_purchase_price(interval) * Load_profile_non_ren.l(interval)*(1-esurplus_active.l(months,TOU_energy_period))*(%NEM_nscr%))* interval_length;
       renewable_sales = elec_cost_ren;
 * OLD renewable_sales = sum(devices_ren, renewable_sales_vec(devices_ren));
 
