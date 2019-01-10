@@ -1778,15 +1778,16 @@ $ontext
       elec_cost_ren = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
                      + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
                      + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period)*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),
-                     interval_length*(sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren))+sum(devices,output_power_MW_ren.l(interval,devices))-Import_elec_profile.l(interval)))])$(esurplus_active.l(months,TOU_energy_period)=0))*(%NEM_nscr%)
+                     interval_length*(sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren))+sum(devices,output_power_MW_ren.l(interval,devices))-Import_elec_profile.l(interval))*(1-esurplus_active.l(months,TOU_energy_period)))]))*(%NEM_nscr%)
                       ;
 $offtext
 * Option 2
       elec_cost_ren = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
                      + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
                      + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period)*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),
-                     interval_length*(sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren))))])$(esurplus_active.l(months,TOU_energy_period)=0))*(%NEM_nscr%)
-                      ;
+                     interval_length*(sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)*(1-esurplus_active.l(months,TOU_energy_period)))))]))*(%NEM_nscr%)
+                     ;
+
 parameter
          test1(months,TOU_energy_period)
          test2(months,TOU_energy_period)
