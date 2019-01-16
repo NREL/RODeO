@@ -1049,7 +1049,7 @@ operating_profit_eqn..
                  - sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ) * (wacc*(1+wacc)**H2comp_lifetime(devices)/((1+wacc)**H2comp_lifetime(devices) - 1)))*(%new_finance_model%)
 
 * Having negative TOU_energy_prices made electricity surplus go to 0.
-                 + sum((months,TOU_energy_period),(NSCR(months)-TOU_energy_prices(TOU_energy_period))*electricity_surplus(months,TOU_energy_period))*(%NEM_nscr%)
+                 + sum((months,TOU_energy_period),(NSCR(months)-TOU_energy_prices(TOU_energy_period)-NBC)*electricity_surplus(months,TOU_energy_period))*(%NEM_nscr%)
                  + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period))*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),
                    interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW(interval,devices))-Import_elec_profile(interval)))])*(%NEM_nscr%)
 ;
@@ -1563,14 +1563,14 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                        input_cap_cost2_vec(devices)     = -(1-ITC)*input_cap_cost(devices)     * input_capacity_MW(devices)  *  (wacc*(1+wacc)**input_lifetime(devices)/((1+wacc)**input_lifetime(devices) - 1));
                        input_cap_costH2(devices)$(H2_revenue_vec(devices)>0)        =  input_cap_cost2_vec(devices)/(H2_revenue_vec(devices)/H2_price_adj(devices));
 
-                       input_FOM_cost2_vec(devices)     = -input_FOM_cost(devices)     * input_capacity_MW(devices)  *  (wacc*(1+wacc)**input_lifetime(devices)/((1+wacc)**input_lifetime(devices) - 1));
+                       input_FOM_cost2_vec(devices)     = -input_FOM_cost(devices) * input_lifetime(devices)    * input_capacity_MW(devices)  *  (wacc*(1+wacc)**input_lifetime(devices)/((1+wacc)**input_lifetime(devices) - 1));
                        input_FOM_costH2(devices)$(H2_revenue_vec(devices)>0)        =  input_FOM_cost2_vec(devices)/(H2_revenue_vec(devices)/H2_price_adj(devices));
 
                        renew_cap_cost2_vec(devices_ren) = -(1-ITC)*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren) * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1)) ;
-                       renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren) * Renewable_MW(devices_ren)   * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1));
+                       renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren)*renew_lifetime(devices_ren) * Renewable_MW(devices_ren)   * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1));
                        elec_cost_ren_vec(devices_ren)   = sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) );
                        renewable_sales = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
-                                       + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
+                                       + sum((months,TOU_energy_period),(NSCR(months)-NBC)*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
                                        + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period)*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),
                                         (sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)*(1-esurplus_active.l(months,TOU_energy_period))*interval_length)))]))*(%NEM_nscr%)
                          ;
@@ -1767,7 +1767,7 @@ elec_cost_ren_vec(devices_ren) = sum(interval, elec_sale_price(interval) * renew
 fuel_cost = sum(devices, fuel_cost_vec(devices));
 elec_cost = sum(devices, elec_cost_vec(devices));
 elec_cost_ren = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
-                + sum((months,TOU_energy_period),(NSCR(months))*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
+                + sum((months,TOU_energy_period),(NSCR(months)-NBC)*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
                 + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period)*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),
                  (sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)*(1-esurplus_active.l(months,TOU_energy_period))*interval_length)))]))*(%NEM_nscr%)
                 ;
@@ -1838,19 +1838,19 @@ if (%new_finance_model%=0,
          input_cap_cost2_vec(devices)     = -input_cap_cost(devices)     * input_capacity_MW(devices)  * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1)));
          output_cap_cost2_vec(devices)    = -output_cap_cost(devices)    * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1)));
          H2stor_cap_cost2_vec(devices)    = -H2stor_cap_cost(devices)    * input_capacity_MW(devices)  * (input_efficiency(devices) / H2_LHV ) * (H2_consumed_adj(devices) * (1-CF_opt) + CF_opt * Hydrogen_fraction.l) * storage_capacity_hours(devices) * (H2stor_interest_rate(devices)+(H2stor_interest_rate(devices)/(power((1+H2stor_interest_rate(devices)),H2stor_lifetime(devices))-1)));
-         H2comp_cap_cost2_vec(devices)    = - H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ) * (H2comp_interest_rate(devices)+(H2comp_interest_rate(devices)/(power((1+H2comp_interest_rate(devices)),H2comp_lifetime(devices))-1))) ;
-         renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren) * Renewable_MW(devices_ren)   * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1)));
-         input_FOM_cost2_vec(devices)     = -input_FOM_cost(devices)     * input_capacity_MW(devices)  * input_lifetime(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1)));
-         output_FOM_cost2_vec(devices)    = -output_FOM_cost(devices)    * output_capacity_MW(devices) * output_lifetime(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1)));
+         H2comp_cap_cost2_vec(devices)    = -H2comp_cap_cost(devices)    * input_capacity_MW(devices)  * (input_efficiency(devices) / H2_LHV ) * (H2comp_interest_rate(devices)+(H2comp_interest_rate(devices)/(power((1+H2comp_interest_rate(devices)),H2comp_lifetime(devices))-1))) ;
+         renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren) * renew_lifetime(devices_ren) * Renewable_MW(devices_ren)   * (renew_interest_rate(devices_ren)+(renew_interest_rate(devices_ren)/(power((1+renew_interest_rate(devices_ren)),renew_lifetime(devices_ren))-1)));
+         input_FOM_cost2_vec(devices)     = -input_FOM_cost(devices)     * input_lifetime(devices)     * input_capacity_MW(devices)  * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),input_lifetime(devices))-1)));
+         output_FOM_cost2_vec(devices)    = -output_FOM_cost(devices)    * output_lifetime(devices)    * output_capacity_MW(devices) * (interest_rate(devices)+(interest_rate(devices)/(power((1+interest_rate(devices)),output_lifetime(devices))-1)));
 elseif %new_finance_model%=1,
          renew_cap_cost2_vec(devices_ren) = -(1-ITC)*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren) * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1)) ;
          input_cap_cost2_vec(devices)     = -(1-ITC)*input_cap_cost(devices)     * input_capacity_MW(devices)  *  (wacc*(1+wacc)**input_lifetime(devices)/((1+wacc)**input_lifetime(devices) - 1));
          output_cap_cost2_vec(devices)    = -output_cap_cost(devices)    * output_capacity_MW(devices) *  (wacc*(1+wacc)**output_lifetime(devices)/((1+wacc)**output_lifetime(devices) - 1));
-         H2stor_cap_cost2_vec(devices)    = -H2stor_cap_cost(devices)    * input_capacity_MW(devices)  * (input_efficiency(devices) / H2_LHV ) * (wacc*(1+wacc)**H2stor_lifetime(devices)/((1+wacc)**H2stor_lifetime(devices) - 1));
-         H2comp_cap_cost2_vec(devices)    = - H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ) * (wacc*(1+wacc)**H2comp_lifetime(devices)/((1+wacc)**H2comp_lifetime(devices) - 1)) ;
-         renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren) * Renewable_MW(devices_ren)   * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1));
-         input_FOM_cost2_vec(devices)     = -input_FOM_cost(devices)     * input_capacity_MW(devices)  *  (wacc*(1+wacc)**input_lifetime(devices)/((1+wacc)**input_lifetime(devices) - 1));
-         output_FOM_cost2_vec(devices)    = -output_FOM_cost(devices)    * output_capacity_MW(devices) *  (wacc*(1+wacc)**output_lifetime(devices)/((1+wacc)**output_lifetime(devices) - 1));
+         H2stor_cap_cost2_vec(devices)    = -H2stor_cap_cost(devices)    * input_capacity_MW(devices)  *  (input_efficiency(devices) / H2_LHV ) * (wacc*(1+wacc)**H2stor_lifetime(devices)/((1+wacc)**H2stor_lifetime(devices) - 1));
+         H2comp_cap_cost2_vec(devices)    = -H2comp_cap_cost(devices)    * input_capacity_MW(devices)  *  (input_efficiency(devices) / H2_LHV ) * (wacc*(1+wacc)**H2comp_lifetime(devices)/((1+wacc)**H2comp_lifetime(devices) - 1)) ;
+         renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren) * renew_lifetime(devices_ren) *  Renewable_MW(devices_ren)   * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1));
+         input_FOM_cost2_vec(devices)     = -input_FOM_cost(devices)     * input_lifetime(devices)     *  input_capacity_MW(devices)  *  (wacc*(1+wacc)**input_lifetime(devices)/((1+wacc)**input_lifetime(devices) - 1));
+         output_FOM_cost2_vec(devices)    = -output_FOM_cost(devices)    * output_lifetime(devices)    *  output_capacity_MW(devices) *  (wacc*(1+wacc)**output_lifetime(devices)/((1+wacc)**output_lifetime(devices) - 1));
 );
 
 renew_cap_cost2 = sum(devices_ren, renew_cap_cost2_vec(devices_ren));
