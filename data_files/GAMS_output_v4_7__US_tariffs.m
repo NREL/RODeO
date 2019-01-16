@@ -19,6 +19,10 @@ cd(dir1);
 Year_select = 2016;     % select year to be analyzed
 Year_length = ceil((datenum(Year_select,12,31,23,59,59)-datenum(Year_select,1,1,0,0,0))*24);   %8784;     % length of year in hours
 shorten_year = 1;       % 0 = use actual Year_length, 1 = set to value below
+remove_leap_year = 1;   % 0 = shorten year in Dec., 1 = remove 2/29 (must select leap year and must enable shorten_year)
+if Year_length<8784, 
+    remove_leap_year=0; % Disable remove_leap_year if not leap year
+end
 Year_length_set = 8760; 
 if shorten_year==1
     Year_length=Year_length_set;
@@ -211,8 +215,17 @@ end, clear i0 i1
 %% Create season values
 disp('Create season values...')
 date_values = (datenum(Year_select,1,1,0,0,0):(1/24/interval_length):datenum(Year_select,12,31,23,59,59))';
-if shorten_year==1
-    date_values(Year_length_set+1:end) = [];    % Shorten date_values
+if shorten_year==1      % Shorten year if necessary and remove either last day in Dec. or 2/29 based on "remove_leap_year"
+    if remove_leap_year==1
+        Leap_day = datenum(Year_select,2,29,0,0,0);
+        for i0=length(date_values):-1:1
+            if floor(date_values(i0))==Leap_day
+                date_values(i0) = [];    % Shorten date_values
+            end
+        end
+    else
+        date_values(Year_length_set+1:end) = [];    % Shorten date_values
+    end
 end
 interval1 = (1:length(date_values))';
 for i5=1:length(interval1)
@@ -285,13 +298,10 @@ clear i4 i5 i6 i7 Y1 M1 D1 H1 MN1 S1 c1 c2 interim1 interim2 col1
 
 %%% Create matrix to separate hours for each month, TOU bin and utility (for energy charges)            
 Month_to_hour = {};
-% % % TOU_energy = {};      % Removed this representation of TOU_energy (if you uncomment, double check that num1int is calculated correctly)
 for i4=1:length(Scenarios1)
     count1 = 1;   % Initialize counter
-% % %     count2 = 1;   % Initialize counter
     i5=1;
     M2H_month = month_values(i5);  M2H_interval1 = i5;  M2H_interval2 = i5;
-% % %     TOUe_month = month_values(i5); TOUe_interval1 = i5; TOUe_interval2 = i5; TOUe_bin = num1int(i5);
     while i5<length(interval1)+1
         if (M2H_month==month_values(i5) && i5-M2H_interval2==1)
             M2H_interval2 = i5;
@@ -305,18 +315,6 @@ for i4=1:length(Scenarios1)
             end
             M2H_month = month_values(i5);  M2H_interval1 = i5;  M2H_interval2 = i5;
         end    
-% % %         if (TOUe_month==month_values(i5) && i5-TOUe_interval2==1 && TOUe_bin==num1int(i5))
-% % %             TOUe_interval2 = i5;
-% % %             if i5==length(interval1)  % Capture last item 
-% % %                 TOU_energy{count2,i4} = strcat([num2str(TOUe_month),'.',num2str(TOUe_interval1),'*',num2str(TOUe_interval2),' ',num2str(num1int(i5)+1)]);
-% % %             end
-% % %         else
-% % %             if i5~=1
-% % %                 TOU_energy{count2,i4} = strcat([num2str(TOUe_month),'.',num2str(TOUe_interval1),'*',num2str(TOUe_interval2),' ',num2str(num1int(i5)+1)]);
-% % %                 count2 = count2+1;
-% % %             end
-% % %             TOUe_month = month_values(i5); TOUe_interval1 = i5; TOUe_interval2 = i5; TOUe_bin = num1int(i5);
-% % %         end    
         i5 = i5+1;
     end
 end

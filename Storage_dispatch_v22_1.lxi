@@ -1,0 +1,30 @@
+B 2 C o m p i l a t i o n
+B 56857 Include File Summary
+B 57085 E x e c u t i o n
+I 57086 H2_price_adj
+I 57093 H2_price
+B 65861 Model Statistics    SOLVE arbitrage_and_AS Using MIP From line 54255
+B 65884 Solution Report     SOLVE arbitrage_and_AS Using MIP From line 54255
+B 65927 E x e c u t i o n
+I 65928 H2_price_adj
+I 65935 H2_price_adj
+I 65941 H2_price
+B 74709 Model Statistics    SOLVE arbitrage_and_AS Using MIP From line 54255
+B 74732 Solution Report     SOLVE arbitrage_and_AS Using MIP From line 54255
+B 74775 E x e c u t i o n
+I 74776 H2_price_adj
+I 74783 H2_price_adj
+I 74789 H2_price
+B 83557 Model Statistics    SOLVE arbitrage_and_AS Using MIP From line 54255
+B 83580 Solution Report     SOLVE arbitrage_and_AS Using MIP From line 54255
+B 83623 E x e c u t i o n
+I 83624 H2_price_adj
+I 83632 test1
+I 83637 test2
+I 83642 test3
+I 83647 test4
+I 83651 test5
+I 83669 elec_TOU_bins
+I 90033 electricity_surplus
+I 90037 NSCR
+I 90044 esurplus_active
