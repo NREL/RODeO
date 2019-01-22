@@ -340,8 +340,10 @@ Parameters
          input_cap_costH2(devices)             Input capital cost per kg of hydrogen ($ per kg)
          input_FOM_costH2(devices)             Input fixed operating cost per kg of hydrogen ($ per kg)
          renewable_sales                       Revenue from renewables sales ($)
-         Taxes_and_debts                       Taxes and debts used for outputs ($)
-         Taxes_and_debtsH2                     Taxes and debts per kg of hydrogen produced used for outputs ($ per kg)
+         Taxes                                 Taxes used for outputs ($)
+         Debts                                 Debts used for outputs ($)
+         TaxesH2                               Taxes per kg of hydrogen produced used for outputs ($ per kg)
+         DebtsH2                               Debts per kg of hydrogen produced used for outputs ($ per kg)
 ;
 
 Scalars
@@ -1459,7 +1461,11 @@ option limcol = 0;
 *suppress listing of the solution in the listing file
 option solprint = off;
 option sysout = off;
-
+$onecho > cplex.opt
+scaind 1
+lpmethod 4
+$offecho
+arbitrage_and_AS.OptFile = 1;
 *prepare for rolling window solution
 
 *determine the number of times the model will be solved
@@ -1678,8 +1684,10 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                        renew_cap_cost2_vec(devices_ren) = -equity*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren) * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1)) ;
                        renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren)*renew_lifetime(devices_ren) * Renewable_MW(devices_ren)   * (wacc*(1+wacc)**renew_lifetime(devices_ren)/((1+wacc)**renew_lifetime(devices_ren) - 1));
 
-                       Taxes_and_debtsH2 =  [sum(years,yearly_taxes.l(years))*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1)) - (debt_service.l*NoYears)*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1))]
-                                          /sum(devices,(H2_revenue_vec(devices)/H2_price_adj(devices)));
+                       TaxesH2 = [sum(years,yearly_taxes.l(years))*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1))]
+                                  /sum(devices,(H2_revenue_vec(devices)/H2_price_adj(devices)));
+
+                       DebtsH2 = [- (debt_service.l*NoYears)*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1))]/sum(devices,(H2_revenue_vec(devices)/H2_price_adj(devices)));
 
                        elec_cost_ren_vec(devices_ren)   = sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) );
                        renewable_sales = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
@@ -1700,7 +1708,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                          Renewable_revenueH2 = 0;
                          Renewable_cost = 0;
                        );
-                       H2_break_even_cost               = sum(devices,LCFS_FCEV(devices) + Energy_charge(devices) + Fixed_demand_charge(devices) + Timed_demand_charge(devices) + Meters_cost(devices) + Storage_cost(devices) + Compressor_cost(devices) +  input_cap_costH2(devices) + input_FOM_costH2(devices)) + Renewable_cost + Taxes_and_debtsH2;
+                       H2_break_even_cost               = sum(devices,LCFS_FCEV(devices) + Energy_charge(devices) + Fixed_demand_charge(devices) + Timed_demand_charge(devices) + Meters_cost(devices) + Storage_cost(devices) + Compressor_cost(devices) +  input_cap_costH2(devices) + input_FOM_costH2(devices)) + Renewable_cost + TaxesH2 + DebtsH2;
 
                        epsilon = (sum(devices,H2_price_adj(devices)) + H2_break_even_cost)/sum(devices$(ord(devices) <= %devices_instance%),1) ;
 
@@ -1943,11 +1951,12 @@ spinres_revenue    = sum(devices, spinres_revenue_vec(devices));
 nonspinres_revenue = sum(devices, nonspinres_revenue_vec(devices));
 startup_costs      = sum(devices, startup_costs_vec(devices));
 H2_revenue         = sum(devices, H2_revenue_vec(devices));
-
+Taxes              = sum(years,yearly_taxes.l(years))*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1)) ;
+Debts              = - (debt_service.l*NoYears)*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1)) ;
 actual_operating_profit = arbitrage_revenue + regup_revenue + regdn_revenue + spinres_revenue + nonspinres_revenue + H2_revenue - startup_costs
                         + Fixed_dem_charge_cost + Timed_dem_1_cost + Timed_dem_2_cost + Timed_dem_3_cost + Timed_dem_4_cost + Timed_dem_5_cost + Timed_dem_6_cost + Meter_cost
                         + input_cap_cost2 + output_cap_cost2 + input_FOM_cost2 + output_FOM_cost2 + input_VOM_cost2 + output_VOM_cost2 + renewable_sales
-                        + renew_cap_cost2 + renew_FOM_cost2 + renew_VOM_cost2 + H2stor_cap_cost2 + H2comp_cap_cost2 + REC_revenue + LCFS_revenue;
+                        + renew_cap_cost2 + renew_FOM_cost2 + renew_VOM_cost2 + H2stor_cap_cost2 + H2comp_cap_cost2 + REC_revenue + LCFS_revenue + Taxes + Debts;
 
 Hydrogen_fraction_val = Hydrogen_fraction.l*100;
 
@@ -1992,9 +2001,9 @@ Renewable_FOM_costH2             = renew_FOM_cost2/Total_H2_produced;
 Renewable_revenueH2              = (renewable_sales + sum(interval, REC_price * sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)) * interval_length + sum(devices,output_power_MW_ren.l(interval,devices)) * interval_length ))
                                    /Total_H2_produced;
 Renewable_cost                   = Renewable_cap_costH2 + Renewable_FOM_costH2 + Renewable_revenueH2;
-Taxes_and_debts                  = sum(years,yearly_taxes.l(years))*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1)) - (debt_service.l*NoYears)*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1));
-Taxes_and_debtsH2                = [sum(years,yearly_taxes.l(years))*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1)) - (debt_service.l*NoYears)*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1))]/Total_H2_produced;
-H2_break_even_cost               = sum(devices,LCFS_FCEV(devices) + Energy_charge(devices) + Fixed_demand_charge(devices) + Timed_demand_charge(devices) + Meters_cost(devices) + Storage_cost(devices) + Compressor_cost(devices) +  input_cap_costH2(devices) + input_FOM_costH2(devices)) + Renewable_cost + Taxes_and_debtsH2*(%new_finance_model%);
+TaxesH2                          = [sum(years,yearly_taxes.l(years))*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1))]/Total_H2_produced;
+DebtsH2                          = [- (debt_service.l*NoYears)*(wacc*(1+wacc)**NoYears/((1+wacc)**NoYears - 1))]/Total_H2_produced;
+H2_break_even_cost               = sum(devices,LCFS_FCEV(devices) + Energy_charge(devices) + Fixed_demand_charge(devices) + Timed_demand_charge(devices) + Meters_cost(devices) + Storage_cost(devices) + Compressor_cost(devices) +  input_cap_costH2(devices) + input_FOM_costH2(devices)) + Renewable_cost + TaxesH2*(%new_finance_model%) + DebtsH2*(%new_finance_model%);
 
 if (1=0,
 option decimals=8;
@@ -2231,7 +2240,8 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Renewable VOM cost ($), ',                 renew_VOM_cost2 /;
                  put 'Input VOM cost ($), ',                     input_VOM_cost2 /;
                  put 'Output VOM cost ($), ',                    output_VOM_cost2 /;
-                 put 'Taxes and debts ($),',                     Taxes_and_debts /;
+                 put 'Annualized Taxes ($),',                    Taxes /;
+                 put 'Annualized Debts ($),',                    Debts / ;
                  put 'Renewable sales ($), ',                    renewable_sales /;
                  put 'Renewable Penetration net meter (%), ',    Renewable_pen_input_net /;
                  put 'Curtailment (MWh), ',                      curtailment_sum /;
@@ -2254,7 +2264,8 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Input FOM (US$/kg),',                      sum(devices,-input_FOM_costH2(devices)) /;
                  put 'Renewable capital cost (US$/kg),',         (-Renewable_cap_costH2) /;
                  put 'Renewable FOM (US$/kg),',                  (-Renewable_FOM_costH2) /;
-                 put 'Taxes and debts (US$/kg),',                (-Taxes_and_debtsH2) /;
+                 put 'Taxes (US$/kg),',                          (-TaxesH2) /;
+                 put 'Debts (US$/kg),',                          (-DebtsH2) /;
                  put 'H2 break-even cost (US$/kg),',             (-H2_break_even_cost) / ;
                  put /;
 
