@@ -1073,10 +1073,7 @@ operating_profit_eqn..
                  - sum(devices,equity*output_cap_cost(devices) * output_capacity_MW(devices))
                  - sum(devices, equity*H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours(devices))
                  - sum(devices, equity*H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ))
-                 + sum(years,[- sum(devices_ren,renew_FOM_cost(devices_ren)*inflation_vec(years) * Renewable_MW(devices_ren))
-                 - sum(devices,input_FOM_cost(devices)*inflation_vec(years) * input_capacity_MW(devices))
-                 - sum(devices,output_FOM_cost(devices)*inflation_vec(years) * output_capacity_MW(devices))
-                 + yearly_taxes(years)*inflation_vec(years)
+                 + sum(years,[yearly_taxes(years)
                  - debt_service*inflation_vec(years)
                  + inflation_vec(years)*yearly_operating_profit]/[(wacc + 1)**ord(years)])
 ;
@@ -1686,7 +1683,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                        renew_cap_cost2_vec(devices_ren) = -equity*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)  ;
                        renew_FOM_cost2_vec(devices_ren) = sum(years,-renew_FOM_cost(devices_ren) * Renewable_MW(devices_ren) *inflation_vec(years)/[(wacc + 1)**ord(years)]);
 
-                       TaxesH2 = [sum(years,yearly_taxes.l(years)*inflation_vec(years)/[(wacc + 1)**ord(years)])]
+                       TaxesH2 = [sum(years,yearly_taxes.l(years)/[(wacc + 1)**ord(years)])]
                                   /sum(devices,H2_sold_total(devices));
 
                        DebtsH2 = sum(years,- debt_service.l*inflation_vec(years)/[(wacc + 1)**ord(years)])/sum(devices,H2_sold_total(devices));
@@ -1962,7 +1959,7 @@ spinres_revenue    = sum(devices, spinres_revenue_vec(devices));
 nonspinres_revenue = sum(devices, nonspinres_revenue_vec(devices));
 startup_costs      = sum(devices, startup_costs_vec(devices));
 H2_revenue         = sum(devices, H2_revenue_vec(devices));
-Taxes              = sum(years,yearly_taxes.l(years)*inflation_vec(years)/[(wacc + 1)**ord(years)]) ;
+Taxes              = sum(years,yearly_taxes.l(years)/[(wacc + 1)**ord(years)]) ;
 Debts              = - debt_service.l ;
 Debts_Renewable    =  sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
                       / (sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)) + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices)) +
@@ -1977,12 +1974,12 @@ Debts_StoNComp     =  [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW
                       /(sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)) + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices)) +
                         [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction.l)*storage_capacity_hours(devices))
                         + sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ))]) ;
-actual_operating_profit = arbitrage_revenue + regup_revenue + regdn_revenue + spinres_revenue + nonspinres_revenue + H2_revenue - startup_costs
+actual_operating_profit = sum(years,[(arbitrage_revenue + regup_revenue + regdn_revenue + spinres_revenue + nonspinres_revenue + H2_revenue - startup_costs
                         + Fixed_dem_charge_cost + Timed_dem_1_cost + Timed_dem_2_cost + Timed_dem_3_cost + Timed_dem_4_cost + Timed_dem_5_cost + Timed_dem_6_cost + Meter_cost
-                        + (input_cap_cost2 + output_cap_cost2 + renew_cap_cost2 + H2stor_cap_cost2 + H2comp_cap_cost2
-                        + (renew_FOM_cost2  + input_FOM_cost2 + output_FOM_cost2)*NoYears)*[wacc*(1+wacc)**NoYears/((1+wacc)**NoYears-1)]
+                        + renew_FOM_cost2  + input_FOM_cost2 + output_FOM_cost2
                         + input_VOM_cost2 + output_VOM_cost2 + renewable_sales + renew_VOM_cost2
-                        + REC_revenue + LCFS_revenue + sum(years,yearly_taxes.l(years))/NoYears + Debts;
+                        + REC_revenue + LCFS_revenue  + Debts)*inflation_vec(years)
+                        + input_cap_cost2 + output_cap_cost2 + renew_cap_cost2 + H2stor_cap_cost2 + H2comp_cap_cost2 + yearly_taxes.l(years)]/[(wacc + 1)**ord(years)]);
 
 Hydrogen_fraction_val = Hydrogen_fraction.l*100;
 
