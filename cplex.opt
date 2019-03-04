@@ -1,0 +1,4 @@
+scaind 1
+lpmethod 4
+CPXPARAM_Barrier_Limits_Iteration 100000000
+baritlim 100000000

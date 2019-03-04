@@ -128,7 +128,7 @@ $if not set int_length_instance    $set int_length_instance    1
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
 $if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.9
-$if not set H2_price_instance      $set H2_price_instance      6
+$if not set H2_price_instance      $set H2_price_instance      7.155
 $if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
@@ -171,6 +171,7 @@ Files
          input_echo_file         /%outdir%\Storage_dispatch_inputs_%file_name_instance%.csv/
          results_file            /%outdir%\Storage_dispatch_results_%file_name_instance%.csv/
          summary_file            /%outdir%\Storage_dispatch_summary_%file_name_instance%.csv/
+         summary_file_yearly     /%outdir%\Storage_dispatch_summary-yearly_%file_name_instance%.csv/
          RT_out_file             /%outdir%\Real_time_output_values.csv/
          results_file_devices    /%outdir%\Storage_dispatch_resultsDevices_%file_name_instance%.csv/
          summary_file_devices    /%outdir%\Storage_dispatch_summaryDevices_%file_name_instance%.csv/
@@ -360,6 +361,7 @@ Parameters
          DebtsH2                               Debts per kg of hydrogen produced used for outputs ($ per kg)
          to_NPV(years)
          H2_revenue_years(years)
+         H2_revenue_yearly2(years)
          Total_H2_produced        Calculate the total amount of hydrogen produced (kg)
 ;
 
@@ -638,7 +640,7 @@ NoYears = card(years);
 * USA inflation vector is 1.9%
 inflation_vec(years) = (1 + 0.019)**(ord(years)-1);
 wacc =  (1 - equity)*(1 - debt_interest)*ror + equity*roe ;
-to_NPV(years) = (wacc + 1)**(ord(years)-1) ;
+to_NPV(years) = (wacc + 1)**(ord(years)) ;
 *===============================================================================
 
 H2_price(interval,devices)              = H2_price2(interval,devices);
@@ -1083,16 +1085,17 @@ operating_profit_eqn..
                  - sum(devices_ren,equity*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
                  - sum(devices,equity*input_cap_cost(devices) * input_capacity_MW(devices))
                  - sum(devices,equity*output_cap_cost(devices) * output_capacity_MW(devices))
-                 - sum(devices, equity*H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours(devices))
+                 - sum(devices, equity*H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*storage_capacity_hours(devices))
                  - sum(devices, equity*H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ))
                  + sum(years,[yearly_taxes(years)
-                 - debt_service*inflation_vec(years)
+                 - debt_service
                  + inflation_vec(years)*yearly_operating_profit]/to_NPV(years))
 ;
+
 depreciation(years)..
 amount_depreciated(years) =e= deprec_base_reduction*bonus_depreciation_schedule(years)*[sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
                             + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices))]
-                            + depreciation_schedule(years)*[sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours(devices))
+                            + depreciation_schedule(years)*[sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*storage_capacity_hours(devices))
                             + sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ))];
 
 yearly_operating_profit_eqn..
@@ -1133,47 +1136,47 @@ yearly_operating_profit_eqn..
                    interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW(interval,devices))-Import_elec_profile(interval)))])*(%NEM_nscr%)
 ;
 
+* Taxes include an ITC offset for renewables, input devices and output devices (change as necessary for specific technologies).
 taxes_lin1(years)..
-
-                  - cftr*(yearly_operating_profit - amount_depreciated(years))
+                  - cftr*(yearly_operating_profit*inflation_vec(years) - amount_depreciated(years))
                   + reserved_taxes(years-1)
                   + ITC*deprec_base_reduction*[sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
-                  + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices))]$(ord(years)=1)
+                  + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices) + output_cap_cost(devices) * output_capacity_MW(devices))]$(ord(years)=1)
                   =l= big_Mtaxes*(1 - taxes_active(years)) ;
 
 taxes_lin2(years)..
-                  - cftr*(yearly_operating_profit - amount_depreciated(years))
+                  - cftr*(yearly_operating_profit*inflation_vec(years) - amount_depreciated(years))
                   + reserved_taxes(years-1)
                   + ITC*deprec_base_reduction*[sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
-                  + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices))]$(ord(years)=1)
+                  + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices) + output_cap_cost(devices) * output_capacity_MW(devices))]$(ord(years)=1)
                   =g= -big_Mtaxes*taxes_active(years) ;
 
 taxes_lin3(years)..
-                 yearly_taxes(years) - [- cftr*(yearly_operating_profit - amount_depreciated(years))
+                 yearly_taxes(years) - [- cftr*(yearly_operating_profit*inflation_vec(years) - amount_depreciated(years))
                   + reserved_taxes(years-1)
                   + ITC*deprec_base_reduction*[sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
-                  + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices))]$(ord(years)=1)]
+                  + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices) + output_cap_cost(devices) * output_capacity_MW(devices))]$(ord(years)=1)]
                  =l= big_Mtaxes*(1 - taxes_active(years)) ;
 
 taxes_lin4(years)..
-                 yearly_taxes(years) - [- cftr*(yearly_operating_profit - amount_depreciated(years))
+                 yearly_taxes(years) - [- cftr*(yearly_operating_profit*inflation_vec(years) - amount_depreciated(years))
                   + reserved_taxes(years-1)
                   + ITC*deprec_base_reduction*[sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
-                  + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices))]$(ord(years)=1)]
+                  + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices) + output_cap_cost(devices) * output_capacity_MW(devices))]$(ord(years)=1)]
                  =g= -big_Mtaxes*(1 - taxes_active(years)) ;
 
 taxes_lin5(years)..
                  yearly_taxes(years) =g= - big_Mtaxes*taxes_active(years) ;
 
 reserved_taxes_eqn(years)..
-reserved_taxes(years)  =e= reserved_taxes(years-1) - yearly_taxes(years) - cftr*(yearly_operating_profit - amount_depreciated(years))
+reserved_taxes(years)  =e= reserved_taxes(years-1) - yearly_taxes(years) - cftr*(yearly_operating_profit*inflation_vec(years) - amount_depreciated(years))
                          + ITC*deprec_base_reduction*[sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
-                         + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices))]$(ord(years)=1);
+                         + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices) + output_cap_cost(devices) * output_capacity_MW(devices))]$(ord(years)=1);
 
 debt_service_eqn..
 debt_service    =e= [debt_interest*(1-equity)*([sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
-                            + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices))]
-                            + [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction)*storage_capacity_hours(devices))
+                            + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices) + output_cap_cost(devices) * output_capacity_MW(devices))]
+                            + [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*storage_capacity_hours(devices))
                             + sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ))])]
                       /[1 - (1 + debt_interest)**(-NoYears)]  ;
 
@@ -1681,8 +1684,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
                                                            /Total_H2_produced;
                        Meters_costH2                  = sum(years,-(meter_mnth_chg("1") * 12*allow_import)*inflation_vec(years)/to_NPV(years))/Total_H2_produced;
 
-                       H2stor_cap_cost2_vec(devices)  = - equity * H2stor_cap_cost(devices) * input_capacity_MW(devices) * (input_efficiency(devices) / H2_LHV ) * (H2_consumed_adj(devices)*(1-CF_opt)
-                                                        + CF_opt*Hydrogen_fraction.l)*storage_capacity_hours(devices);
+                       H2stor_cap_cost2_vec(devices)  = - equity * H2stor_cap_cost(devices) * input_capacity_MW(devices) * (input_efficiency(devices) / H2_LHV ) * storage_capacity_hours(devices);
                        Storage_costH2                 = sum(devices,H2stor_cap_cost2_vec(devices))/Total_H2_produced;
 
                        H2comp_cap_cost2_vec(devices)  = - equity*H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ) ;
@@ -1700,7 +1702,7 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
 
                        TaxesH2                          = sum(years,yearly_taxes.l(years)/to_NPV(years))/Total_H2_produced;
 
-                       DebtsH2                          = sum(years,- debt_service.l*inflation_vec(years)/to_NPV(years))/Total_H2_produced;
+                       DebtsH2                          = sum(years,- debt_service.l/to_NPV(years))/Total_H2_produced;
 
                        elec_cost_ren_vec(devices_ren)   = sum(years,sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) )*inflation_vec(years)/to_NPV(years));
 
@@ -1856,6 +1858,7 @@ Scalars
          Taxes_NPV                 NPV taxes
          Debts_NPV                 NPV debts
 
+
          Storage_revenue          Track the storage revenue from the storage only (no renewable charging) ($)
          Renewable_only_revenue   Track the revenue portion from renewables ($)
          Renewable_max_revenue    Calculate the maximum revenue from renewables without any storage installed ($)
@@ -1872,6 +1875,40 @@ Scalars
          Taxes_debt_int           Taxes which are calculated based on the debt interest ($)
          Taxes_debt_intH2         Taxes which are calculated based on the debt interest per kg of hydrogen ($ per kg)
          actual_operating_profit_NPV
+;
+
+Parameters
+         Fixed_dem_charge_cost_yearly(years) NPV Fixed demand charge cost
+         Timed_dem_1_cost_yearly(years)      NPV Timed demand charge cost
+         Timed_dem_2_cost_yearly(years)      NPV Timed demand charge cost
+         Timed_dem_3_cost_yearly(years)      NPV Timed demand charge cost
+         Timed_dem_4_cost_yearly(years)      NPV Timed demand charge cost
+         Timed_dem_5_cost_yearly(years)      NPV Timed demand charge cost
+         Timed_dem_6_cost_yearly(years)      NPV Timed demand charge cost
+         Meter_cost_yearly(years)            NPV cost for operating meter
+         fuel_cost_yearly(years)             NPV cost of fuel (dollars)
+         elec_cost_yearly(years)             NPV cost of electricity (dollars)
+         elec_cost_ren_yearly(years)         NPV market value of renewable electricity sold to the grid (dollars)
+         VOM_cost_val_yearly(years)          NPV cost of VOM (dollars)
+         arbitrage_revenue_yearly(years)     NPV operating profits due to electricity purchases and sales (dollars)
+         regup_revenue_yearly(years)         NPV operating profits due to regulation up AS market (dollars)
+         regdn_revenue_yearly(years)         NPV operating profits due to regulation down AS market (dollars)
+         spinres_revenue_yearly(years)       NPV operating profits due to spinning reserve AS market (dollars)
+         nonspinres_revenue_yearly(years)    NPV operating profits due to nonspinning reserve AS market (dollars)
+         H2_revenue_yearly(years)            NPV operating profits due to selling hydrogen (dollars)
+         REC_revenue_yearly(years)           NPV REC revenue ($)
+         LCFS_revenue_yearly(years)          NPV LCSF revenue ($)
+         startup_costs_yearly(years)         NPV cost due to startups
+         renew_FOM_cost2_yearly(years)       NPV FOM cost
+         input_FOM_cost2_yearly(years)       NPV FOM cost
+         output_FOM_cost2_yearly(years)      NPV FOM cost
+         renew_VOM_cost2_yearly(years)       NPV VOM cost
+         input_VOM_cost2_yearly(years)       NPV VOM cost
+         output_VOM_cost2_yearly(years)      NPV VOM cost
+         renewable_sales_yearly(years)       NPV renewable sales
+         Taxes_yearly(years)                 NPV taxes
+         Debts_yearly(years)                 NPV debts
+         actual_operating_profit_yearly(years)
 ;
 *===============================================================================
 * Curtailment, electricity and capacity sold/bought
@@ -1940,7 +1977,7 @@ H2_revenue_vec(devices)         = sum(interval, H2_price(interval,devices) * H2_
 renew_cap_cost2_vec(devices_ren) = -equity*renew_cap_cost(devices_ren) * Renewable_MW(devices_ren) ;
 input_cap_cost2_vec(devices)     = -equity*input_cap_cost(devices)     * input_capacity_MW(devices);
 output_cap_cost2_vec(devices)    = -equity*output_cap_cost(devices)    * output_capacity_MW(devices);
-H2stor_cap_cost2_vec(devices)    = -equity*H2stor_cap_cost(devices)    * input_capacity_MW(devices)  *  (input_efficiency(devices) / H2_LHV )  * (H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction.l)*storage_capacity_hours(devices);
+H2stor_cap_cost2_vec(devices)    = -equity*H2stor_cap_cost(devices)    * input_capacity_MW(devices)  *  (input_efficiency(devices) / H2_LHV ) * storage_capacity_hours(devices);
 H2comp_cap_cost2_vec(devices)    = -equity*H2comp_cap_cost(devices)    * input_capacity_MW(devices)  *  (input_efficiency(devices) / H2_LHV ) ;
 renew_FOM_cost2_vec(devices_ren) = -renew_FOM_cost(devices_ren) * Renewable_MW(devices_ren)  ;
 input_FOM_cost2_vec(devices)     = -input_FOM_cost(devices)     * input_capacity_MW(devices) ;
@@ -1997,18 +2034,19 @@ H2_revenue         = sum(devices, H2_revenue_vec(devices));
 Taxes              = sum(years,yearly_taxes.l(years))/NoYears ;
 Debts              = - debt_service.l ;
 
+* Fraction of debt associated with each component
 Debts_Renewable    =  sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
                     /(sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)) + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices)) +
-                     [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction.l)*storage_capacity_hours(devices))
+                     [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*storage_capacity_hours(devices))
                     + sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ))]) ;
 Debts_Input        =  sum(devices, input_cap_cost(devices) * input_capacity_MW(devices))
                     /(sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)) + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices)) +
-                     [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction.l)*storage_capacity_hours(devices))
+                     [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*storage_capacity_hours(devices))
                     + sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ))]) ;
-Debts_StoNComp     = [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction.l)*storage_capacity_hours(devices))
+Debts_StoNComp     = [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*storage_capacity_hours(devices))
                     + sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ))]
                     /(sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)) + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices)) +
-                     [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*(H2_consumed_adj(devices)*(1-CF_opt) + CF_opt*Hydrogen_fraction.l)*storage_capacity_hours(devices))
+                     [sum(devices, H2stor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV )*storage_capacity_hours(devices))
                     + sum(devices, H2comp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / H2_LHV ))]) ;
 *===============================================================================
 * NPV revenues and charges
@@ -2056,12 +2094,67 @@ H2_price_NPV =  sum(years, H2_revenue_years(years))/sum(years,H2_sold_years(year
 display H2_revenue_years, H2_sold_years, H2_price_NPV ;
 * taxes shpuld not be inflated!
 Taxes_NPV              = sum(years,yearly_taxes.l(years)/to_NPV(years)) ;
-Debts_NPV              = sum(years,Debts*inflation_vec(years)/to_NPV(years)) ;
+Debts_NPV              = sum(years,Debts/to_NPV(years)) ;
 
 actual_operating_profit_NPV = arbitrage_revenue_NPV + regup_revenue_NPV + regdn_revenue_NPV + spinres_revenue_NPV + nonspinres_revenue_NPV + H2_revenue_NPV - startup_costs_NPV
                         + Fixed_dem_charge_cost_NPV + Timed_dem_1_cost_NPV + Timed_dem_2_cost_NPV + Timed_dem_3_cost_NPV + Timed_dem_4_cost_NPV + Timed_dem_5_cost_NPV + Timed_dem_6_cost_NPV + Meter_cost_NPV
                         + input_cap_cost2 + output_cap_cost2 + input_FOM_cost2_NPV + output_FOM_cost2_NPV + input_VOM_cost2_NPV + output_VOM_cost2_NPV + renewable_sales_NPV
                         + renew_cap_cost2 + renew_FOM_cost2_NPV + renew_VOM_cost2_NPV + H2stor_cap_cost2 + H2comp_cap_cost2 + REC_revenue_NPV + LCFS_revenue_NPV + Taxes_NPV + Debts_NPV;
+*===============================================================================
+* Yearlky revenues and charges
+*===============================================================================
+Fixed_dem_charge_cost_yearly(years)= Fixed_dem_charge_cost*inflation_vec(years);
+Timed_dem_1_cost_yearly(years)     = Timed_dem_1_cost*inflation_vec(years);
+Timed_dem_2_cost_yearly(years)     = Timed_dem_2_cost*inflation_vec(years);
+Timed_dem_3_cost_yearly(years)     = Timed_dem_3_cost*inflation_vec(years);
+Timed_dem_4_cost_yearly(years)     = Timed_dem_4_cost*inflation_vec(years);
+Timed_dem_5_cost_yearly(years)     = Timed_dem_5_cost*inflation_vec(years);
+Timed_dem_6_cost_yearly(years)     = Timed_dem_6_cost*inflation_vec(years);
+Meter_cost_yearly(years)           = Meter_cost*inflation_vec(years);
+
+fuel_cost_yearly(years)       = fuel_cost*inflation_vec(years);
+elec_cost_yearly(years)       = elec_cost*inflation_vec(years);
+elec_cost_ren_yearly(years)   = elec_cost_ren*inflation_vec(years);
+
+arbitrage_revenue_yearly(years) = arbitrage_revenue*inflation_vec(years);
+renewable_sales_yearly(years)   = elec_cost_ren*inflation_vec(years);
+
+REC_revenue_yearly(years)  = REC_revenue*inflation_vec(years);
+LCFS_revenue_yearly(years) = LCFS_revenue*inflation_vec(years);
+
+renew_FOM_cost2_yearly(years)  = renew_FOM_cost2*inflation_vec(years);
+input_FOM_cost2_yearly(years)  = input_FOM_cost2*inflation_vec(years);
+output_FOM_cost2_yearly(years) = output_FOM_cost2*inflation_vec(years);
+
+renew_VOM_cost2_yearly(years)  = renew_VOM_cost2*inflation_vec(years);
+input_VOM_cost2_yearly(years)  = input_VOM_cost2*inflation_vec(years);
+output_VOM_cost2_yearly(years) = output_VOM_cost2*inflation_vec(years);
+
+regup_revenue_yearly(years)      = regup_revenue*inflation_vec(years);
+regdn_revenue_yearly(years)      = regdn_revenue*inflation_vec(years);
+spinres_revenue_yearly(years)    = spinres_revenue*inflation_vec(years);
+nonspinres_revenue_yearly(years) = nonspinres_revenue*inflation_vec(years);
+startup_costs_yearly(years)      = startup_costs*inflation_vec(years);
+H2_revenue_yearly(years)         = H2_revenue*inflation_vec(years);
+
+Parameter H2_sold_yearly(years), H2_price_yearly(years);
+H2_sold_yearly(years)    = sum((devices,interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ), (H2_sold.l(interval,devices)));
+H2_revenue_yearly2(years) = sum((devices,interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ), H2_price(interval,devices) * H2_sold.l(interval,devices))*inflation_vec(years);
+H2_price_yearly(years)   = H2_revenue_yearly2(years)/H2_sold_yearly(years);
+display H2_revenue_yearly2, H2_sold_yearly, H2_price_yearly ;
+* taxes should not be inflated!
+Taxes_yearly(years)  = yearly_taxes.l(years);
+Debts_yearly(years)  = Debts;
+
+
+* Capital cost itmes in "actual_operating_profit_yearly" should be in year 0 but for debugging they are currently in year 1
+Parameters year_one_multiplier(years)  Use to charge for capital cost in year 1 /1 1/;
+
+actual_operating_profit_yearly(years) = arbitrage_revenue_yearly(years) + regup_revenue_yearly(years) + regdn_revenue_yearly(years) + spinres_revenue_yearly(years) + nonspinres_revenue_yearly(years) + H2_revenue_yearly(years) - startup_costs_yearly(years)
+                        + Fixed_dem_charge_cost_yearly(years) + Timed_dem_1_cost_yearly(years) + Timed_dem_2_cost_yearly(years) + Timed_dem_3_cost_yearly(years) + Timed_dem_4_cost_yearly(years) + Timed_dem_5_cost_yearly(years) + Timed_dem_6_cost_yearly(years) + Meter_cost_yearly(years)
+                        + [input_cap_cost2 + output_cap_cost2 + renew_cap_cost2 + H2stor_cap_cost2 + H2comp_cap_cost2]*year_one_multiplier(years) + input_FOM_cost2_yearly(years) + output_FOM_cost2_yearly(years) + input_VOM_cost2_yearly(years) + output_VOM_cost2_yearly(years) + renewable_sales_yearly(years)
+                        + renew_FOM_cost2_yearly(years) + renew_VOM_cost2_yearly(years) + REC_revenue_yearly(years) + LCFS_revenue_yearly(years) + Taxes_yearly(years) + Debts_yearly(years);
+
 *===============================================================================
 * Hydrogen break-even cost breakdown
 *===============================================================================
@@ -2080,6 +2173,7 @@ if (Renewable_pen_input_net>1,
 
 Total_H2_produced = sum(years,sum((interval,devices),H2_sold.l(interval,devices))/to_NPV(years));
 display H2_sold.l;
+display Total_H2_produced;
 Storage_revenue_vec(devices) = sum(interval,(output_power_MW.l(interval,devices) - input_power_MW.l(interval,devices)) * interval_length * elec_sale_price(interval));
 Storage_revenue = sum((years,devices), Storage_revenue_vec(devices)*inflation_vec(years)/to_NPV(years));
 Renewable_only_revenue = sum(years,[sum(interval, (sum(devices,input_power_MW.l(interval,devices) - input_power_MW_non_ren.l(interval,devices))+sum(devices_ren, renewable_power_MW_sold.l(interval,devices_ren))) * interval_length  * elec_sale_price(interval))]*inflation_vec(years)/to_NPV(years));
@@ -2371,6 +2465,8 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Renewable Electricity Input (MWh), ',      Renewable_electricity_in /;
                  put 'Electricity Import (MWh), ',               Electricity_import /;
                  put 'Total Electricity Consumed (MWh), ',       Total_elec_consumed /;
+                 put 'Yearly Debt service ($), ',                (debt_service.l) /;
+                 put 'WACC, ',                                   (wacc) /;
                  put /
                  put 'Hydrogen cost breakdown (US$/kg)' /;
                  put 'LCFS_FCEV (US$/kg),',                      (- LCFS_revenueH2) /;
@@ -2385,7 +2481,56 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
                  put 'Renewable capital cost (US$/kg),',         (-Renewable_cap_costH2 - Debts_Renewable*DebtsH2) /;
                  put 'Renewable FOM (US$/kg),',                  (-Renewable_FOM_costH2) /;
                  put 'Taxes (US$/kg),',                          (-TaxesH2) /;
-                 put 'H2 NPV cost (US$/kg),',             (-H2_break_even_cost) / ;
+                 put 'H2 NPV cost (US$/kg),',                    (-H2_break_even_cost) / ;
+                 put /;
+
+         summary_file_yearly.nd = 8;
+         summary_file_yearly.pw = 10000;
+         put summary_file_yearly;
+                 put 'Year, Fixed demand charge, Timed demand charge 1, Timed demand charge 2, Timed demand charge 3, Timed demand charge 4, Timed demand charge 5,  Timed demand charge 6, Meter cost,'
+                 put 'Fuel cost, Electricity cost, Electricity cost (renewable), Arbitrage, Renewable sales, REC revenue, LCFS revenue,'
+                 put 'Renewable FOM, Input FOM, Output FOM, Renewable VOM, Input VOM, Output VOM,'
+                 put 'Regulation up, Regulation down, Spinning reserve, Nonspinning reserve, Startup costs, H2 revenue,'
+                 put 'H2 sold (kg), H2 revenue adj, H2 price ($/kg), Taxes, Debts, Actual operating profit, Depreciated value, Inflation, Tax carryover, Divide by this to convert to NPV' /;
+                 loop(years, put         ord(years),',',
+                                         Fixed_dem_charge_cost_yearly(years),',',
+                                         Timed_dem_1_cost_yearly(years),',',
+                                         Timed_dem_2_cost_yearly(years),',',
+                                         Timed_dem_3_cost_yearly(years),',',
+                                         Timed_dem_4_cost_yearly(years),',',
+                                         Timed_dem_5_cost_yearly(years),',',
+                                         Timed_dem_6_cost_yearly(years),',',
+                                         Meter_cost_yearly(years),',',
+                                         fuel_cost_yearly(years),',',
+                                         elec_cost_yearly(years),',',
+                                         elec_cost_ren_yearly(years),',',
+                                         arbitrage_revenue_yearly(years),',',
+                                         renewable_sales_yearly(years),',',
+                                         REC_revenue_yearly(years),',',
+                                         LCFS_revenue_yearly(years),',',
+                                         renew_FOM_cost2_yearly(years),',',
+                                         input_FOM_cost2_yearly(years),',',
+                                         output_FOM_cost2_yearly(years),',',
+                                         renew_VOM_cost2_yearly(years),',',
+                                         input_VOM_cost2_yearly(years),',',
+                                         output_VOM_cost2_yearly(years),',',
+                                         regup_revenue_yearly(years),',',
+                                         regdn_revenue_yearly(years),',',
+                                         spinres_revenue_yearly(years),',',
+                                         nonspinres_revenue_yearly(years),',',
+                                         startup_costs_yearly(years),',',
+                                         H2_revenue_yearly(years),',',
+                                         H2_sold_yearly(years),',',
+                                         H2_revenue_yearly2(years),',',
+                                         H2_price_yearly(years),',',
+                                         Taxes_yearly(years),',',
+                                         Debts_yearly(years),',',
+                                         actual_operating_profit_yearly(years),',',
+                                         amount_depreciated.l(years),',',
+                                         inflation_vec(years),',',
+                                         reserved_taxes.l(years),',',
+                                         to_NPV(years) /;
+                 );
                  put /;
 
 $ontext
