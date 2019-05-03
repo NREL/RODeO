@@ -12,21 +12,25 @@ import pandas as pd
 import warnings 
 warnings.simplefilter("ignore",UserWarning)
 
-Scenario1 = 'VTA_bus_project'
+#Scenario1 = 'VTA_bus_project'
 #Scenario1 = 'Central_vs_distributed'
-#Scenario1 = 'Solar_Hydrogen'
+Scenario1 = 'Solar_Hydrogen'
 #Scenario1 = 'Example'
 
-dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/'+Scenario1+'/Output/'  # Location to put database files
+#dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/'+Scenario1+'/Output/'  # Location to put database files
+dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/'+Scenario1+'/Output/Vaca_Dixon/'  # Location to put database files
 dir1 = dir0                                                          # Location of csv files
 
 c0 = [0,0,0]
 files2load_input={}
 files2load_input_title={}
+files2load_input_categories={}
 files2load_results={}
 files2load_results_title={}
+files2load_results_categories={}
 files2load_summary={}
 files2load_summary_title={}
+files2load_summary_categories={}
 
 for files2load in os.listdir(dir1):
     if 1==0:
@@ -57,6 +61,8 @@ for files2load in os.listdir(dir1):
             int1[5] = int1[5].replace('RE', '')
             int1[7] = int1[7].replace('hrs.csv', '')
             files2load_summary_title[c0[2]] = int1
+            
+            
     elif 1==0:
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
             c0[0]=c0[0]+1
@@ -79,6 +85,8 @@ for files2load in os.listdir(dir1):
             int1 = int1[3:]
             int1[2] = int1[2].replace('hrs.csv', '')
             files2load_summary_title[c0[2]] = int1
+            
+            
     elif Scenario1=='Example':
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
             c0[0]=c0[0]+1
@@ -104,6 +112,8 @@ for files2load in os.listdir(dir1):
             int1[2] = int1[2].replace('CF', '')
             int1[3] = int1[3].replace('hrs.csv', '')
             files2load_summary_title[c0[2]] = int1
+            
+            
     elif Scenario1=='Central_vs_distributed':
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
             c0[0]=c0[0]+1
@@ -129,31 +139,77 @@ for files2load in os.listdir(dir1):
             int1[2] = int1[2].replace('CF', '')
             int1[5] = int1[5].replace('hrs.csv', '')
             files2load_summary_title[c0[2]] = int1
+            
+            
     elif Scenario1=='Solar_Hydrogen':
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
             c0[0]=c0[0]+1
             files2load_input[c0[0]] = files2load
             int1 = files2load.split("_")
             int1 = int1[3:]
-#            int1[2] = int1[2].replace('CF', '')            
-            int1[1] = int1[1].replace('hrs.csv', '')
+            del int1[1]
+            files2load_input_categories[0]='Scenario'
+            if int1[1]=='Vaca':
+                int1[1:3] = [' '.join(int1[1:3])]
+                files2load_input_categories[1]='Location'                    
+            for i0 in range(len(int1)):
+                if fnmatch.fnmatch(int1[i0], 'itc*'):
+                    int1[i0] = int1[i0].replace('itc', '')
+                    if c0[1]==1: files2load_input_categories[i0]='ITC'
+                if fnmatch.fnmatch(int1[i0], 'NEM*'):
+                    int1[i0] = int1[i0].replace('NEM', '')
+                    if c0[1]==1: files2load_input_categories[i0]='NEM'
+                if fnmatch.fnmatch(int1[i0], 'EY*'):
+                    int1[i0] = int1[i0].replace('.csv', '')
+                    int1[i0] = int1[i0].replace('EY', '')
+                    if c0[1]==1: files2load_input_categories[i0]='EY Size'
             files2load_input_title[c0[0]] = int1
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_results*'):
             c0[1]=c0[1]+1
             files2load_results[c0[1]] = files2load
             int1 = files2load.split("_")
             int1 = int1[3:]
-#            int1[2] = int1[2].replace('CF', '')
-            int1[1] = int1[1].replace('hrs.csv', '')
+            del int1[1]
+            files2load_results_categories[0]='Scenario'
+            if int1[1]=='Vaca':
+                int1[1:3] = [' '.join(int1[1:3])]
+                files2load_results_categories[1]='Location'                    
+            for i0 in range(len(int1)):
+                if fnmatch.fnmatch(int1[i0], 'itc*'):
+                    int1[i0] = int1[i0].replace('itc', '')
+                    if c0[1]==1: files2load_results_categories[i0]='ITC'
+                if fnmatch.fnmatch(int1[i0], 'NEM*'):
+                    int1[i0] = int1[i0].replace('NEM', '')
+                    if c0[1]==1: files2load_results_categories[i0]='NEM'
+                if fnmatch.fnmatch(int1[i0], 'EY*'):
+                    int1[i0] = int1[i0].replace('.csv', '')
+                    int1[i0] = int1[i0].replace('EY', '')
+                    if c0[1]==1: files2load_results_categories[i0]='EY Size'
             files2load_results_title[c0[1]] = int1
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_summary*'):
             c0[2]=c0[2]+1
             files2load_summary[c0[2]] = files2load
             int1 = files2load.split("_")
             int1 = int1[3:]
-#            int1[2] = int1[2].replace('CF', '')
-            int1[1] = int1[1].replace('hrs.csv', '')
+            del int1[1]
+            files2load_summary_categories[0]='Scenario'
+            if int1[1]=='Vaca':
+                int1[1:3] = [' '.join(int1[1:3])]
+                files2load_summary_categories[1]='Location'                    
+            for i0 in range(len(int1)):
+                if fnmatch.fnmatch(int1[i0], 'itc*'):
+                    int1[i0] = int1[i0].replace('itc', '')
+                    if c0[1]==1: files2load_summary_categories[i0]='ITC'
+                if fnmatch.fnmatch(int1[i0], 'NEM*'):
+                    int1[i0] = int1[i0].replace('NEM', '')
+                    if c0[1]==1: files2load_summary_categories[i0]='NEM'
+                if fnmatch.fnmatch(int1[i0], 'EY*'):
+                    int1[i0] = int1[i0].replace('.csv', '')
+                    int1[i0] = int1[i0].replace('EY', '')
+                    if c0[1]==1: files2load_summary_categories[i0]='EY Size'
             files2load_summary_title[c0[2]] = int1
+            
+            
     elif Scenario1=='VTA_bus_project':
         if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
             c0[0]=c0[0]+1
@@ -178,6 +234,7 @@ for files2load in os.listdir(dir1):
             files2load_summary_title[c0[2]] = int1
         files2load_title_header = ['Utility','Block','Services','Renewable']
 
+
 # Connecting to the database file
 ### conn.close()
 sqlite_file = 'Default_summary.db'  # name of the sqlite database file
@@ -197,8 +254,7 @@ if 1==0:            # This section captures the scenario table from summary file
                                              'Capacity factor' real,
                                              'Renewable ratio to technology' real,
                                              'Renewable type' text,
-                                             'Storage duration (hours)' real)''')
-    
+                                             'Storage duration (hours)' real)''')    
         sql = "INSERT INTO Scenarios VALUES (?,?,?,?,?,?,?,?,?)"
         params=list()
         for i0 in range(len(files2load_summary)):    
@@ -206,12 +262,13 @@ if 1==0:            # This section captures the scenario table from summary file
             print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
         c.executemany(sql, params)
         conn.commit()
+        
+        
     elif 1==0:
         c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
                                              'Market' text,                                             
                                              'Location' text,
-                                             'Storage duration (hours)' real)''')
-    
+                                             'Storage duration (hours)' real)''')    
         sql = "INSERT INTO Scenarios VALUES (?,?,?,?)"
         params=list()
         for i0 in range(len(files2load_summary)):    
@@ -219,12 +276,13 @@ if 1==0:            # This section captures the scenario table from summary file
             print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
         c.executemany(sql, params)
         conn.commit()
+        
+        
     elif 1==0:
         c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
                                              'Market' text,                                             
                                              'Location' text,
-                                             'Storage duration (hours)' real)''')
-    
+                                             'Storage duration (hours)' real)''')    
         sql = "INSERT INTO Scenarios VALUES (?,?,?,?)"
         params=list()
         for i0 in range(len(files2load_summary)):    
@@ -232,13 +290,14 @@ if 1==0:            # This section captures the scenario table from summary file
             print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
         c.executemany(sql, params)
         conn.commit()
+        
+        
     elif Scenario1=='Example':
         c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
                                              'Tariff' text,                                             
                                              'Operating Strategy' text,
                                              'Capacity Factor (%)' real,
-                                             'Storage duration (hours)' real)''')
-    
+                                             'Storage duration (hours)' real)''')    
         sql = "INSERT INTO Scenarios VALUES (?,?,?,?,?)"
         params=list()
         for i0 in range(len(files2load_summary)):    
@@ -246,6 +305,8 @@ if 1==0:            # This section captures the scenario table from summary file
             print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
         c.executemany(sql, params)
         conn.commit()   
+        
+        
     elif Scenario1=='Central_vs_distributed':
         c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
                                              'Tariff' text,                                             
@@ -253,21 +314,21 @@ if 1==0:            # This section captures the scenario table from summary file
                                              'Capacity Factor (%)' real,
                                              'Configuration' text,
                                              'Timeframe' text,
-                                             'Storage duration (hours)' real)''')
-    
+                                             'Storage duration (hours)' real)''')    
         sql = "INSERT INTO Scenarios VALUES (?,?,?,?,?,?,?)"
         params=list()
         for i0 in range(len(files2load_summary)):    
             params.insert(i0,tuple(list([str(i0+1)])+files2load_summary_title[i0+1]))
             print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
         c.executemany(sql, params)
-        conn.commit()         
+        conn.commit()    
+        
+        
     elif Scenario1=='Solar_Hydrogen':
         c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
                                              'Tariff' text,                                             
                                              'Capacity Factor (%)' real,
-                                             'Storage duration (hours)' real)''')
-    
+                                             'Storage duration (hours)' real)''')    
         sql = "INSERT INTO Scenarios VALUES (?,?,?,?)"
         params=list()
         for i0 in range(len(files2load_summary)):    
@@ -340,7 +401,7 @@ if 1==1:            # This section captures the summary files
     
     
    
-if 1==1:            # This section captures a subset of the results files 
+if 1==0:            # This section captures a subset of the results files 
     # Creating Results Table
     for i0 in range(len(files2load_results_title)):
         # Creating Results Table header

@@ -19,11 +19,10 @@
 
 [OPENWINDOW_1]
 FILE0=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
-FILE1=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.lst
-FILE2=C:\Users\jeichman\Documents\gamsdir\projdir\Testing\Untitled_1.gms
-FILE3=C:\Users\jeichman\Documents\gamsdir\projdir\Untitled_11.gms
-FILE4=C:\Users\jeichman\Documents\gamsdir\projdir\Untitled_4.gms
-FILE5=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+FILE1=C:\Users\jeichman\Documents\gamsdir\projdir\Testing\Untitled_1.gms
+FILE2=C:\Users\jeichman\Documents\gamsdir\projdir\Untitled_11.gms
+FILE3=C:\Users\jeichman\Documents\gamsdir\projdir\Untitled_4.gms
+FILE4=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
 MAXIM=0
 TOP=2
 LEFT=6
