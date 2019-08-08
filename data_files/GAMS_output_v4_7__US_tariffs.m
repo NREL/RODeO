@@ -7,7 +7,8 @@ clear all, close all, clc
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Central_vs_distributed\Data_files\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Example\Data_files\'];
 % dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\VTA_bus_project\Data_files\'];
-dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Solar_Hydrogen\Data_files\'];
+% dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Solar_Hydrogen\Data_files\'];
+dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\VTA_bus_project2\Data_files\'];
 
 dir1 = [dir2,'CSV_data\'];      % Input folder
 [status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
@@ -16,7 +17,7 @@ dir0 = [dir2,'TXT_files\'];     % Output folder
 cd(dir1);
 
 % Prompt for which files to output
-Year_select = 2016;     % select year to be analyzed
+Year_select = 2017;     % select year to be analyzed
 Year_length = ceil((datenum(Year_select,12,31,23,59,59)-datenum(Year_select,1,1,0,0,0))*24);   %8784;     % length of year in hours
 shorten_year = 1;       % 0 = use actual Year_length, 1 = set to value below
 remove_leap_year = 1;   % 0 = shorten year in Dec., 1 = remove 2/29 (must select leap year and must enable shorten_year)
@@ -27,7 +28,7 @@ Year_length_set = 8760;
 if shorten_year==1
     Year_length=Year_length_set;
 end
-interval_length = 1;    % used to create sub-hourly data files (1, 4, or 12)
+interval_length = 4;    % used to create sub-hourly data files (1, 4, or 12)
 % DST_year_beg = datenum([2015,3,8,2,0,0]);   %Daylight savings time
 % DST_year_end = datenum([2015,11,1,2,0,0]);  %Daylight savings time
 month_vec = {'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'};
@@ -224,7 +225,7 @@ if shorten_year==1      % Shorten year if necessary and remove either last day i
             end
         end
     else
-        date_values(Year_length_set+1:end) = [];    % Shorten date_values
+        date_values(Year_length_set*interval_length+1:end) = [];    % Shorten date_values
     end
 end
 interval1 = (1:length(date_values))';

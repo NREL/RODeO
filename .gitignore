@@ -3,6 +3,7 @@ Output/Wind_farm_plus_storage/*
 Projects/Example/Output*
 Projects/Central_vs_distributed/Output*
 Projects/VTA_bus_project/Output*
+Projects/VTA_bus_project2/Output*
 Projects/Solar_Hydrogen/Output*
 Projects/Solar_Hydrogen_VacaDixon/Output*
 Projects/Solar_Hydrogen/Data_files/CSV_data/LMP_data_2017.csv
