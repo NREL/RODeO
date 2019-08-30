@@ -14,11 +14,13 @@ warnings.simplefilter("ignore",UserWarning)
 
 #Scenario1 = 'VTA_bus_project'
 #Scenario1 = 'Central_vs_distributed'
-Scenario1 = 'Solar_Hydrogen'
+#Scenario1 = 'Solar_Hydrogen'
+Scenario1 = 'VTA_bus_project2'
 #Scenario1 = 'Example'
 
 #dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/'+Scenario1+'/Output/'  # Location to put database files
-dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/'+Scenario1+'/Output/Vaca_Dixon/'  # Location to put database files
+#dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/'+Scenario1+'/Output/Vaca_Dixon/'  # Location to put database files
+dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/'+Scenario1+'/Output/'
 dir1 = dir0                                                          # Location of csv files
 
 c0 = [0,0,0]
@@ -234,6 +236,30 @@ for files2load in os.listdir(dir1):
             files2load_summary_title[c0[2]] = int1
         files2load_title_header = ['Utility','Block','Services','Renewable']
 
+    elif Scenario1=='VTA_bus_project2':
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
+            c0[0]=c0[0]+1
+            files2load_input[c0[0]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+            int1[-1] = int1[-1].replace('.csv', '')
+            files2load_input_title[c0[0]] = int1
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_results_*'):
+            c0[1]=c0[1]+1
+            files2load_results[c0[1]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+            int1[-1] = int1[-1].replace('.csv', '')
+            files2load_results_title[c0[1]] = int1
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_summary_*'):
+            c0[2]=c0[2]+1
+            files2load_summary[c0[2]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+            int1[-1] = int1[-1].replace('.csv', '')
+            files2load_summary_title[c0[2]] = int1
+        files2load_title_header = ['Utility','Services','Location','Charge Power','Charge Properties','Bus Type','Additional Technologies','Renewable level']
+
 
 # Connecting to the database file
 ### conn.close()
@@ -394,14 +420,14 @@ if 1==1:            # This section captures the summary files
     params=list()
     for i0 in range(len(files2load_summary_data_all)):
         params.insert(i0,tuple(files2load_summary_data_all.loc[i0,:].tolist()))
-        if (i0%1000)==0:
+        if ((i0+1)%1000)==0:
             print('Creating Output: '+str(i0)+' of '+str(len(files2load_summary_data_all)))
     c.executemany(sql, params)
     conn.commit()
     
     
    
-if 1==0:            # This section captures a subset of the results files 
+if 1==1:            # This section captures a subset of the results files 
     # Creating Results Table
     for i0 in range(len(files2load_results_title)):
         # Creating Results Table header
