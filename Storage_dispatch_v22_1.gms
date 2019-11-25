@@ -41,7 +41,7 @@ $if not set NEM_nscr               $set NEM_nscr            0
 
 $if not set elec_rate_instance          $set elec_rate_instance             5a3430585457a3e3595c48a2_hourly
 $if not set H2_price_prof_instance      $set H2_price_prof_instance         H2_price_Price1_hourly
-$if not set H2_consumed_instance        $set H2_consumed_instance           H2_consumption_blank_hourly
+$if not set H2_consumed_instance        $set H2_consumed_instance           H2_consumption_ones_hourly
 $if not set baseload_pwr_instance       $set baseload_pwr_instance          Input_power_baseload
 $if not set NG_price_instance           $set NG_price_instance              NG_price_Price1_hourly
 $if not set ren_prof_instance           $set ren_prof_instance              renewable_profiles_PV_hourly
@@ -50,20 +50,20 @@ $if not set MACRS_instance              $set MACRS_instance                 MACR
 $if not set load_prof_instance          $set load_prof_instance             Additional_load_none_hourly
 $if not set energy_purchase_price_inst  $set energy_purchase_price_inst     Energy_purchase_prices_Wholesale_MWh_hourly
 $if not set energy_sale_price_inst      $set energy_sale_price_inst         Energy_sale_prices_Wholesale_MWh_hourly
-$if not set AS_price_inst               $set AS_price_inst                  Ancillary_services_none_hourly
+$if not set AS_price_inst               $set AS_price_inst                  Ancillary_services_PGE2014_hourly
 $if not set Max_input_prof_inst         $set Max_input_prof_inst            Max_input_cap_ones_hourly
 $if not set Max_output_prof_inst        $set Max_output_prof_inst           Max_output_cap_ones_hourly
 $if not set Device_parameters_inst      $set Device_parameters_inst         Devices_parameters_empty
 $if not set Device_ren_params_inst      $set Device_ren_params_inst         Devices_ren_parameters_empty
-$if not set outdir                      $set outdir                         Projects\Solar+Storage\Output
-$if not set indir                       $set indir                          Projects\Solar+Storage\Data_files\TXT_files
+$if not set outdir                      $set outdir                         Projects\flex_bldg_load\Output
+$if not set indir                       $set indir                          Projects\flex_bldg_load\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
 $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
-$if not set file_name_instance     $set file_name_instance     "Test_solar-storage_1"
+$if not set file_name_instance     $set file_name_instance     "Test_flex_bldg_load_1"
 $if not set devices_instance       $set devices_instance       1
 ***$if not set fix_active_devices     $set fix_active_devices     1
 $if not set use_alt_devices        $set use_alt_devices        0
@@ -75,14 +75,14 @@ $if not set soft_cons_device_inst  $set soft_cons_device_inst  0
 $if not set devices_ren_instance   $set devices_ren_instance   1
 $if not set val_from_batch_inst    $set val_from_batch_inst    2
 $if not set input_cap_instance     $set input_cap_instance     1
-$if not set output_cap_instance    $set output_cap_instance    1
+$if not set output_cap_instance    $set output_cap_instance    0
 
 * Set the limiting price (must be less than infinity)
 $if not set price_cap_instance     $set price_cap_instance     10000
 
-$if not set max_output_cap_inst    $set max_output_cap_inst    1.2
+$if not set max_output_cap_inst    $set max_output_cap_inst    Inf
 * "max_input_cap_inst" must be greater than load profile otherwise infeasibilities occur
-$if not set max_input_cap_inst     $set max_input_cap_inst     1.2
+$if not set max_input_cap_inst     $set max_input_cap_inst     Inf
 $if not set allow_import_instance  $set allow_import_instance  1
 * by default allow_sales_instance should be 1; however, when it is 0, sales variables should be prohibited
 $if not set allow_sales_instance   $set allow_sales_instance   1
@@ -92,8 +92,8 @@ $if not set output_LSL_instance    $set output_LSL_instance    0
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0
 $if not set Output_start_cost_inst $set Output_start_cost_inst 0
 * Efficiency takes into account compressor. Otherwise, take 0.613669
-$if not set input_efficiency_inst  $set input_efficiency_inst  0.92
-$if not set output_efficiency_inst $set output_efficiency_inst 0.92
+$if not set input_efficiency_inst  $set input_efficiency_inst  0.80
+$if not set output_efficiency_inst $set output_efficiency_inst 1
 
 $if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1111000
 $if not set input_cap_cost_inst    $set input_cap_cost_inst    16466666.67
@@ -122,7 +122,7 @@ $if not set H2comp_interest_inst   $set H2comp_interest_inst   0.07
 
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   4
+$if not set storage_cap_instance   $set storage_cap_instance   8
 $if not set storage_set_instance   $set storage_set_instance   1
 $if not set storage_init_instance  $set storage_init_instance  0.5
 $if not set storage_final_instance $set storage_final_instance 0.5
@@ -148,12 +148,12 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0
-$if not set H2_price_instance      $set H2_price_instance      0
-$if not set H2_use_instance        $set H2_use_instance        0
+$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.2
+$if not set H2_price_instance      $set H2_price_instance      10
+$if not set H2_use_instance        $set H2_use_instance        1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
-$if not set Renewable_MW_instance  $set Renewable_MW_instance  1
+$if not set Renewable_MW_instance  $set Renewable_MW_instance  0
 $if not set REC_price_inst         $set REC_price_inst         0
 
 $if not set CF_opt_instance        $set CF_opt_instance        0
@@ -1136,9 +1136,9 @@ loop(devices,
     elseif H2_use(devices)=1,
          H2_price(interval,devices) = H2_price(interval,devices) * H2_price_adj(devices);
          if (CF_opt=0,
-                 H2_consumed(interval,devices) = H2_consumed(interval,devices) * H2_consumed_adj(devices) * input_capacity_MW(devices) * input_efficiency(devices) / H2_LHV * 24 * interval_length;
+                 H2_consumed(interval,devices) = H2_consumed(interval,devices) * H2_consumed_adj(devices) * input_capacity_MW(devices) * input_efficiency(devices) / H2_LHV * interval_length;
          elseif CF_opt=1,
-                 H2_consumed_adj(devices) = input_capacity_MW(devices) * input_efficiency(devices) / H2_LHV *24;
+                 H2_consumed_adj(devices) = input_capacity_MW(devices) * input_efficiency(devices) / H2_LHV;
          );
     elseif H2_use(devices)=2,
     );
@@ -2434,7 +2434,7 @@ display current_storage_lvl;
 display current_monthly_max;
 display max_interval;
 );
-if (1=1,
+if (1=0,
 option decimals=8;
 *display Device_table;
 *display Device_ren_table;
@@ -2452,6 +2452,13 @@ display renewable_power_MW_sold.l;
 display Load_profile_ren.l;
 display Load_profile_non_ren.l;
 );
+
+if (1=1,
+option decimals=8;
+display CF_adjust.l;
+display H2_sold_ren.l
+display H2_sold_non_ren.l
+display H2_consumed);
 
 
 
@@ -2730,168 +2737,172 @@ if( (arbitrage_and_AS.modelstat=1 or arbitrage_and_AS.modelstat=2 or arbitrage_a
 
          summary_file_yearly.nd = 8;
          summary_file_yearly.pw = 10000;
-         put summary_file_yearly;
-                 put 'Year, Fixed demand charge, Timed demand charge 1, Timed demand charge 2, Timed demand charge 3, Timed demand charge 4, Timed demand charge 5,  Timed demand charge 6, Meter cost,'
-                 put 'Fuel cost, Electricity cost, Electricity cost (renewable), Arbitrage, Renewable sales, REC revenue, LCFS revenue,'
-                 put 'Renewable FOM, Input FOM, Output FOM, Renewable VOM, Input VOM, Output VOM,'
-                 put 'Regulation up, Regulation down, Spinning reserve, Nonspinning reserve, Startup costs, H2 revenue,'
-                 put 'H2 sold (kg), H2 revenue adj, H2 price ($/kg), Taxes, Debts, Actual operating profit, Depreciated value, Inflation, Tax carryover, Divide by this to convert to NPV' /;
-                 loop(years, put         ord(years),',',
-                                         Fixed_dem_charge_cost_yearly(years),',',
-                                         Timed_dem_1_cost_yearly(years),',',
-                                         Timed_dem_2_cost_yearly(years),',',
-                                         Timed_dem_3_cost_yearly(years),',',
-                                         Timed_dem_4_cost_yearly(years),',',
-                                         Timed_dem_5_cost_yearly(years),',',
-                                         Timed_dem_6_cost_yearly(years),',',
-                                         Meter_cost_yearly(years),',',
-                                         fuel_cost_yearly(years),',',
-                                         elec_cost_yearly(years),',',
-                                         elec_cost_ren_yearly(years),',',
-                                         arbitrage_revenue_yearly(years),',',
-                                         renewable_sales_yearly(years),',',
-                                         REC_revenue_yearly(years),',',
-                                         LCFS_revenue_yearly(years),',',
-                                         renew_FOM_cost2_yearly(years),',',
-                                         input_FOM_cost2_yearly(years),',',
-                                         output_FOM_cost2_yearly(years),',',
-                                         renew_VOM_cost2_yearly(years),',',
-                                         input_VOM_cost2_yearly(years),',',
-                                         output_VOM_cost2_yearly(years),',',
-                                         regup_revenue_yearly(years),',',
-                                         regdn_revenue_yearly(years),',',
-                                         spinres_revenue_yearly(years),',',
-                                         nonspinres_revenue_yearly(years),',',
-                                         startup_costs_yearly(years),',',
-                                         H2_revenue_yearly(years),',',
-                                         H2_sold_yearly(years),',',
-                                         H2_revenue_yearly2(years),',',
-                                         H2_price_yearly(years),',',
-                                         Taxes_yearly(years),',',
-                                         Debts_yearly(years),',',
-                                         actual_operating_profit_yearly(years),',',
-                                         amount_depreciated.l(years),',',
-                                         inflation_vec(years),',',
-                                         reserved_taxes.l(years),',',
-                                         to_NPV(years) /;
-                 );
-                 put /;
+         if (1=0,
+            put summary_file_yearly;
+                    put 'Year, Fixed demand charge, Timed demand charge 1, Timed demand charge 2, Timed demand charge 3, Timed demand charge 4, Timed demand charge 5,  Timed demand charge 6, Meter cost,'
+                    put 'Fuel cost, Electricity cost, Electricity cost (renewable), Arbitrage, Renewable sales, REC revenue, LCFS revenue,'
+                    put 'Renewable FOM, Input FOM, Output FOM, Renewable VOM, Input VOM, Output VOM,'
+                    put 'Regulation up, Regulation down, Spinning reserve, Nonspinning reserve, Startup costs, H2 revenue,'
+                    put 'H2 sold (kg), H2 revenue adj, H2 price ($/kg), Taxes, Debts, Actual operating profit, Depreciated value, Inflation, Tax carryover, Divide by this to convert to NPV' /;
+                    loop(years, put         ord(years),',',
+                                            Fixed_dem_charge_cost_yearly(years),',',
+                                            Timed_dem_1_cost_yearly(years),',',
+                                            Timed_dem_2_cost_yearly(years),',',
+                                            Timed_dem_3_cost_yearly(years),',',
+                                            Timed_dem_4_cost_yearly(years),',',
+                                            Timed_dem_5_cost_yearly(years),',',
+                                            Timed_dem_6_cost_yearly(years),',',
+                                            Meter_cost_yearly(years),',',
+                                            fuel_cost_yearly(years),',',
+                                            elec_cost_yearly(years),',',
+                                            elec_cost_ren_yearly(years),',',
+                                            arbitrage_revenue_yearly(years),',',
+                                            renewable_sales_yearly(years),',',
+                                            REC_revenue_yearly(years),',',
+                                            LCFS_revenue_yearly(years),',',
+                                            renew_FOM_cost2_yearly(years),',',
+                                            input_FOM_cost2_yearly(years),',',
+                                            output_FOM_cost2_yearly(years),',',
+                                            renew_VOM_cost2_yearly(years),',',
+                                            input_VOM_cost2_yearly(years),',',
+                                            output_VOM_cost2_yearly(years),',',
+                                            regup_revenue_yearly(years),',',
+                                            regdn_revenue_yearly(years),',',
+                                            spinres_revenue_yearly(years),',',
+                                            nonspinres_revenue_yearly(years),',',
+                                            startup_costs_yearly(years),',',
+                                            H2_revenue_yearly(years),',',
+                                            H2_sold_yearly(years),',',
+                                            H2_revenue_yearly2(years),',',
+                                            H2_price_yearly(years),',',
+                                            Taxes_yearly(years),',',
+                                            Debts_yearly(years),',',
+                                            actual_operating_profit_yearly(years),',',
+                                            amount_depreciated.l(years),',',
+                                            inflation_vec(years),',',
+                                            reserved_taxes.l(years),',',
+                                            to_NPV(years) /;
+                    );
+                    put /;
+        );
 
 *$ontext
 
-         if ( max_max_cap>100, results_file_devices.nd = 2; elseif max_max_cap>10, results_file_devices.nd = 4; elseif max_max_cap>0.1, results_file_devices.nd = 6; else results_file_devices.nd = 8;);
-         results_file_devices.pw = 20000;
-         put results_file_devices;
-                 put 'Interval,';
-                 loop(devices, put 'In Pwr ',ord(devices):0:0,' (MW),Out Pwr Sold',ord(devices):0:0,' (MW),Out Pwr Load',ord(devices):0:0,' (MW),Storage Lvl ',ord(devices):0:0,' (MW-h),H2 Out ',ord(devices):0:0,' (kg),Non-Ren In ',ord(devices):0:0,' (MW),');
-                 loop(devices_ren, put 'Ren In ',ord(devices_ren):0:0,' (MW),Ren Sold ',ord(devices_ren):0:0,' (MW),');
-                 put 'Curtailment (MW)' /;
-                 loop(interval, put      ord(interval),',';
-                                loop(devices,     put input_power_MW.l(interval,devices),',',
-                                                      Output_power_sold(interval,devices),',',
-                                                      Output_power_load(interval,devices),',',
-                                                      storage_level_MWh_tot(interval,devices),',',
-                                                      H2_sold.l(interval,devices),',',
-                                                      input_power_MW_non_ren.l(interval,devices),',',);
-                                loop(devices_ren, put Renewable_power(interval,devices_ren),',',
-                                                      renewable_power_MW_sold.l(interval,devices_ren),',');
-                                put curtailment(interval);
-                                put /;
-                 );
-
-         if ( max_max_cap>100, summary_file_devices.nd = 2; else summary_file_devices.nd = 4; );
-         summary_file_devices.pw = 20000;
-         put summary_file_devices;
-                 PUT 'Run on a %system.filesys% machine on %system.date% %system.time%.' /;
-                 put 'Optimal solution found within time limit:,',
-                 if ( optimal_solution_reached = 1,
-                         put 'Yes' /;
-                 else
-                         put 'No' /;
-                 );
-                 put /;
-                 put 'Device Number,';                           loop(most_devices_set, put most_devices_set.tl,',');            put /;
-                 put 'Renewable Capacity (MW),';                 loop(devices_ren, put Renewable_MW(devices_ren),',');           put /;
-                 put 'Renewable Penetration for Input (%), ',    Renewable_pen_input /;
-                 put 'interval length (hours), ',                interval_length /;
-                 put 'operating period length (hours), '         operating_period_length /;
-                 put 'additional look-ahead (hours), '           look_ahead_length /;
-                 put 'output capacity (MW), ',                   loop(devices, put output_capacity_MW(devices),',');             put /;
-                 put 'input capacity (MW), ',                    loop(devices, put input_capacity_MW(devices),',');              put /;
-                 put 'storage capacity (hours), ',               loop(devices, put storage_capacity_hours(devices),',');         put /;
-                 put 'input efficiency (%), ',                   loop(devices, put input_efficiency(devices),',');               put /;
-                 put 'output efficiency (%), ',                  loop(devices, put output_efficiency(devices),',');              put /;
-                 put 'input heat rate (MMBtu/MWh), ',            loop(devices, put input_heat_rate(devices),',');                put /;
-                 put 'ouptut heat rate (MMBtu/MWh), ',           loop(devices, put output_heat_rate(devices),',');               put /;
-                 put 'variable O&M cost, ',                      VOM_cost /;
-                 put 'regulation cost, ',                        reg_cost /;
-                 put 'hydrogen use, ',                           loop(devices, put H2_use(devices),',');                         put /;
-                 put /;
-                 put 'input' /;
-                 put 'LSL limit fraction, ',                     loop(devices, put input_LSL_fraction(devices),',');             put /;
-                 put 'reg up limit fraction, ',                  loop(devices, put input_regup_limit_fraction(devices),',');     put /;
-                 put 'reg down limit fraction, ',                loop(devices, put input_regdn_limit_fraction(devices),',');     put /;
-                 put 'spining reserve limit fraction, ',         loop(devices, put input_spinres_limit_fraction(devices),',');   put /;
-                 put 'startup cost ($/MW-start), ',              loop(devices, put input_startup_cost(devices),',');             put /;
-                 put 'minimum run intervals, '                   min_input_on_intervals /;
-                 put /;
-                 put 'output' /;
-                 put 'LSL limit fraction, ',                     loop(devices, put output_LSL_fraction(devices),',');            put /;
-                 put 'reg up limit fraction, ',                  loop(devices, put output_regup_limit_fraction(devices),',');    put /;
-                 put 'reg down limit fraction, ',                loop(devices, put output_regdn_limit_fraction(devices),',');    put /;
-                 put 'spining reserve limit fraction, ',         loop(devices, put output_spinres_limit_fraction(devices),',');  put /;
-                 put 'startup cost ($/MW-start), ',              loop(devices, put output_startup_cost(devices),',');            put /;
-                 put 'minimum run intervals, ',                  min_output_on_intervals /;
-                 put /;
-                 put 'actual operating profit ($), ',            sum(years,actual_operating_profit_yearly(years)) /;
-                 put 'total electricity input (MWh), ',          elec_in_MWh /;
-                 put 'total electricity output (MWh), ',         elec_output_MWh /;
-                 put 'output to input ratio, ',                  output_input_ratio /;
-                 put 'input capacity factor, ',                  input_capacity_factor /;
-                 put 'output capacity factor, ',                 output_capacity_factor /;
-                 put 'average regup (MW), ',                     loop(devices, put avg_regup_MW_vec(devices),',');               put /;
-                 put 'average regdn (MW), ',                     loop(devices, put avg_regdn_MW_vec(devices),',');               put /;
-                 put 'average spinres (MW), ',                   loop(devices, put avg_spinres_MW_vec(devices),',');             put /;
-                 put 'average nonspinres (MW), '                 loop(devices, put avg_nonspinres_MW_vec(devices),',');          put /;
-                 put 'number of input power system starts, ',    loop(devices, put num_input_starts_vec(devices),',');           put /;
-                 put 'number of output power system starts, ',   loop(devices, put num_output_starts_vec(devices),',');          put /;
-                 put 'arbitrage revenue ($),',                   loop(devices, put arbitrage_revenue_vec(devices),',');          put /;
-                 put 'regup revenue ($), ',                      loop(devices, put regup_revenue_vec(devices),',');              put /;
-                 put 'regdn revenue ($), ',                      loop(devices, put regdn_revenue_vec(devices),',');              put /;
-                 put 'spinres revenue ($), ',                    loop(devices, put spinres_revenue_vec(devices),',');            put /;
-                 put 'nonspinres revenue ($), ',                 loop(devices, put nonspinres_revenue_vec(devices),',');         put /;
-                 put 'hydrogen revenue ($), ',                   loop(devices, put H2_revenue_vec(devices),',');                 put /;
-                 put 'REC revenue ($), ',                        REC_revenue /;
-                 put 'LCFS revenue ($), ',                       LCFS_revenue /;
-                 put 'startup costs ($), ',                      loop(devices, put startup_costs_vec(devices),',');              put /;
-                 put 'Fixed demand charge ($), ',                Fixed_dem_charge_cost/;
-                 put 'Timed demand charge 1 ($), ',              Timed_dem_1_cost/;
-                 put 'Timed demand charge 2 ($), ',              Timed_dem_2_cost/;
-                 put 'Timed demand charge 3 ($), ',              Timed_dem_3_cost/;
-                 put 'Timed demand charge 4 ($), ',              Timed_dem_4_cost/;
-                 put 'Timed demand charge 5 ($), ',              Timed_dem_5_cost/;
-                 put 'Timed demand charge 6 ($), ',              Timed_dem_6_cost/;
-                 put 'Meter cost ($), ',                         Meter_cost/;
-                 put 'Renewable capital cost ($), ',             loop(devices_ren, put renew_cap_cost2_vec(devices_ren),',');    put /;
-                 put 'Input capital cost ($), ',                 loop(devices, put input_cap_cost2_vec(devices),',');            put /;
-                 put 'Output capital cost ($), ',                loop(devices, put output_cap_cost2_vec(devices),',');           put /;
-                 put 'Hydrogen storage cost ($), ',              loop(devices, put H2stor_cap_cost2_vec(devices),',');           put /;
-                 put 'Renewable FOM cost ($), ',                 loop(devices_ren, put renew_FOM_cost2_vec(devices_ren),',');    put /;
-                 put 'Input FOM cost ($), ',                     loop(devices, put input_FOM_cost2_vec(devices),',');            put /;
-                 put 'Output FOM cost ($), ',                    loop(devices, put output_FOM_cost2_vec(devices),',');           put /;
-                 put 'Renewable VOM cost ($), ',                 loop(devices_ren, put renew_VOM_cost2_vec(devices_ren),',');    put /;
-                 put 'Input VOM cost ($), ',                     input_VOM_cost2/;
-                 put 'Output VOM cost ($), ',                    output_VOM_cost2/;
-                 put 'Renewable sales ($), ',                    loop(devices_ren, put renewable_sales_vec(devices_ren),',');    put /;
-                 put 'Renewable Penetration net meter (%), ',    Renewable_pen_input_net /;
-                 put 'Curtailment (MWh), ',                      curtailment_sum /;
-                 put 'Storage revenue ($), ',                    loop(devices, put Storage_revenue_vec(devices),',');            put /;
-                 put 'Renewable only revenue ($), ',             Renewable_only_revenue /;
-                 put 'Renewable max revenue ($), ',              Renewable_max_revenue /;
-                 put 'Renewable Electricity Input (MWh), ',      Renewable_electricity_in /;
-                 put 'Input Electricity Import (MWh), ',         loop(devices, put Input_elec_import_vec(devices),',');         put /;
-                 put 'Integer device adjustment, ',              loop(devices, put CF_adjust.l(devices),',');                   put /;
-                 put /;
+         if (1=0,
+             if ( max_max_cap>100, results_file_devices.nd = 2; elseif max_max_cap>10, results_file_devices.nd = 4; elseif max_max_cap>0.1, results_file_devices.nd = 6; else results_file_devices.nd = 8;);
+             results_file_devices.pw = 20000;
+             put results_file_devices;
+                     put 'Interval,';
+                     loop(devices, put 'In Pwr ',ord(devices):0:0,' (MW),Out Pwr Sold',ord(devices):0:0,' (MW),Out Pwr Load',ord(devices):0:0,' (MW),Storage Lvl ',ord(devices):0:0,' (MW-h),H2 Out ',ord(devices):0:0,' (kg),Non-Ren In ',ord(devices):0:0,' (MW),');
+                     loop(devices_ren, put 'Ren In ',ord(devices_ren):0:0,' (MW),Ren Sold ',ord(devices_ren):0:0,' (MW),');
+                     put 'Curtailment (MW)' /;
+                     loop(interval, put      ord(interval),',';
+                                    loop(devices,     put input_power_MW.l(interval,devices),',',
+                                                          Output_power_sold(interval,devices),',',
+                                                          Output_power_load(interval,devices),',',
+                                                          storage_level_MWh_tot(interval,devices),',',
+                                                          H2_sold.l(interval,devices),',',
+                                                          input_power_MW_non_ren.l(interval,devices),',',);
+                                    loop(devices_ren, put Renewable_power(interval,devices_ren),',',
+                                                          renewable_power_MW_sold.l(interval,devices_ren),',');
+                                    put curtailment(interval);
+                                    put /;
+                     );
+    
+             if ( max_max_cap>100, summary_file_devices.nd = 2; else summary_file_devices.nd = 4; );
+             summary_file_devices.pw = 20000;
+             put summary_file_devices;
+                     PUT 'Run on a %system.filesys% machine on %system.date% %system.time%.' /;
+                     put 'Optimal solution found within time limit:,',
+                     if ( optimal_solution_reached = 1,
+                             put 'Yes' /;
+                     else
+                             put 'No' /;
+                     );
+                     put /;
+                     put 'Device Number,';                           loop(most_devices_set, put most_devices_set.tl,',');            put /;
+                     put 'Renewable Capacity (MW),';                 loop(devices_ren, put Renewable_MW(devices_ren),',');           put /;
+                     put 'Renewable Penetration for Input (%), ',    Renewable_pen_input /;
+                     put 'interval length (hours), ',                interval_length /;
+                     put 'operating period length (hours), '         operating_period_length /;
+                     put 'additional look-ahead (hours), '           look_ahead_length /;
+                     put 'output capacity (MW), ',                   loop(devices, put output_capacity_MW(devices),',');             put /;
+                     put 'input capacity (MW), ',                    loop(devices, put input_capacity_MW(devices),',');              put /;
+                     put 'storage capacity (hours), ',               loop(devices, put storage_capacity_hours(devices),',');         put /;
+                     put 'input efficiency (%), ',                   loop(devices, put input_efficiency(devices),',');               put /;
+                     put 'output efficiency (%), ',                  loop(devices, put output_efficiency(devices),',');              put /;
+                     put 'input heat rate (MMBtu/MWh), ',            loop(devices, put input_heat_rate(devices),',');                put /;
+                     put 'ouptut heat rate (MMBtu/MWh), ',           loop(devices, put output_heat_rate(devices),',');               put /;
+                     put 'variable O&M cost, ',                      VOM_cost /;
+                     put 'regulation cost, ',                        reg_cost /;
+                     put 'hydrogen use, ',                           loop(devices, put H2_use(devices),',');                         put /;
+                     put /;
+                     put 'input' /;
+                     put 'LSL limit fraction, ',                     loop(devices, put input_LSL_fraction(devices),',');             put /;
+                     put 'reg up limit fraction, ',                  loop(devices, put input_regup_limit_fraction(devices),',');     put /;
+                     put 'reg down limit fraction, ',                loop(devices, put input_regdn_limit_fraction(devices),',');     put /;
+                     put 'spining reserve limit fraction, ',         loop(devices, put input_spinres_limit_fraction(devices),',');   put /;
+                     put 'startup cost ($/MW-start), ',              loop(devices, put input_startup_cost(devices),',');             put /;
+                     put 'minimum run intervals, '                   min_input_on_intervals /;
+                     put /;
+                     put 'output' /;
+                     put 'LSL limit fraction, ',                     loop(devices, put output_LSL_fraction(devices),',');            put /;
+                     put 'reg up limit fraction, ',                  loop(devices, put output_regup_limit_fraction(devices),',');    put /;
+                     put 'reg down limit fraction, ',                loop(devices, put output_regdn_limit_fraction(devices),',');    put /;
+                     put 'spining reserve limit fraction, ',         loop(devices, put output_spinres_limit_fraction(devices),',');  put /;
+                     put 'startup cost ($/MW-start), ',              loop(devices, put output_startup_cost(devices),',');            put /;
+                     put 'minimum run intervals, ',                  min_output_on_intervals /;
+                     put /;
+                     put 'actual operating profit ($), ',            sum(years,actual_operating_profit_yearly(years)) /;
+                     put 'total electricity input (MWh), ',          elec_in_MWh /;
+                     put 'total electricity output (MWh), ',         elec_output_MWh /;
+                     put 'output to input ratio, ',                  output_input_ratio /;
+                     put 'input capacity factor, ',                  input_capacity_factor /;
+                     put 'output capacity factor, ',                 output_capacity_factor /;
+                     put 'average regup (MW), ',                     loop(devices, put avg_regup_MW_vec(devices),',');               put /;
+                     put 'average regdn (MW), ',                     loop(devices, put avg_regdn_MW_vec(devices),',');               put /;
+                     put 'average spinres (MW), ',                   loop(devices, put avg_spinres_MW_vec(devices),',');             put /;
+                     put 'average nonspinres (MW), '                 loop(devices, put avg_nonspinres_MW_vec(devices),',');          put /;
+                     put 'number of input power system starts, ',    loop(devices, put num_input_starts_vec(devices),',');           put /;
+                     put 'number of output power system starts, ',   loop(devices, put num_output_starts_vec(devices),',');          put /;
+                     put 'arbitrage revenue ($),',                   loop(devices, put arbitrage_revenue_vec(devices),',');          put /;
+                     put 'regup revenue ($), ',                      loop(devices, put regup_revenue_vec(devices),',');              put /;
+                     put 'regdn revenue ($), ',                      loop(devices, put regdn_revenue_vec(devices),',');              put /;
+                     put 'spinres revenue ($), ',                    loop(devices, put spinres_revenue_vec(devices),',');            put /;
+                     put 'nonspinres revenue ($), ',                 loop(devices, put nonspinres_revenue_vec(devices),',');         put /;
+                     put 'hydrogen revenue ($), ',                   loop(devices, put H2_revenue_vec(devices),',');                 put /;
+                     put 'REC revenue ($), ',                        REC_revenue /;
+                     put 'LCFS revenue ($), ',                       LCFS_revenue /;
+                     put 'startup costs ($), ',                      loop(devices, put startup_costs_vec(devices),',');              put /;
+                     put 'Fixed demand charge ($), ',                Fixed_dem_charge_cost/;
+                     put 'Timed demand charge 1 ($), ',              Timed_dem_1_cost/;
+                     put 'Timed demand charge 2 ($), ',              Timed_dem_2_cost/;
+                     put 'Timed demand charge 3 ($), ',              Timed_dem_3_cost/;
+                     put 'Timed demand charge 4 ($), ',              Timed_dem_4_cost/;
+                     put 'Timed demand charge 5 ($), ',              Timed_dem_5_cost/;
+                     put 'Timed demand charge 6 ($), ',              Timed_dem_6_cost/;
+                     put 'Meter cost ($), ',                         Meter_cost/;
+                     put 'Renewable capital cost ($), ',             loop(devices_ren, put renew_cap_cost2_vec(devices_ren),',');    put /;
+                     put 'Input capital cost ($), ',                 loop(devices, put input_cap_cost2_vec(devices),',');            put /;
+                     put 'Output capital cost ($), ',                loop(devices, put output_cap_cost2_vec(devices),',');           put /;
+                     put 'Hydrogen storage cost ($), ',              loop(devices, put H2stor_cap_cost2_vec(devices),',');           put /;
+                     put 'Renewable FOM cost ($), ',                 loop(devices_ren, put renew_FOM_cost2_vec(devices_ren),',');    put /;
+                     put 'Input FOM cost ($), ',                     loop(devices, put input_FOM_cost2_vec(devices),',');            put /;
+                     put 'Output FOM cost ($), ',                    loop(devices, put output_FOM_cost2_vec(devices),',');           put /;
+                     put 'Renewable VOM cost ($), ',                 loop(devices_ren, put renew_VOM_cost2_vec(devices_ren),',');    put /;
+                     put 'Input VOM cost ($), ',                     input_VOM_cost2/;
+                     put 'Output VOM cost ($), ',                    output_VOM_cost2/;
+                     put 'Renewable sales ($), ',                    loop(devices_ren, put renewable_sales_vec(devices_ren),',');    put /;
+                     put 'Renewable Penetration net meter (%), ',    Renewable_pen_input_net /;
+                     put 'Curtailment (MWh), ',                      curtailment_sum /;
+                     put 'Storage revenue ($), ',                    loop(devices, put Storage_revenue_vec(devices),',');            put /;
+                     put 'Renewable only revenue ($), ',             Renewable_only_revenue /;
+                     put 'Renewable max revenue ($), ',              Renewable_max_revenue /;
+                     put 'Renewable Electricity Input (MWh), ',      Renewable_electricity_in /;
+                     put 'Input Electricity Import (MWh), ',         loop(devices, put Input_elec_import_vec(devices),',');         put /;
+                     put 'Integer device adjustment, ',              loop(devices, put CF_adjust.l(devices),',');                   put /;
+                     put /;
+        );
 *$offtext
 
          if (next_interval>1,

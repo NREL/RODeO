@@ -1,0 +1,316 @@
+--- Job Storage_dispatch_v22_1.gms Start 11/25/19 15:22:18 27.3.0 r58c491d WEX-WEI x86 64bit/MS Windows
+--- GAMS Parameters defined
+    Input C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+    PageSize 0
+    ScrDir C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225a\
+    SysDir C:\GAMS\win64\27.3\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+GAMS 27.3.0   Copyright (C) 1987-2019 GAMS Development. All rights reserved
+Licensee: Large MUD - 20 User License                    G180911:1426CO-GEN
+          National Renewable Energy Laboratory (NREL), Strategic EnerDC3485
+          License Admin: Kelly Eurek, kelly.eurek@nrel.gov                 
+--- Starting compilation
+--- Storage_dispatch_v22_1.gms(60) 2 Mb
+--- call if not exist Projects\flex_bldg_load\Output\nul mkdir Projects\flex_bldg_load\Output
+--- Storage_dispatch_v22_1.gms(409) 4 Mb
+--- . Projects\flex_bldg_load\Data_files\TXT_files\Tariff_files\5a3430585457a3e3595c48a2_hourly.txt(51505) 5 Mb
+--- . Projects\flex_bldg_load\Data_files\TXT_files\Tariff_files\5a3430585457a3e3595c48a2_hourly.txt(52691) 5 Mb
+--- Storage_dispatch_v22_1.gms(499) 5 Mb
+--- . Projects\flex_bldg_load\Data_files\TXT_files\Devices_parameters_empty.csv(37) 5 Mb
+--- Storage_dispatch_v22_1.gms(504) 5 Mb
+--- . Projects\flex_bldg_load\Data_files\TXT_files\Devices_ren_parameters_empty.csv(7) 5 Mb
+--- Storage_dispatch_v22_1.gms(566) 5 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Energy_purchase_prices_Wholesale_MWh_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Energy_purchase_prices_Wholesale_MWh_hourly.gdx ID=elec_purchase_price_interim UseHeader=y In
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(568) 5 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Energy_purchase_prices_Wholesale_MWh_hourly.gdx
+--- Storage_dispatch_v22_1.gms(572) 5 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Energy_sale_prices_Wholesale_MWh_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Energy_sale_prices_Wholesale_MWh_hourly.gdx ID=elec_sale_price_interim UseHeader=y Index=1 Values
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(573) 5 Mb
+--- Storage_dispatch_v22_1.gms(574) 5 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Energy_sale_prices_Wholesale_MWh_hourly.gdx
+--- Storage_dispatch_v22_1.gms(578) 6 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\H2_price_Price1_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\H2_price_Price1_hourly.gdx ID=H2_price2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 63ms
+--- Storage_dispatch_v22_1.gms(580) 6 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\H2_price_Price1_hourly.gdx
+--- Storage_dispatch_v22_1.gms(584) 11 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\H2_consumption\H2_consumption_ones_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\H2_consumption\H2_consumption_ones_hourly.gdx ID=H2_consumed2 UseHeader=y Index=1 Values=(2..La
+No errors, CSV2GDX time = 47ms
+--- Storage_dispatch_v22_1.gms(585) 11 Mb
+--- Storage_dispatch_v22_1.gms(586) 11 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\H2_consumption\H2_consumption_ones_hourly.gdx
+--- Storage_dispatch_v22_1.gms(590) 17 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Input_power_baseload.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Input_power_baseload.gdx ID=input_power_baseload UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 15ms
+--- Storage_dispatch_v22_1.gms(592) 17 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Input_power_baseload.gdx
+--- Storage_dispatch_v22_1.gms(596) 18 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\NG_price_Price1_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\NG_price_Price1_hourly.gdx ID=NG_price UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(597) 18 Mb
+--- Storage_dispatch_v22_1.gms(598) 18 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\NG_price_Price1_hourly.gdx
+--- Storage_dispatch_v22_1.gms(602) 18 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Additional_load_none_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Additional_load_none_hourly.gdx ID=Load_profile UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(604) 18 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Additional_load_none_hourly.gdx
+--- Storage_dispatch_v22_1.gms(608) 18 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\renewable_profiles_PV_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\renewable_profiles_PV_hourly.gdx ID=renewable_signal2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 31ms
+--- Storage_dispatch_v22_1.gms(609) 18 Mb
+--- Storage_dispatch_v22_1.gms(610) 18 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\renewable_profiles_PV_hourly.gdx
+--- Storage_dispatch_v22_1.gms(614) 18 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\NSCR.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\NSCR.gdx ID=NSCR UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(616) 18 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\NSCR.gdx
+--- Storage_dispatch_v22_1.gms(621) 18 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Input_cap\Max_input_cap_ones_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Input_cap\Max_input_cap_ones_hourly.gdx ID=Max_input_cap2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 63ms
+--- Storage_dispatch_v22_1.gms(622) 18 Mb
+--- Storage_dispatch_v22_1.gms(623) 18 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Input_cap\Max_input_cap_ones_hourly.gdx
+--- Storage_dispatch_v22_1.gms(627) 24 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Output_cap\Max_output_cap_ones_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Output_cap\Max_output_cap_ones_hourly.gdx ID=Max_output_cap2 UseHeader=y Index=1 Values=(2..LastCol
+No errors, CSV2GDX time = 594ms
+--- Storage_dispatch_v22_1.gms(628) 24 Mb
+--- Storage_dispatch_v22_1.gms(629) 24 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Output_cap\Max_output_cap_ones_hourly.gdx
+--- Storage_dispatch_v22_1.gms(630) 66 Mb
+--- Storage_dispatch_v22_1.gms(634) 80 Mb
+
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx ID=regup_price_interim UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 15ms
+--- Storage_dispatch_v22_1.gms(636) 80 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx
+--- Storage_dispatch_v22_1.gms(640) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx ID=regdn_price_interim UseHeader=y Index=1 Values=3
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(641) 81 Mb
+--- Storage_dispatch_v22_1.gms(642) 81 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx
+--- Storage_dispatch_v22_1.gms(646) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx ID=spinres_price_interim UseHeader=y Index=1 Values=4
+No errors, CSV2GDX time = 15ms
+--- Storage_dispatch_v22_1.gms(648) 81 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx
+--- Storage_dispatch_v22_1.gms(652) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx ID=nonspinres_price_interim UseHeader=y Index=1 Values=5
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(653) 81 Mb
+--- Storage_dispatch_v22_1.gms(654) 81 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx
+--- Storage_dispatch_v22_1.gms(662) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Compressors_cost.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Compressors_cost.gdx ID=H2comp_cap_cost_s UseHeader=y Index=1 Values=3
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(664) 81 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Compressors_cost.gdx
+--- Storage_dispatch_v22_1.gms(668) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\Compressors_cost.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\Compressors_cost.gdx ID=input_sizes UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(670) 81 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\Compressors_cost.gdx
+--- Storage_dispatch_v22_1.gms(685) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\MACRS_depreciation_schedule.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\MACRS_depreciation_schedule.gdx ID=depreciation_schedule UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(686) 81 Mb
+--- Storage_dispatch_v22_1.gms(687) 81 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\MACRS_depreciation_schedule.gdx
+--- Storage_dispatch_v22_1.gms(740) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx ID=current_interval2 UseHeader=y Values=1
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(742) 81 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(746) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx ID=next_interval2 UseHeader=y Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(748) 81 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(752) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx ID=current_storage_lvl2 UseHeader=y Values=3
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(753) 81 Mb
+--- Storage_dispatch_v22_1.gms(754) 81 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(758) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx ID=current_monthly_max2 UseHeader=y Values=4
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(760) 81 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(764) 81 Mb
+--- call CSV2GDX Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.csv Output=Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx ID=max_interval2 UseHeader=y Values=5
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(766) 81 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(780) 81 Mb
+--- call rm -rf Projects\flex_bldg_load\Data_files\TXT_files\*.gdx
+--- Storage_dispatch_v22_1.gms(781) 81 Mb
+--- call rm -rf Projects\flex_bldg_load\Data_files\TXT_files\H2_consumption\*.gdx
+--- Storage_dispatch_v22_1.gms(782) 81 Mb
+--- call rm -rf Projects\flex_bldg_load\Data_files\TXT_files\Input_cap\*.gdx
+--- Storage_dispatch_v22_1.gms(783) 81 Mb
+--- call rm -rf Projects\flex_bldg_load\Data_files\TXT_files\Output_cap\*.gdx
+--- Storage_dispatch_v22_1.gms(784) 81 Mb
+--- Storage_dispatch_v22_1.gms(2926) 82 Mb
+
+--- Starting execution: elapsed 0:00:03.823
+--- Storage_dispatch_v22_1.gms(54404) 109 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54030) 124 Mb
+--- Storage_dispatch_v22_1.gms(54054) 128 Mb
+--- Storage_dispatch_v22_1.gms(54214) 153 Mb
+--- Storage_dispatch_v22_1.gms(54233) 157 Mb
+--- Storage_dispatch_v22_1.gms(54045) 174 Mb
+--- Storage_dispatch_v22_1.gms(54016) 182 Mb
+--- Storage_dispatch_v22_1.gms(54638) 184 Mb
+--- Storage_dispatch_v22_1.gms(54638) 186 Mb
+
+--- LOOPS FOR/WHILE = 1
+---   289,189 rows  289,187 columns  884,389 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:00:05.177
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.83 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 0
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225a\"
+Tried aggregator 1 time.
+MIP Presolve eliminated 289113 rows and 306662 columns.
+MIP Presolve modified 51 coefficients.
+Reduced MIP has 76 rows, 45 columns, and 251 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 3.94 sec. (1976.77 ticks)
+Found incumbent of value 5.9370608e+07 after 4.05 sec. (2017.75 ticks)
+Probing fixed 14 vars, tightened 46 bounds.
+Probing time = 0.00 sec. (0.04 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 75 rows and 44 columns.
+MIP Presolve modified 44 coefficients.
+Aggregator did 1 substitutions.
+All rows and columns eliminated.
+Presolve time = 0.00 sec. (0.08 ticks)
+
+Root node processing (before b&c):
+  Real time             =    4.13 sec. (2035.74 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    4.13 sec. (2035.74 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 4.14sec (det. 2036.62 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225a\"
+Tried aggregator 1 time.
+LP Presolve eliminated 271628 rows and 289158 columns.
+Aggregator did 17521 substitutions.
+Reduced LP has 40 rows, 28 columns, and 118 nonzeros.
+Presolve time = 2.00 sec. (1285.54 ticks)
+Parallel mode: none, using 1 thread for barrier
+Number of nonzeros in lower triangle of A*A' = 780
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (0.02 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 40
+  Integer space required    = 40
+  Total non-zeros in factor = 820
+  Total FP ops to factor    = 22140
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   2.6635751e+08   4.6547805e+09  1.99e+05  5.62e+07  2.83e+02  1.00e+00
+   1   1.7161391e+08   6.5036031e+08  5.35e+04  1.51e+07  3.22e+01  2.59e-06
+   2   6.7150097e+07   1.2214649e+08  2.99e+03  8.46e+05  3.41e+00  7.68e-07
+   3   6.1160017e+07   6.1219947e+07  2.90e+00  8.19e+02  3.61e-03  5.50e-03
+   4   6.1156625e+07   6.1157118e+07  3.47e-04  7.93e-02  2.82e-05  6.66e-01
+   5   6.1156825e+07   6.1156825e+07  1.75e-05  9.72e-06  3.18e-09  9.99e+02
+   6   6.1156825e+07   6.1156825e+07  2.50e-07  4.45e-10  2.58e-12  7.03e+06
+Barrier time = 0.02 sec. (0.37 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 13 variables.
+       12 DMoves:  Infeasibility  0.00000000e+00  Objective  6.11568248e+07
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  6.11568248e+07
+  Dual:  Pushed 13, exchanged 0.
+Using devex.
+Total crossover time = 0.31 sec. (176.98 ticks)
+
+Total time on 1 threads = 2.48 sec. (1581.73 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 2.48sec (det. 1581.73 ticks)
+
+Proven optimal solution.
+
+MIP Solution:     61156824.834947    (0 iterations, 0 nodes)
+Final Solve:      61156824.834947    (0 iterations)
+
+Best possible:    61156824.834947
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54638) 118 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54638) 139 Mb
+--- Executing after solve: elapsed 0:00:13.461
+--- Storage_dispatch_v22_1.gms(55004) 140 Mb
+--- Storage_dispatch_v22_1.gms(55058) 140 Mb
+--- Storage_dispatch_v22_1.gms(55148) 140 Mb
+--- Storage_dispatch_v22_1.gms(55191) 140 Mb
+--- Storage_dispatch_v22_1.gms(55217) 141 Mb
+
+*** Open Error for PUTFILE RC=13 FN=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Output\Storage_dispatch_results_Test_flex_bldg_load_1.csv
+*** Msg=Permission denied
+*** New file name used is C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\gams3.put
+--- Putfile input_echo_file C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Output\Storage_dispatch_inputs_Test_flex_bldg_load_1.csv
+--- Putfile results_file C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\gams3.put
+--- Putfile summary_file C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\flex_bldg_load\Output\Storage_dispatch_summary_Test_flex_bldg_load_1.csv
+*** Status: Normal completion
+--- Job Storage_dispatch_v22_1.gms Stop 11/25/19 15:22:33 elapsed 0:00:14.146
