@@ -38,7 +38,7 @@ $if not set NEM_nscr               $set NEM_nscr            0
 *===============================================================================
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
- "Create flex_bldg_load branch and begin adjusting"
+
 $if not set elec_rate_instance          $set elec_rate_instance             5a3430585457a3e3595c48a2_hourly
 $if not set H2_price_prof_instance      $set H2_price_prof_instance         H2_price_Price1_hourly
 $if not set H2_consumed_instance        $set H2_consumed_instance           H2_consumption_blank_hourly
@@ -63,29 +63,29 @@ $if not set gas_price_instance     $set gas_price_instance     NA
 $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
-$if not set file_name_instance     $set file_name_instance     "Test18_Cerone_60kW_NoBreaks_immediate_v1"
-$if not set devices_instance       $set devices_instance       30
+$if not set file_name_instance     $set file_name_instance     "Test_solar-storage_1"
+$if not set devices_instance       $set devices_instance       1
 ***$if not set fix_active_devices     $set fix_active_devices     1
 $if not set use_alt_devices        $set use_alt_devices        0
-$if not set use_all_devices        $set use_all_devices        0
-$if not set use_smart_charging     $set use_smart_charging     0
-$if not set soft_cons_device_inst  $set soft_cons_device_inst  1
+$if not set use_all_devices        $set use_all_devices        1
+$if not set use_smart_charging     $set use_smart_charging     1
+$if not set soft_cons_device_inst  $set soft_cons_device_inst  0
 ***$if not set device_num_inst        $set device_num_inst        3
 ***$if not set calc_charger_num_inst  $set calc_charger_num_inst  1
 $if not set devices_ren_instance   $set devices_ren_instance   1
-$if not set val_from_batch_inst    $set val_from_batch_inst    1
-$if not set input_cap_instance     $set input_cap_instance     0.5
-$if not set output_cap_instance    $set output_cap_instance    0.5
+$if not set val_from_batch_inst    $set val_from_batch_inst    2
+$if not set input_cap_instance     $set input_cap_instance     1
+$if not set output_cap_instance    $set output_cap_instance    1
 
 * Set the limiting price (must be less than infinity)
 $if not set price_cap_instance     $set price_cap_instance     10000
 
-$if not set max_output_cap_inst    $set max_output_cap_inst    Inf
+$if not set max_output_cap_inst    $set max_output_cap_inst    1.2
 * "max_input_cap_inst" must be greater than load profile otherwise infeasibilities occur
-$if not set max_input_cap_inst     $set max_input_cap_inst     Inf
+$if not set max_input_cap_inst     $set max_input_cap_inst     1.2
 $if not set allow_import_instance  $set allow_import_instance  1
 * by default allow_sales_instance should be 1; however, when it is 0, sales variables should be prohibited
-$if not set allow_sales_instance   $set allow_sales_instance   0
+$if not set allow_sales_instance   $set allow_sales_instance   1
 
 $if not set input_LSL_instance     $set input_LSL_instance     0
 $if not set output_LSL_instance    $set output_LSL_instance    0
@@ -97,17 +97,19 @@ $if not set output_efficiency_inst $set output_efficiency_inst 0.92
 
 $if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1111000
 $if not set input_cap_cost_inst    $set input_cap_cost_inst    16466666.67
-$if not set input_cap_alt_cst_inst $set input_cap_alt_cst_inst 11666666.67
+$if not set input_cap_alt_cst_inst $set input_cap_alt_cst_inst 0
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
 $if not set H2stor_cap_cost_inst   $set H2stor_cap_cost_inst   0
 $if not set H2comp_cap_cost_inst   $set H2comp_cap_cost_inst   0
 $if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    20000
 $if not set input_FOM_cost_inst    $set input_FOM_cost_inst    206338.8314
-$if not set input_FOM_alt_cst_inst $set input_FOM_alt_cst_inst 551461.6535
+$if not set input_FOM_alt_cst_inst $set input_FOM_alt_cst_inst 0
 $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
 $if not set renew_VOM_cost_inst    $set renew_VOM_cost_inst    0
 $if not set input_VOM_cost_inst    $set input_VOM_cost_inst    0
 $if not set output_VOM_cost_inst   $set output_VOM_cost_inst   0
+
+* Lifetime and interest rate not used in updated representation (uses WACC and "years" for lifetime)
 $if not set renew_lifetime_inst    $set renew_lifetime_inst    15
 $if not set input_lifetime_inst    $set input_lifetime_inst    15
 $if not set output_lifetime_inst   $set output_lifetime_inst   15
@@ -117,9 +119,10 @@ $if not set interest_rate_inst     $set interest_rate_inst     0.07
 $if not set renew_interest_inst    $set renew_interest_inst    0.07
 $if not set H2stor_interest_inst   $set H2stor_interest_inst   0.07
 $if not set H2comp_interest_inst   $set H2comp_interest_inst   0.07
+
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   5.833333333
+$if not set storage_cap_instance   $set storage_cap_instance   4
 $if not set storage_set_instance   $set storage_set_instance   1
 $if not set storage_init_instance  $set storage_init_instance  0.5
 $if not set storage_final_instance $set storage_final_instance 0.5
@@ -135,27 +138,27 @@ $if not set ror_instance           $set ror_instance           0.0489
 $if not set roe_instance           $set roe_instance           0.104
 $if not set debt_interest_instance $set debt_interest_instance 0.0481
 * combined federal and local taxes
-$if not set cftr_instance          $set cftr_instance          0
+$if not set cftr_instance          $set cftr_instance          0.2795
 $if not set bonus_deprec_instance  $set bonus_deprec_instance  0.5
 * Next two values change the resoultion of the optimization
-*    hourly: 8760, 1     15min: 35040, 0.25       5min: 105120, 0.08333333333
+*    hourly: 8760, 1     15min: 35040, 0.25       5min: 105120, 0.08333333333       1min: 525600, 0.01666666666
 $if not set op_length_instance     $set op_length_instance     8760
 $if not set op_period_instance     $set op_period_instance     8760
 $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0.211138306
+$if not set H2_consume_adj_inst    $set H2_consume_adj_inst    0
 $if not set H2_price_instance      $set H2_price_instance      0
 $if not set H2_use_instance        $set H2_use_instance        0
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
-$if not set Renewable_MW_instance  $set Renewable_MW_instance  0.849
-$if not set REC_price_inst         $set REC_price_inst         12
+$if not set Renewable_MW_instance  $set Renewable_MW_instance  1
+$if not set REC_price_inst         $set REC_price_inst         0
 
 $if not set CF_opt_instance        $set CF_opt_instance        0
 * Select to run retail or wholesale analysis (0=wholesale, 1=retail, 2=hybrid (retail for purchase and wholesale for sale))
-$if not set run_retail_instance    $set run_retail_instance    1
+$if not set run_retail_instance    $set run_retail_instance    0
 $if not set NBC_instance           $set NBC_instance           19.19
 $if not set one_active_device_inst $set one_active_device_inst 1
 $if not set ITC_inst               $set ITC_inst               0
@@ -173,7 +176,7 @@ $if not set H2_EneDens_inst        $set H2_EneDens_inst        120
 $if not set EER_inst               $set EER_inst               4.2
 $if not set Grid_CarbInt_inst      $set Grid_CarbInt_inst      81.49
 $if not set CI_base_line_inst      $set CI_base_line_inst      91.81
-$if not set LCFS_price_inst        $set LCFS_price_inst        180
+$if not set LCFS_price_inst        $set LCFS_price_inst        0
 
 
 *        energy_only_instance = 0, 1 (1 = Energy only operation, 0 = All ancillary services included)
@@ -560,10 +563,16 @@ elseif %use_all_devices%=1,
 );
 
 * Load csv files for wholesale electricity price analysis (energy and AS)
-$call CSV2GDX %indir%\%energy_price_inst%.csv Output=%indir%\%energy_price_inst%.gdx ID=elec_purchase_price_interim UseHeader=y Index=1 Values=2
-parameter elec_purchase_price_interim(interval)   "electricity price in each interval ($/MWh)"
-$GDXIN %indir%\%energy_price_inst%.gdx
+$call CSV2GDX %indir%\%energy_purchase_price_inst%.csv Output=%indir%\%energy_purchase_price_inst%.gdx ID=elec_purchase_price_interim UseHeader=y Index=1 Values=2
+parameter elec_purchase_price_interim(interval)   "electricity purchase price in each interval ($/MWh)"
+$GDXIN %indir%\%energy_purchase_price_inst%.gdx
 $LOAD elec_purchase_price_interim
+$GDXIN
+;
+$call CSV2GDX %indir%\%energy_sale_price_inst%.csv Output=%indir%\%energy_sale_price_inst%.gdx ID=elec_sale_price_interim UseHeader=y Index=1 Values=2
+parameter elec_sale_price_interim(interval)   "electricity sale price in each interval ($/MWh)"
+$GDXIN %indir%\%energy_sale_price_inst%.gdx
+$LOAD elec_sale_price_interim
 $GDXIN
 ;
 $call CSV2GDX %indir%\%H2_price_prof_instance%.csv Output=%indir%\%H2_price_prof_instance%.gdx ID=H2_price2 UseHeader=y Index=1 Values=(2..LastCol)
@@ -703,8 +712,8 @@ Parameter   H2_price_init(interval,devices) ;
 H2_price_init(interval,devices) =  H2_price(interval,devices) ;
 
 if (run_retail=0,
-         elec_sale_price(interval)     = elec_purchase_price_interim(interval);
-         elec_purchase_price(interval) = elec_purchase_price(interval);
+         elec_purchase_price(interval) = elec_purchase_price_interim(interval);
+         elec_sale_price(interval)     = elec_sale_price_interim(interval);
          regup_price(interval)         = regup_price_interim(interval);
          regdn_price(interval)         = regdn_price_interim(interval);
          spinres_price(interval)       = spinres_price_interim(interval);
@@ -714,16 +723,17 @@ if (run_retail=0,
          Timed_dem(timed_dem_period)   = Timed_dem(timed_dem_period) * 0;
          TOU_energy_prices(TOU_energy_period) = TOU_energy_prices(TOU_energy_period) * 0;
 elseif run_retail=2,
-         elec_sale_price(interval)     = elec_purchase_price_interim(interval);
+         elec_sale_price(interval)     = elec_sale_price_interim(interval);
          regup_price(interval)         = regup_price_interim(interval);
          regdn_price(interval)         = regdn_price_interim(interval);
          spinres_price(interval)       = spinres_price_interim(interval);
          nonspinres_price(interval)    = nonspinres_price_interim(interval);
 elseif (run_retail=1 and %NEM_nscr%=1),
          REC_price                     = 0;
-         elec_sale_price(interval)     = elec_purchase_price_interim(interval);
+         elec_sale_price(interval)     = elec_sale_price_interim(interval);
 elseif run_retail=1,
          REC_price                     = 0;
+         elec_sale_price(interval)     = elec_sale_price_interim(interval);
 );
 
 * Loads predictive controller values from excel file
@@ -1267,8 +1277,11 @@ lin5(months,TOU_energy_period)$(%NEM_nscr%=1)..
                  sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),interval_length*(sum(devices_ren,renewable_power_MW_sold(interval,devices_ren))+sum(devices,output_power_MW(interval,devices))-Import_elec_profile(interval)))
                  =l= big_M*esurplus_active(months,TOU_energy_period);
 
+* Max system power only includes electricity sold.
 system_power_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
-         sum(devices, output_power_MW(interval,devices)) + sum(devices_ren, renewable_power_MW_sold(interval,devices_ren)) =l= max_sys_output_cap;
+         sum(devices, output_power_MW_non_ren_sold(interval,devices) +
+                      output_power_MW_ren_sold(interval,devices))
+       + sum(devices_ren, renewable_power_MW_sold(interval,devices_ren)) =l= max_sys_output_cap;
 
 system_power_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          Import_elec_profile(interval) =l= max_sys_input_cap;
@@ -1418,7 +1431,7 @@ Dec_6_eqn(Dec_6)$( rolling_window_min_index <= ord(Dec_6) and ord(Dec_6) <= roll
 *************************
 
 input_capacity_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
-         Import_elec_profile(interval) =e= sum(devices,input_power_MW_non_ren(interval,devices) - output_power_MW_ren_load(interval,devices) - output_power_MW_non_ren_load(interval,devices)) + Load_profile_non_ren(interval);
+         Import_elec_profile(interval) =e= sum(devices,input_power_MW_non_ren(interval,devices) - output_power_MW_non_ren_load(interval,devices)) + Load_profile_non_ren(interval);
 *** Made a fixed value at the bottom instead of an equation
 ***input_capacity_limit_eqn3(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and allow_import=0)..
 ***         Import_elec_profile(interval) =e= 0;
@@ -1600,7 +1613,7 @@ number_of_solves = ceil( card(interval) / operating_period_length );
 *set optcr so that (best feasible - best possible) / (best feasible + 1e-10) < optcr
 * default is 0.1 = 10%, which seems too big
 * 0.01 = 1%
-option optcr=0.001;
+option optcr=0.0001;
 
 *give initial values to all of the variables
 output_power_MW.l(interval,devices)      = 0;
@@ -2434,6 +2447,10 @@ display CF_adjust.l;
 ***display active_interval_devices;
 display num_elec_devices;
 display num_non_elec_devices;
+display active_devices;
+display renewable_power_MW_sold.l;
+display Load_profile_ren.l;
+display Load_profile_non_ren.l;
 );
 
 
