@@ -17,6 +17,14 @@ To run as storage device set values for input and output as desired
 To run as baseload DR device setup same as for DR device and set base_op_instance=1
 When loading files with multiple devices, each column header entry must match the device number
 
+ToDo:
+Determine the resoultion (1 min)
+Detemrine the input range (e.g., exactly a 24 hour rolling window)
+    Solar forecast are released every hour for an entire day
+Create file of optimized storage setpoint
+Create file to keep track of predicted and actual values
+
+
 $OffText
 *===============================================================================
 * This toggle switches an iteration mode which updates the hydrogen break-even cost
@@ -30,24 +38,25 @@ $if not set NEM_nscr               $set NEM_nscr            0
 *===============================================================================
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
-
-$if not set elec_rate_instance     $set elec_rate_instance     5a3430585457a3e3595c48a2_hourly
-$if not set H2_price_prof_instance $set H2_price_prof_instance H2_price_Price1_200_hourly
-$if not set H2_consumed_instance   $set H2_consumed_instance   H2_consumption_Cerone_NoBreaks_hourly
-$if not set baseload_pwr_instance  $set baseload_pwr_instance  Input_power_baseload
-$if not set NG_price_instance      $set NG_price_instance      NG_price_Price1
-$if not set ren_prof_instance      $set ren_prof_instance      renewable_profiles_PV_hourly
-$if not set NSCR_instance          $set NSCR_instance          NSCR
-$if not set MACRS_instance         $set MACRS_instance         MACRS_depreciation_schedule
-$if not set load_prof_instance     $set load_prof_instance     Additional_load_Cerone_hourly
-$if not set energy_price_inst      $set energy_price_inst      Energy_prices_Wholesale_MWh_hourly
-$if not set AS_price_inst          $set AS_price_inst          Ancillary_services_PGE2017_SPNP_hourly
-$if not set Max_input_prof_inst    $set Max_input_prof_inst    Max_input_cap_Cerone_NoBreaks_hourly
-$if not set Max_output_prof_inst   $set Max_output_prof_inst   Max_output_cap_ones_hourly
-$if not set Device_parameters_inst $set Device_parameters_inst Devices_parameters_Cerone_60kW
-$if not set Device_ren_params_inst $set Device_ren_params_inst Devices_ren_parameters_Cerone_x1
-$if not set outdir                 $set outdir                 Projects\VTA_bus_project2\Output
-$if not set indir                  $set indir                  Projects\VTA_bus_project2\Data_files\TXT_files
+ "Create flex_bldg_load branch and begin adjusting"
+$if not set elec_rate_instance          $set elec_rate_instance             5a3430585457a3e3595c48a2_hourly
+$if not set H2_price_prof_instance      $set H2_price_prof_instance         H2_price_Price1_hourly
+$if not set H2_consumed_instance        $set H2_consumed_instance           H2_consumption_blank_hourly
+$if not set baseload_pwr_instance       $set baseload_pwr_instance          Input_power_baseload
+$if not set NG_price_instance           $set NG_price_instance              NG_price_Price1_hourly
+$if not set ren_prof_instance           $set ren_prof_instance              renewable_profiles_PV_hourly
+$if not set NSCR_instance               $set NSCR_instance                  NSCR
+$if not set MACRS_instance              $set MACRS_instance                 MACRS_depreciation_schedule
+$if not set load_prof_instance          $set load_prof_instance             Additional_load_none_hourly
+$if not set energy_purchase_price_inst  $set energy_purchase_price_inst     Energy_purchase_prices_Wholesale_MWh_hourly
+$if not set energy_sale_price_inst      $set energy_sale_price_inst         Energy_sale_prices_Wholesale_MWh_hourly
+$if not set AS_price_inst               $set AS_price_inst                  Ancillary_services_none_hourly
+$if not set Max_input_prof_inst         $set Max_input_prof_inst            Max_input_cap_ones_hourly
+$if not set Max_output_prof_inst        $set Max_output_prof_inst           Max_output_cap_ones_hourly
+$if not set Device_parameters_inst      $set Device_parameters_inst         Devices_parameters_empty
+$if not set Device_ren_params_inst      $set Device_ren_params_inst         Devices_ren_parameters_empty
+$if not set outdir                      $set outdir                         Projects\Solar+Storage\Output
+$if not set indir                       $set indir                          Projects\Solar+Storage\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
