@@ -1,16 +1,16 @@
 B 3 C o m p i l a t i o n
-B 54243 Include File Summary
-B 54319 Model Statistics    SOLVE arbitrage_and_AS Using MIP From line 54638
-B 54340 Solution Report     SOLVE arbitrage_and_AS Using MIP From line 54638
-B 54390 E x e c u t i o n
-I 54390 H2_revenue_years
-I 54397 H2_sold_years
-I 54403 H2_price_NPV
-I 54404 H2_revenue_yearly2
-I 54410 H2_sold_yearly
-I 54415 H2_price_yearly
-I 54421 Total_H2_produced
-I 54422 CF_adjust
-I 54427 H2_sold_ren
-I 54432 H2_sold_non_ren
-I 63198 H2_consumed
+B 54230 Include File Summary
+B 54307 Model Statistics    SOLVE arbitrage_and_AS Using MIP From line 54625
+B 54328 Solution Report     SOLVE arbitrage_and_AS Using MIP From line 54625
+B 54377 E x e c u t i o n
+I 54377 product_revenue_years
+I 54384 product_sold_years
+I 54390 product_price_NPV
+I 54391 product_revenue_yearly2
+I 54397 product_sold_yearly
+I 54402 product_price_yearly
+I 54408 Total_product_sold
+I 54409 CF_incremental_change
+I 54414 product_sold_ren
+I 54419 product_sold_non_ren
+I 63185 product_consumed

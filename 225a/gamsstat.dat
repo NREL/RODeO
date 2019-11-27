@@ -1,0 +1,496 @@
+=1
+=0IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+=1
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+=2
+=1
+--- GAMS/Cplex licensed for continuous and discrete problems.
+=2
+=1
+Cplex 12.9.0.0
+
+=2
+ 
+ 
+--------------------------------------------------------------
+CONTROL FILE STATISTICS
+--------------------------------------------------------------
+Rows : 289190, columns : 306707, nonzeroes : 901911
+Free Rows          : 17520
+Iteration limit    : 1000000
+Resource  limit    : 8.640000e+04
+Objective variable : 289186
+Objective sense    : maximize
+Advanced basis     : no
+Binary variables   : 35055
+Integer variables  : 1
+SOS1 variables     : 0
+SOS2 variables     : 0
+SemiCont variables : 0
+SemiInt variables  : 0
+OPTCA : 0.000000e+00 , OPTCR : 1.000000e-04
+Priorities         : no
+Cheat              : n.a.
+Cutoff             : n.a.
+Node limit         : 0
+ 
+ 
+=1
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+=2
+=1
+>>  scaind 1
+=2
+=1
+>>  lpmethod 4
+=2
+=1
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+=2
+=1
+>>  baritlim 100000000
+=2
+=1
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+=2
+
+
+Option Values:
+----------------------------------------------------
+usebasis              0
+cutoff                0
+tryint                0
+domlim                0
+advind                0
+aggcutlim             3
+aggfill               10
+aggind                -1
+auxrootthreads        0
+baralg                0
+barcolnz              0
+barcrossalg           0
+bardisplay            1
+barepcomp             1e-08
+bargrowth             1e+12
+baritlim              100000000
+barmaxcor             -1
+barobjrng             1e+20
+barorder              0
+barqcpepcomp          1e-07
+barstartalg           1
+bbinterval            7
+bendersfeascuttol     1e-06
+bendersoptcuttol      1e-06
+.benderspartition     0
+benderspartitioninstage 0
+bendersstrategy       0
+bndstrenind           -1
+bqpcuts               0
+brdir                 0
+bttol                 0.9999
+calcqcpduals          1
+cliques               0
+clocktype             2
+clonelog              0
+coeredind             -1
+computeserver        
+covers                0
+cpumask               auto
+craind                1
+crossoveralg          default
+cutlo                 -1e+75
+cutpass               0
+cuts                  0
+cutsfactor            -1
+cutup                 1e+75
+datacheck             0
+depind                -1
+dettilim              1e+75
+disjcuts              0
+divetype              0
+divfltup              1e+299
+divfltlo              -1e+299
+.divflt               0
+dpriind               0
+dtprefix              bnd
+dtterm                1
+dumpcuts              0
+dumptree              0
+dumplp                0
+dynamicrows           -1
+eachcutlim            2100000000
+epagap                0
+epgap                 0.0001
+epint                 1e-05
+epmrk                 0.01
+epopt                 1e-06
+epper                 1e-06
+eprelax               1e-06
+eprhs                 1e-06
+feasopt               0
+feasoptmode           0
+.feaspref             1
+fixoptfile            
+flowcovers            0
+flowpaths             0
+flushfiles            0
+folding               -1
+fpheur                0
+fraccand              200
+fraccuts              0
+fracpass              0
+freegamsmodel         0
+gubcovers             0
+heurfreq              0
+iafile                
+iatriggerfile         
+iatriggertime         60
+iis                   0
+implbd                0
+interactive           0
+intsollim             2100000000
+itlim                 2100000000
+lbheur                0
+liftprojcuts          0
+lpalg                 default
+lpmethod              4
+ltol                  0
+mcfcuts               0
+memoryemphasis        0
+localimplied          0
+mipdisplay            4
+mipemphasis           0
+mipkappastats         -1
+mipinterval           0
+mipordind             1
+mipordtype            0
+mipsearch             0
+mipstart              0
+miptrace              
+miptracenode          100
+miptracetime          1
+miqcpstrat            0
+mircuts               0
+mpslongnum            1
+mtol                  0
+multobj               0
+multobjdisplay        1
+multobjmethod         0
+names                 1
+netdisplay            2
+netepopt              1e-06
+neteprhs              1e-06
+netfind               2
+netitlim              2100000000
+netppriind            0
+nodefileind           1
+nodelim               2100000000
+nodesel               1
+numericalemphasis     0
+objdif                0
+objllim               -1e+75
+objnabstol           
+objnreltol           
+objrng               
+objulim               1e+75
+parallelmode          1
+paramdisplay          1
+perind                0
+perlim                0
+polishtime            0
+polishafterepagap     0
+polishafterepgap      0
+polishafternode       2100000000
+polishafterintsol     2100000000
+polishaftertime       1e+75
+polishafterdettime    1e+75
+populatelim           20
+ppriind               0
+predual               0
+preind                1
+prelinear             1
+prepass               -1
+preslvnd              0
+pricelim              0
+printoptions          0
+probe                 0
+probetime             1e+75
+probedettime          1e+75
+probread              
+qpmakepsdind          1
+qpmethod              0
+qtolin                -1
+quality               0
+rampupdettimelimit    1e+75
+rampupduration        0
+rampuptimelimit       1e+75
+randomseed            0
+readflt               
+readparams            
+record                0
+reduce                3
+reinv                 0
+relaxfixedinfeas      0
+relaxpreind           -1
+relobjdif             0
+repairtries           0
+repeatpresolve        -1
+rerun                 yes
+rhsrng               
+rinsheur              0
+rngrestart            
+rtlcuts               0
+scaind                1
+secret               
+siftalg               0
+siftdisplay           1
+sifting               1
+siftitlim             2100000000
+simdisplay            1
+singlim               10
+solnpool              
+solnpoolmerge         
+solnpoolnumsym        10
+solnpoolagap          1e+75
+solnpoolcapacity      2100000000
+solnpoolgap           1e+75
+solnpoolintensity     0
+solnpoolpop           1
+solnpoolpopdel        
+solnpoolpoprepeat     
+solnpoolprefix        soln
+solnpoolreplace       0
+solutiontype          0
+optimalitytarget      0
+solvefinal            1
+startalg              0
+strongcandlim         10
+strongitlim           0
+subalg                0
+submipnodelim         500
+submipscale           0
+submipstartalg        0
+submipsubalg          0
+symmetry              -1
+threads               1
+tilim                 86400
+trelim                1e+75
+tuning               
+tuningdisplay         1
+tuningmeasure         1
+tuningrepeat          1
+tuningtilim           17280
+tuningdettilim        1e+07
+usercutcall           
+usercutfirst          10
+usercutfreq           10
+usercutinterval       100
+usercutmult           2
+usercutnewint         1
+usergdxin             bchin.gdx
+usergdxsol            bchsol.gdx
+usergdxname           bchout.gdx
+usergdxnameinc        bchout_i.gdx
+usergdxprefix         
+userheurcall          
+userheurfirst         10
+userheurfreq          10
+userheurinterval      100
+userheurmult          2
+userheurnewint        1
+userheurobjfirst      0
+userincbcall          
+userincbicall         
+userjobid             
+userkeep              0
+usercgmaxcols         2147483647
+usercgadvind          1
+usercgsolopt          0
+usercgdumplp          bchcgdump.lp
+userpricingcall       
+usersolvenodelp       
+varsel                0
+waitforenter          0
+warninglimit          10
+workdir               C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225a\
+workeralgorithm       0
+workmem               128
+writeannotation       
+writebas              
+writeflt              
+writelp               
+writemps              
+writemst              
+writeord              
+writeparam            
+writepre              
+writeprob             
+writesav              
+zerohalfcuts          0
+----------------------------------------------------
+
+=1
+Space for names approximately 19.83 Mb
+Use option 'names no' to turn use of names off
+=2
+CPXPARAM_Advance                                 0
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225a\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 280432 rows and 289190 columns.
+MIP Presolve modified 2 coefficients.
+Aggregator did 17 substitutions.
+Reduced MIP has 8741 rows, 17500 columns, and 26240 nonzeros.
+Reduced MIP has 0 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.53 sec. (269.77 ticks)
+Tried aggregator 1 time.
+Reduced MIP has 8741 rows, 17500 columns, and 26240 nonzeros.
+Reduced MIP has 0 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.06 sec. (18.60 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =      -8716719.283059
+Iteration:   381   Dual objective     =      -8725300.010690
+Perturbation started.
+Iteration:   606   Dual objective     =      -8725300.010690
+Iteration:   668   Dual objective     =      -8816904.514105
+Iteration:   777   Dual objective     =      -8850186.924463
+Iteration:   886   Dual objective     =      -8882046.017324
+Iteration:   990   Dual objective     =      -8910492.244003
+Iteration:  1098   Dual objective     =      -8938033.324132
+Iteration:  1205   Dual objective     =      -8971374.591880
+Iteration:  1326   Dual objective     =      -9000400.125322
+Iteration:  1514   Dual objective     =      -9023542.127054
+Iteration:  1635   Dual objective     =      -9048622.289890
+Iteration:  1830   Dual objective     =      -9069929.750160
+Iteration:  1954   Dual objective     =      -9090259.262567
+Iteration:  2111   Dual objective     =      -9112164.538525
+Iteration:  2237   Dual objective     =      -9130486.275561
+Iteration:  2355   Dual objective     =      -9155706.364458
+Iteration:  2488   Dual objective     =      -9367106.495531
+Iteration:  2697   Dual objective     =      -9495478.329860
+Iteration:  3028   Dual objective     =      -9532197.746031
+Iteration:  3473   Dual objective     =      -9543984.216619
+Iteration:  3986   Dual objective     =      -9551755.586413
+Iteration:  4559   Dual objective     =      -9557343.135812
+Iteration:  4904   Dual objective     =      -9558971.480054
+Iteration:  5192   Dual objective     =      -9559383.090102
+Removing perturbation.
+Root relaxation solution time = 0.59 sec. (395.61 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0     0      integral     0 -9559386.1239 -9559386.1239     5204    0.00%
+Elapsed time = 1.34 sec. (740.59 ticks, tree = 0.00 MB, solutions = 1)
+Found incumbent of value -9559386.123850 after 1.34 sec. (740.59 ticks)
+
+Root node processing (before b&c):
+  Real time             =    1.39 sec. (750.32 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    1.39 sec. (750.32 ticks)
+=1
+MIP status(101): integer optimal solution
+Cplex Time: 1.39sec (det. 751.20 ticks)
+=2
+=1
+Fixing integer variables, and solving final LP...
+=2
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225a\"
+Tried aggregator 1 time.
+LP Presolve eliminated 271655 rows and 280413 columns.
+Aggregator did 8794 substitutions.
+Reduced LP has 8741 rows, 17500 columns, and 26240 nonzeros.
+Presolve time = 0.48 sec. (216.55 ticks)
+Parallel mode: none, using 1 thread for barrier
+Number of nonzeros in lower triangle of A*A' = 8740
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (1.05 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8741
+  Integer space required    = 9200
+  Total non-zeros in factor = 96141
+  Total FP ops to factor    = 1319741
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0  -1.1189455e+07  -8.6373472e+06  4.03e+03  8.76e+03  7.39e-13  1.00e+00
+   1  -1.1158087e+07  -8.6988633e+06  3.94e+03  8.57e+03  2.11e-10  9.54e-01
+   2  -1.1065466e+07  -8.9625217e+06  3.68e+03  8.00e+03  3.51e-10  3.51e-01
+   3  -1.0994319e+07  -9.0248724e+06  3.51e+03  7.62e+03  3.91e-10  3.39e-01
+   4  -1.0932883e+07  -9.0481074e+06  3.36e+03  7.30e+03  4.22e-10  3.19e-01
+   5  -1.0819636e+07  -9.2426485e+06  3.08e+03  6.71e+03  5.50e-10  1.90e-01
+   6  -1.0532160e+07  -9.3520872e+06  2.41e+03  5.24e+03  5.76e-10  1.86e-01
+   7  -1.0288513e+07  -9.4265138e+06  1.83e+03  3.98e+03  4.95e-10  2.26e-01
+   8  -1.0073639e+07  -9.4769030e+06  1.31e+03  2.85e+03  5.47e-10  3.16e-01
+   9  -9.8988599e+06  -9.5065236e+06  8.80e+02  1.91e+03  5.52e-10  4.69e-01
+  10  -9.7346004e+06  -9.5290641e+06  4.61e+02  1.00e+03  5.19e-10  8.12e-01
+  11  -9.6463348e+06  -9.5423976e+06  2.33e+02  5.06e+02  5.09e-10  1.44e+00
+  12  -9.6037634e+06  -9.5511583e+06  1.21e+02  2.62e+02  5.31e-10  3.00e+00
+  13  -9.5741107e+06  -9.5551335e+06  4.13e+01  8.97e+01  6.16e-10  5.89e+00
+  14  -9.5622847e+06  -9.5575938e+06  8.29e+00  1.80e+01  4.89e-10  1.41e+01
+  15  -9.5602069e+06  -9.5588244e+06  2.32e+00  5.04e+00  6.29e-10  4.52e+01
+  16  -9.5596468e+06  -9.5592690e+06  7.30e-01  1.59e+00  5.15e-10  2.18e+02
+  17  -9.5594896e+06  -9.5593678e+06  2.89e-01  6.29e-01  5.72e-10  1.41e+03
+  18  -9.5594042e+06  -9.5593831e+06  5.09e-02  1.11e-01  4.94e-10  8.52e+03
+  19  -9.5593868e+06  -9.5593854e+06  1.93e-03  4.20e-03  4.91e-10  3.63e+04
+  20  -9.5593862e+06  -9.5593861e+06  7.79e-05  1.69e-04  4.44e-10  1.12e+06
+  21  -9.5593861e+06  -9.5593861e+06  7.87e-09  1.69e-08  7.84e-10  9.69e+09
+  22  -9.5593861e+06  -9.5593861e+06  1.13e-07  5.04e-12  7.53e-08  1.00e+14
+Barrier time = 0.28 sec. (247.79 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixed no variables.
+Using devex.
+Total crossover time = 0.31 sec. (178.03 ticks)
+
+Total time on 1 threads = 1.13 sec. (651.60 ticks)
+=1
+Fixed MIP status(1): optimal
+Cplex Time: 1.13sec (det. 651.60 ticks)
+=2
+=1
+Proven optimal solution.
+=2
+=1
+
+MIP Solution:     -9559386.123850    (5204 iterations, 0 nodes)
+=2
+=1
+Final Solve:      -9559386.123850    (0 iterations)
+
+=2
+=1
+Best possible:    -9559386.123850
+=2
+=1
+Absolute gap:            0.000000
+=2
+=1
+Relative gap:            0.000000
+
+=2
