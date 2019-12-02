@@ -63,7 +63,7 @@ $if not set gas_price_instance     $set gas_price_instance     NA
 $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
-$if not set file_name_instance     $set file_name_instance     "Test_flex_bldg_load_2"
+$if not set file_name_instance     $set file_name_instance     "Test_flex_bldg_load_3"
 $if not set devices_instance       $set devices_instance       1
 $if not set use_alt_devices        $set use_alt_devices        0
 $if not set use_all_devices        $set use_all_devices        1
@@ -148,7 +148,7 @@ $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
 * Setting storage dissipation term increases CF above specified value and can cause infeasibilities if dissipation and/or CF are too large
 $if not set CF_adj_inst            $set CF_adj_inst            0.4
-$if not set Product_price_instance $set Product_price_instance 10
+$if not set Product_price_instance $set Product_price_instance 0
 $if not set Product_use_instance   $set Product_use_instance   1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
@@ -420,7 +420,7 @@ Scalars
          reg_cost                "variable costs associated with providing regulation ($/MW-h)"                  /%reg_cost_instance%/
          REC_price               "Renewable Energy Credits (RECs) ($/MWh)"                                       /%REC_price_inst%/
 
-         product_conversion      "product unit conversion for storage (e.g., H2 LHV 0.033322222 (MWh/kg)"        /0.033322222/
+         product_conversion      "product unit conversion (e.g., H2 LHV 0.033322222 (MWh/kg), elec 1 (MWh/MWh)"  /1/
 
          CF_opt                  "Select optimization criteria for system"                                       /%CF_opt_instance%/
          run_retail              "Select to run retail or wholesale analysis (0=wholesale, 1=retail, 2=hybrid (retail for purchase and wholesale for sale))" /%run_retail_instance%/
