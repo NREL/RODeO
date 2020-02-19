@@ -1,0 +1,10 @@
+Input=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+PageSize=0
+ScrDir=225d
+SysDir=C:\GAMS\win64\27.3
+ScriptNext=225d\gamsnext.cmd
+LogOption=3
+ErrMsg=1
+ErrorLog=99
+IDE=1
+LstTitleLeftAligned=1

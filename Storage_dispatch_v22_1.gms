@@ -39,7 +39,7 @@ $if not set NEM_nscr               $set NEM_nscr            0
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance          $set elec_rate_instance             5a3430585457a3e3595c48a2_hourly
+$if not set elec_rate_instance          $set elec_rate_instance             5e1676e95457a3f87673e3b0_hourly
 $if not set product_price_prof_inst     $set product_price_prof_inst        Product_price_Price1_hourly
 $if not set product_consumed_inst       $set product_consumed_inst          Product_consumption_ones_hourly
 $if not set baseload_pwr_instance       $set baseload_pwr_instance          Input_power_baseload
@@ -47,23 +47,23 @@ $if not set NG_price_instance           $set NG_price_instance              NG_p
 $if not set ren_prof_instance           $set ren_prof_instance              renewable_profiles_PV_hourly
 $if not set NSCR_instance               $set NSCR_instance                  NSCR
 $if not set MACRS_instance              $set MACRS_instance                 MACRS_depreciation_schedule
-$if not set load_prof_instance          $set load_prof_instance             Additional_load_none_hourly
+$if not set load_prof_instance          $set load_prof_instance             Additional_load_BLDG_hourly
 $if not set energy_purchase_price_inst  $set energy_purchase_price_inst     Energy_purchase_prices_Wholesale_MWh_hourly
 $if not set energy_sale_price_inst      $set energy_sale_price_inst         Energy_sale_prices_Wholesale_MWh_hourly
-$if not set AS_price_inst               $set AS_price_inst                  Ancillary_services_PGE2014_hourly
+$if not set AS_price_inst               $set AS_price_inst                  Ancillary_services_PGE2017spin_hourly
 $if not set Max_input_prof_inst         $set Max_input_prof_inst            Max_input_cap_ones_hourly
 $if not set Max_output_prof_inst        $set Max_output_prof_inst           Max_output_cap_ones_hourly
 $if not set Device_parameters_inst      $set Device_parameters_inst         Devices_parameters_empty
 $if not set Device_ren_params_inst      $set Device_ren_params_inst         Devices_ren_parameters_empty
-$if not set outdir                      $set outdir                         Projects\flex_bldg_load\Output
-$if not set indir                       $set indir                          Projects\flex_bldg_load\Data_files\TXT_files
+$if not set outdir                      $set outdir                         Projects\CEC_proposal_305\Output
+$if not set indir                       $set indir                          Projects\CEC_proposal_305\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
 $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
-$if not set file_name_instance     $set file_name_instance     "Test_flex_bldg_load_3"
+$if not set file_name_instance     $set file_name_instance     "Test_storage_with-import_no-sale_upd-ren_contrib_with-spinning_v1"
 $if not set devices_instance       $set devices_instance       1
 $if not set use_alt_devices        $set use_alt_devices        0
 $if not set use_all_devices        $set use_all_devices        1
@@ -71,8 +71,8 @@ $if not set use_smart_charging     $set use_smart_charging     1
 $if not set soft_cons_device_inst  $set soft_cons_device_inst  0
 $if not set devices_ren_instance   $set devices_ren_instance   1
 $if not set val_from_batch_inst    $set val_from_batch_inst    2
-$if not set input_cap_instance     $set input_cap_instance     1
-$if not set output_cap_instance    $set output_cap_instance    0
+$if not set input_cap_instance     $set input_cap_instance     5
+$if not set output_cap_instance    $set output_cap_instance    5
 
 * Set the limiting price (must be less than infinity)
 $if not set price_cap_instance     $set price_cap_instance     10000
@@ -82,24 +82,24 @@ $if not set max_output_cap_inst    $set max_output_cap_inst    Inf
 $if not set max_input_cap_inst     $set max_input_cap_inst     Inf
 $if not set allow_import_instance  $set allow_import_instance  1
 * by default allow_sales_instance should be 1; however, when it is 0, sales variables should be prohibited
-$if not set allow_sales_instance   $set allow_sales_instance   1
+$if not set allow_sales_instance   $set allow_sales_instance   0
 
 $if not set input_LSL_instance     $set input_LSL_instance     0
 $if not set output_LSL_instance    $set output_LSL_instance    0
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0
 $if not set Output_start_cost_inst $set Output_start_cost_inst 0
 * Efficiency takes into account compressor. Otherwise, take 0.613669
-$if not set input_efficiency_inst  $set input_efficiency_inst  0.80
-$if not set output_efficiency_inst $set output_efficiency_inst 1
+$if not set input_efficiency_inst  $set input_efficiency_inst  0.707106781
+$if not set output_efficiency_inst $set output_efficiency_inst 0.707106781
 
-$if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1111000
-$if not set input_cap_cost_inst    $set input_cap_cost_inst    16466666.67
+$if not set renew_cap_cost_inst    $set renew_cap_cost_inst    0
+$if not set input_cap_cost_inst    $set input_cap_cost_inst    0
 $if not set input_cap_alt_cst_inst $set input_cap_alt_cst_inst 0
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
 $if not set ProdStor_cap_cost_inst $set ProdStor_cap_cost_inst 0
 $if not set ProdComp_cap_cost_inst $set ProdComp_cap_cost_inst 0
-$if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    20000
-$if not set input_FOM_cost_inst    $set input_FOM_cost_inst    206338.8314
+$if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    0
+$if not set input_FOM_cost_inst    $set input_FOM_cost_inst    0
 $if not set input_FOM_alt_cst_inst $set input_FOM_alt_cst_inst 0
 $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
 $if not set renew_VOM_cost_inst    $set renew_VOM_cost_inst    0
@@ -119,11 +119,11 @@ $if not set ProdComp_interest_inst $set ProdComp_interest_inst 0.07
 
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
-$if not set storage_cap_instance   $set storage_cap_instance   8
+$if not set storage_cap_instance   $set storage_cap_instance   100
 $if not set storage_set_instance   $set storage_set_instance   1
 $if not set storage_init_instance  $set storage_init_instance  0.5
 $if not set storage_final_instance $set storage_final_instance 0.5
-$if not set stor_dissipation_inst  $set stor_dissipation_inst  0.02
+$if not set stor_dissipation_inst  $set stor_dissipation_inst  0.0
 $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
 $if not set ramp_penalty_instance  $set ramp_penalty_instance  0
@@ -145,19 +145,19 @@ $if not set op_period_instance     $set op_period_instance     8760
 $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
-$if not set energy_only_instance   $set energy_only_instance   1
+$if not set energy_only_instance   $set energy_only_instance   0
 * Setting storage dissipation term increases CF above specified value and can cause infeasibilities if dissipation and/or CF are too large
 $if not set CF_adj_inst            $set CF_adj_inst            0.4
 $if not set Product_price_instance $set Product_price_instance 0
-$if not set Product_use_instance   $set Product_use_instance   1
+$if not set Product_use_instance   $set Product_use_instance   0
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
-$if not set Renewable_MW_instance  $set Renewable_MW_instance  0
+$if not set Renewable_MW_instance  $set Renewable_MW_instance  5
 $if not set REC_price_inst         $set REC_price_inst         0
 
 $if not set CF_opt_instance        $set CF_opt_instance        0
 * Select to run retail or wholesale analysis (0=wholesale, 1=retail, 2=hybrid (retail for purchase and wholesale for sale))
-$if not set run_retail_instance    $set run_retail_instance    0
+$if not set run_retail_instance    $set run_retail_instance    2
 $if not set NBC_instance           $set NBC_instance           19.19
 $if not set one_active_device_inst $set one_active_device_inst 1
 $if not set ITC_inst               $set ITC_inst               0
@@ -722,7 +722,7 @@ elseif (run_retail=1 and %NEM_nscr%=1),
          elec_sale_price(interval)     = elec_sale_price_interim(interval);
 elseif run_retail=1,
          REC_price                     = 0;
-         elec_sale_price(interval)     = elec_sale_price_interim(interval);
+         elec_sale_price(interval)     = elec_sale_price_interim(interval) * 0;
 );
 
 * Loads predictive controller values from excel file
@@ -1424,7 +1424,7 @@ input_capacity_limit_eqn2(interval)$( rolling_window_min_index <= ord(interval) 
 ***         Import_elec_profile(interval) =e= 0;
 
 input_ren_contribution(interval)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
-         sum(devices,input_power_MW_ren(interval,devices)) + sum(devices_ren,renewable_power_MW_sold(interval,devices_ren)) + Load_profile_ren(interval) =l= sum(devices_ren,Renewable_power(interval,devices_ren));
+         sum(devices,input_power_MW_ren(interval,devices)) + sum(devices_ren,renewable_power_MW_sold(interval,devices_ren)) + Load_profile_ren(interval) - sum(devices,output_power_MW_ren_load(interval,devices)) =l= sum(devices_ren,Renewable_power(interval,devices_ren));
 
 input_regup_limit_eqn(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index )..
          input_regup_MW(interval,devices) =l= Max_input_cap(interval,devices) * input_capacity_MW(devices) * input_regup_limit_fraction(devices);
@@ -1446,18 +1446,15 @@ storage_level_accounting_init_eqn(interval,devices)$(rolling_window_min_index <=
          + (input_power_MW(interval,devices)+input_power_MW_ren(interval,devices)) * interval_length * input_efficiency(devices)
          - (output_power_MW(interval,devices)+output_power_MW_ren_sold(interval,devices)+output_power_MW_ren_load(interval,devices)) * interval_length / output_efficiency(devices)
          - (product_sold(interval,devices)+product_sold_ren(interval,devices)) * product_conversion;
-* LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
 storage_level_accounting_final_eqn(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices) > 0 and baseload_operation(devices)=0 and ord(interval)=operating_period_length and storage_set_final(devices)=1)..
          storage_level_MWh(interval,devices)+storage_level_MWh_ren(interval,devices) =e= storage_final(devices)*storage_capacity_hours(devices)*input_capacity_MW(devices);
-* LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
 storage_level_accounting_eqn(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices) > 0 and baseload_operation(devices)=0 and ord(interval)>current_interval and ord(interval)<max_interval and ord(interval)>1)..
          storage_level_MWh(interval,devices) =e= storage_level_MWh(interval-1,devices)*(1-storage_dissipation(devices))
          + input_power_MW_non_ren(interval,devices) * interval_length * input_efficiency(devices)
          - (output_power_MW_non_ren_sold(interval,devices) + output_power_MW_non_ren_load(interval,devices)) * interval_length / output_efficiency(devices)
          - product_sold_non_ren(interval,devices) * product_conversion;
-* LHV selected because fuel cell vehicles typically use a PEM FC and will release liquid water
 
 storage_level_accounting_eqn2(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices) = 0 and baseload_operation(devices)=0 and ord(interval)>current_interval and ord(interval)<max_interval )..
          storage_level_MWh(interval,devices)+storage_level_MWh_ren(interval,devices) =e= (storage_level_MWh(interval-1,devices)+storage_level_MWh_ren(interval-1,devices))*(1-storage_dissipation(devices));
@@ -2011,6 +2008,7 @@ Scalars
          Debts_RenewablePERprod   Annualized debts related to the renewables source per unit of product
          Debts_InputPERprod       Annualized debts related to the input per unit of product
          Debts_StoNCompPERprod    Annualized debts related to the storage and compressor per unit of product
+         Debts_denominator        Interim step to check if denominator is zero
          Taxes_debt_int           Taxes which are calculated based on the debt interest ($)
          Taxes_debt_intPERprod    Taxes which are calculated based on the debt interest per unit of product
          actual_operating_profit_NPV
@@ -2056,7 +2054,7 @@ Parameters
 *===============================================================================
 * Curtailment, electricity and capacity sold/bought
 *===============================================================================
-curtailment(interval) = sum(devices_ren, Renewable_power(interval,devices_ren) - renewable_power_MW_sold.l(interval,devices_ren)) - sum(devices,input_power_MW_ren.l(interval,devices)) - Load_profile_ren.l(interval);
+curtailment(interval) = sum(devices_ren, Renewable_power(interval,devices_ren) - renewable_power_MW_sold.l(interval,devices_ren)) - sum(devices,input_power_MW_ren.l(interval,devices) - output_power_MW_ren_load.l(interval,devices)) - Load_profile_ren.l(interval);
 curtailment_sum       = sum(interval, curtailment(interval) * interval_length );
 elec_in_MWh           = sum((interval,devices), input_power_MW.l(interval,devices)  * interval_length );
 elec_output_MWh       = sum((interval,devices), output_power_MW.l(interval,devices) * interval_length );
@@ -2180,19 +2178,24 @@ Taxes              = sum(years,yearly_taxes.l(years))/NoYears ;
 Debts              = - debt_service.l ;
 
 * Fraction of debt associated with each component
-Debts_Renewable    =  sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
-                    /(sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)) + sum(devices, (input_cap_cost(devices) * active_devices(devices) + input_cap_alt_cost(devices) * (1-active_devices(devices))) * input_capacity_MW(devices)) +
+Debts_denominator =  (sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)) + sum(devices, (input_cap_cost(devices) * active_devices(devices) + input_cap_alt_cost(devices) * (1-active_devices(devices))) * input_capacity_MW(devices)) +
                      [sum(devices, ProdStor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion )*storage_capacity_hours(devices))
                     + sum(devices, ProdComp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion ))]) ;
-Debts_Input        =  sum(devices, (input_cap_cost(devices) * active_devices(devices) + input_cap_alt_cost(devices) * (1-active_devices(devices))) * input_capacity_MW(devices))
-                    /(sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)) + sum(devices, (input_cap_cost(devices) * active_devices(devices) + input_cap_alt_cost(devices) * (1-active_devices(devices))) * input_capacity_MW(devices)) +
-                     [sum(devices, ProdStor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion )*storage_capacity_hours(devices))
-                    + sum(devices, ProdComp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion ))]) ;
-Debts_StoNComp     = [sum(devices, ProdStor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion )*storage_capacity_hours(devices))
-                    + sum(devices, ProdComp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion ))]
-                    /(sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren)) + sum(devices, (input_cap_cost(devices) * active_devices(devices) + input_cap_alt_cost(devices) * (1-active_devices(devices))) * input_capacity_MW(devices)) +
-                     [sum(devices, ProdStor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion )*storage_capacity_hours(devices))
-                    + sum(devices, ProdComp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion ))]) ;
+
+if ( Debts_denominator = 0,
+        Debts_Renewable = 0;
+        Debts_Input = 0;
+        Debts_StoNComp = 0;
+else
+        Debts_Renewable    =  sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
+                            /Debts_denominator;
+        Debts_Input        =  sum(devices, (input_cap_cost(devices) * active_devices(devices) + input_cap_alt_cost(devices) * (1-active_devices(devices))) * input_capacity_MW(devices))
+                            /Debts_denominator;
+        Debts_StoNComp     = [sum(devices, ProdStor_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion )*storage_capacity_hours(devices))
+                            + sum(devices, ProdComp_cap_cost(devices) * input_capacity_MW(devices) *( input_efficiency(devices) / product_conversion ))]
+                            /Debts_denominator;
+);
+
 *** Converting active_devices to parameter
 $ontext
 Debts_Renewable    =  sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
@@ -2440,13 +2443,22 @@ display Load_profile_ren.l;
 display Load_profile_non_ren.l;
 );
 
-if (1=1,
+if (1=0,
 option decimals=8;
 display CF_incremental_change.l;
 display product_sold_ren.l
 display product_sold_non_ren.l
 display product_consumed);
 
+
+if (1=0,
+option decimals=8;
+display output_power_MW.l
+display output_power_MW_non_ren_sold.l
+display output_power_MW_non_ren_load.l
+display output_power_MW_ren_sold.l
+display output_power_MW_ren_load.l
+);
 
 
 *===============================================================================

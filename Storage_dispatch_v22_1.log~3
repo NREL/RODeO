@@ -1,0 +1,508 @@
+--- Job Storage_dispatch_v22_1.gms Start 02/18/20 23:31:37 27.3.0 r58c491d WEX-WEI x86 64bit/MS Windows
+--- GAMS Parameters defined
+    Input C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+    PageSize 0
+    ScrDir C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225f\
+    SysDir C:\GAMS\win64\27.3\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+GAMS 27.3.0   Copyright (C) 1987-2019 GAMS Development. All rights reserved
+Licensee: Large MUD - 20 User License                    G180911:1426CO-GEN
+          National Renewable Energy Laboratory (NREL), Strategic EnerDC3485
+          License Admin: Kelly Eurek, kelly.eurek@nrel.gov                 
+--- Starting compilation
+--- Storage_dispatch_v22_1.gms(60) 2 Mb
+--- call if not exist Projects\CEC_proposal_305\Output\nul mkdir Projects\CEC_proposal_305\Output
+--- Storage_dispatch_v22_1.gms(400) 4 Mb
+--- . Projects\CEC_proposal_305\Data_files\TXT_files\Tariff_files\5e1676e95457a3f87673e3b0_hourly.txt(38190) 5 Mb
+--- . Projects\CEC_proposal_305\Data_files\TXT_files\Tariff_files\5e1676e95457a3f87673e3b0_hourly.txt(52691) 5 Mb
+--- Storage_dispatch_v22_1.gms(488) 5 Mb
+--- . Projects\CEC_proposal_305\Data_files\TXT_files\Devices_parameters_empty.csv(37) 5 Mb
+--- Storage_dispatch_v22_1.gms(493) 5 Mb
+--- . Projects\CEC_proposal_305\Data_files\TXT_files\Devices_ren_parameters_empty.csv(7) 5 Mb
+--- Storage_dispatch_v22_1.gms(555) 5 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Energy_purchase_prices_Wholesale_MWh_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Energy_purchase_prices_Wholesale_MWh_hourly.gdx ID=elec_purchase_price_interim UseHeader=
+No errors, CSV2GDX time = 15ms
+--- Storage_dispatch_v22_1.gms(557) 5 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Energy_purchase_prices_Wholesale_MWh_hourly.gdx
+--- Storage_dispatch_v22_1.gms(561) 5 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Energy_sale_prices_Wholesale_MWh_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Energy_sale_prices_Wholesale_MWh_hourly.gdx ID=elec_sale_price_interim UseHeader=y Index=1 Va
+No errors, CSV2GDX time = 15ms
+--- Storage_dispatch_v22_1.gms(562) 5 Mb
+--- Storage_dispatch_v22_1.gms(563) 5 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Energy_sale_prices_Wholesale_MWh_hourly.gdx
+--- Storage_dispatch_v22_1.gms(567) 6 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Product_price_Price1_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Product_price_Price1_hourly.gdx ID=product_price2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 63ms
+--- Storage_dispatch_v22_1.gms(569) 6 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Product_price_Price1_hourly.gdx
+--- Storage_dispatch_v22_1.gms(573) 11 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Product_consumption\Product_consumption_ones_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Product_consumption\Product_consumption_ones_hourly.gdx ID=product_consumed2 UseH
+No errors, CSV2GDX time = 62ms
+--- Storage_dispatch_v22_1.gms(574) 11 Mb
+--- Storage_dispatch_v22_1.gms(575) 11 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Product_consumption\Product_consumption_ones_hourly.gdx
+--- Storage_dispatch_v22_1.gms(579) 17 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Input_power_baseload.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Input_power_baseload.gdx ID=input_power_baseload UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 15ms
+--- Storage_dispatch_v22_1.gms(580) 17 Mb
+--- Storage_dispatch_v22_1.gms(581) 17 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Input_power_baseload.gdx
+--- Storage_dispatch_v22_1.gms(585) 18 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\NG_price_Price1_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\NG_price_Price1_hourly.gdx ID=NG_price UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(586) 18 Mb
+--- Storage_dispatch_v22_1.gms(587) 18 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\NG_price_Price1_hourly.gdx
+--- Storage_dispatch_v22_1.gms(591) 18 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Additional_load_BLDG_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Additional_load_BLDG_hourly.gdx ID=Load_profile UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(593) 18 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Additional_load_BLDG_hourly.gdx
+--- Storage_dispatch_v22_1.gms(597) 18 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\renewable_profiles_PV_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\renewable_profiles_PV_hourly.gdx ID=renewable_signal2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 31ms
+--- Storage_dispatch_v22_1.gms(598) 18 Mb
+--- Storage_dispatch_v22_1.gms(599) 18 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\renewable_profiles_PV_hourly.gdx
+--- Storage_dispatch_v22_1.gms(603) 18 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\NSCR.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\NSCR.gdx ID=NSCR UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(605) 18 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\NSCR.gdx
+--- Storage_dispatch_v22_1.gms(610) 18 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Input_cap\Max_input_cap_ones_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Input_cap\Max_input_cap_ones_hourly.gdx ID=Max_input_cap2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 110ms
+--- Storage_dispatch_v22_1.gms(611) 18 Mb
+--- Storage_dispatch_v22_1.gms(612) 18 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Input_cap\Max_input_cap_ones_hourly.gdx
+--- Storage_dispatch_v22_1.gms(616) 24 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Output_cap\Max_output_cap_ones_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Output_cap\Max_output_cap_ones_hourly.gdx ID=Max_output_cap2 UseHeader=y Index=1 Values=(2..Las
+No errors, CSV2GDX time = 907ms
+--- Storage_dispatch_v22_1.gms(617) 24 Mb
+--- Storage_dispatch_v22_1.gms(618) 24 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Output_cap\Max_output_cap_ones_hourly.gdx
+--- Storage_dispatch_v22_1.gms(619) 29 Mb
+--- Storage_dispatch_v22_1.gms(619) 58 Mb
+--- Storage_dispatch_v22_1.gms(619) 67 Mb
+--- Storage_dispatch_v22_1.gms(623) 81 Mb
+
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx ID=regup_price_interim UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(624) 81 Mb
+--- Storage_dispatch_v22_1.gms(625) 81 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx
+--- Storage_dispatch_v22_1.gms(629) 81 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx ID=regdn_price_interim UseHeader=y Index=1 Values=3
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(631) 81 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx
+--- Storage_dispatch_v22_1.gms(635) 81 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx ID=spinres_price_interim UseHeader=y Index=1 Values=4
+No errors, CSV2GDX time = 15ms
+--- Storage_dispatch_v22_1.gms(636) 81 Mb
+--- Storage_dispatch_v22_1.gms(637) 81 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx
+--- Storage_dispatch_v22_1.gms(641) 81 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx ID=nonspinres_price_interim UseHeader=y Index=1 Values=5
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(643) 81 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Ancillary_services_PGE2014_hourly.gdx
+--- Storage_dispatch_v22_1.gms(651) 82 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Compressors_cost.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Compressors_cost.gdx ID=ProdComp_cap_cost_s UseHeader=y Index=1 Values=3
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(652) 82 Mb
+--- Storage_dispatch_v22_1.gms(653) 82 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Compressors_cost.gdx
+--- Storage_dispatch_v22_1.gms(657) 82 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\Compressors_cost.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\Compressors_cost.gdx ID=input_sizes UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(659) 82 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\Compressors_cost.gdx
+--- Storage_dispatch_v22_1.gms(674) 82 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\MACRS_depreciation_schedule.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\MACRS_depreciation_schedule.gdx ID=depreciation_schedule UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(675) 82 Mb
+--- Storage_dispatch_v22_1.gms(676) 82 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\MACRS_depreciation_schedule.gdx
+--- Storage_dispatch_v22_1.gms(729) 82 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx ID=current_interval2 UseHeader=y Values=1
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(731) 82 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(735) 82 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx ID=next_interval2 UseHeader=y Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(736) 82 Mb
+--- Storage_dispatch_v22_1.gms(737) 82 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(741) 82 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx ID=current_storage_lvl2 UseHeader=y Values=3
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(743) 82 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(747) 82 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx ID=current_monthly_max2 UseHeader=y Values=4
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(748) 82 Mb
+--- Storage_dispatch_v22_1.gms(749) 82 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(753) 82 Mb
+--- call CSV2GDX Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.csv Output=Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx ID=max_interval2 UseHeader=y Values=5
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(754) 82 Mb
+--- Storage_dispatch_v22_1.gms(755) 82 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(769) 82 Mb
+--- call rm -rf Projects\CEC_proposal_305\Data_files\TXT_files\*.gdx
+--- Storage_dispatch_v22_1.gms(770) 82 Mb
+--- call rm -rf Projects\CEC_proposal_305\Data_files\TXT_files\Product_consumption\*.gdx
+--- Storage_dispatch_v22_1.gms(771) 82 Mb
+--- call rm -rf Projects\CEC_proposal_305\Data_files\TXT_files\Input_cap\*.gdx
+--- Storage_dispatch_v22_1.gms(772) 82 Mb
+--- call rm -rf Projects\CEC_proposal_305\Data_files\TXT_files\Output_cap\*.gdx
+--- Storage_dispatch_v22_1.gms(773) 82 Mb
+--- Storage_dispatch_v22_1.gms(2925) 82 Mb
+
+--- Starting execution: elapsed 0:00:06.121
+--- Storage_dispatch_v22_1.gms(54388) 98 Mb
+--- Storage_dispatch_v22_1.gms(54388) 107 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53898) 107 Mb
+--- Storage_dispatch_v22_1.gms(54029) 119 Mb
+--- Storage_dispatch_v22_1.gms(54044) 126 Mb
+--- Storage_dispatch_v22_1.gms(54188) 144 Mb
+--- Storage_dispatch_v22_1.gms(54198) 150 Mb
+--- Storage_dispatch_v22_1.gms(54291) 165 Mb
+--- Storage_dispatch_v22_1.gms(54247) 167 Mb
+--- Storage_dispatch_v22_1.gms(54622) 179 Mb
+--- Storage_dispatch_v22_1.gms(54622) 181 Mb
+--- LOOPS FOR/WHILE = 1
+---   289,190 rows  289,205 columns  788,855 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:00:08.156
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 20.04 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 0
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225f\"
+Tried aggregator 3 times.
+MIP Presolve eliminated 180733 rows and 184147 columns.
+MIP Presolve modified 4 coefficients.
+Aggregator did 39505 substitutions.
+Reduced MIP has 68952 rows, 83073 columns, and 242842 nonzeros.
+Reduced MIP has 8760 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 1.88 sec. (1019.09 ticks)
+Found incumbent of value -6.3397743e+07 after 8.64 sec. (3685.35 ticks)
+Probing fixed 0 vars, tightened 76673 bounds.
+Probing time = 1.23 sec. (617.02 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 9 rows and 0 columns.
+Aggregator did 2 substitutions.
+Reduced MIP has 68941 rows, 83071 columns, and 242820 nonzeros.
+Reduced MIP has 8760 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.59 sec. (171.08 ticks)
+Probing time = 0.06 sec. (14.16 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Tried aggregator 1 time.
+Aggregator did 8760 substitutions.
+Reduced LP has 60181 rows, 74311 columns, and 225300 nonzeros.
+Presolve time = 0.23 sec. (69.96 ticks)
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       -145930.317113
+Perturbation started.
+Iteration:   101   Dual objective     =       -145930.317113
+Iteration:   227   Dual objective     =       -145930.317320
+Iteration:  1175   Dual objective     =       -145930.317547
+Iteration:  1852   Dual objective     =       -145930.317726
+Iteration:  2685   Dual objective     =       -145930.318054
+Iteration:  3358   Dual objective     =       -145930.318305
+Iteration:  4339   Dual objective     =       -145930.318669
+Iteration:  5049   Dual objective     =       -145930.318951
+Iteration:  5803   Dual objective     =       -145930.319284
+Iteration:  6381   Dual objective     =       -145930.319504
+Iteration:  6996   Dual objective     =       -145930.319733
+Iteration:  7989   Dual objective     =       -145930.320175
+Iteration:  8538   Dual objective     =       -145930.320409
+Iteration:  9187   Dual objective     =       -145930.320649
+Iteration: 10030   Dual objective     =       -145930.321025
+Iteration: 10874   Dual objective     =       -145930.321404
+Iteration: 11538   Dual objective     =       -145930.321695
+Iteration: 12151   Dual objective     =       -145930.321967
+Iteration: 12791   Dual objective     =       -145930.322266
+Iteration: 13365   Dual objective     =       -145930.322552
+Iteration: 14000   Dual objective     =       -145930.322912
+Iteration: 14566   Dual objective     =       -145930.323285
+Iteration: 15391   Dual objective     =       -145930.323841
+Iteration: 16105   Dual objective     =       -145930.324291
+Iteration: 16617   Dual objective     =       -145930.324902
+Iteration: 17296   Dual objective     =       -145930.325490
+Iteration: 18116   Dual objective     =       -145930.326056
+Iteration: 18801   Dual objective     =       -145930.326550
+Iteration: 19393   Dual objective     =       -145930.327027
+Iteration: 20252   Dual objective     =       -145930.327615
+Iteration: 20793   Dual objective     =       -145930.328254
+Iteration: 21023   Dual objective     =       -145930.328446
+Iteration: 21754   Dual objective     =       -145930.329023
+Iteration: 22254   Dual objective     =       -145930.329804
+Iteration: 22926   Dual objective     =       -145930.330273
+Iteration: 23356   Dual objective     =       -145930.331171
+Iteration: 23810   Dual objective     =       -145930.331777
+Iteration: 24124   Dual objective     =       -145930.332049
+Iteration: 24542   Dual objective     =       -145930.332980
+Iteration: 25070   Dual objective     =       -145930.333512
+Iteration: 25547   Dual objective     =       -145930.334213
+Iteration: 25920   Dual objective     =       -145930.334648
+Iteration: 26355   Dual objective     =       -145930.335331
+Iteration: 26749   Dual objective     =       -145930.335943
+Iteration: 27219   Dual objective     =       -145930.336569
+Iteration: 27458   Dual objective     =       -145930.336848
+Iteration: 27880   Dual objective     =       -145930.337611
+Iteration: 28199   Dual objective     =       -145930.337962
+Iteration: 28654   Dual objective     =       -145930.338652
+Iteration: 28905   Dual objective     =       -145930.338881
+Iteration: 29206   Dual objective     =       -145930.339690
+Iteration: 29535   Dual objective     =       -145930.340469
+Iteration: 29888   Dual objective     =       -145930.341568
+Iteration: 30236   Dual objective     =       -145930.342680
+Iteration: 30584   Dual objective     =       -145930.343907
+Iteration: 30934   Dual objective     =       -145930.345049
+Iteration: 31285   Dual objective     =       -145930.346264
+Iteration: 31627   Dual objective     =       -145930.347964
+Iteration: 31964   Dual objective     =       -145930.349686
+Iteration: 32353   Dual objective     =       -145930.352306
+Iteration: 32732   Dual objective     =       -145930.355704
+Iteration: 33064   Dual objective     =       -145930.358467
+Iteration: 33421   Dual objective     =       -145930.362290
+Iteration: 33731   Dual objective     =       -145930.366856
+Iteration: 34058   Dual objective     =       -145930.371617
+Iteration: 34473   Dual objective     =       -145930.375323
+Iteration: 34736   Dual objective     =       -145930.379944
+Iteration: 35119   Dual objective     =       -145930.386179
+Iteration: 35409   Dual objective     =       -145930.393346
+Iteration: 35760   Dual objective     =       -145930.403496
+Iteration: 35960   Dual objective     =       -145930.407387
+Iteration: 36260   Dual objective     =       -145930.417531
+Iteration: 36547   Dual objective     =       -145930.425493
+Iteration: 36901   Dual objective     =       -145930.440915
+Iteration: 37185   Dual objective     =       -145930.451496
+Iteration: 37352   Dual objective     =       -145930.459185
+Iteration: 37528   Dual objective     =       -145930.467767
+Iteration: 37733   Dual objective     =       -145930.487140
+Iteration: 37893   Dual objective     =       -145930.507332
+Iteration: 38054   Dual objective     =       -145930.528429
+Elapsed time = 23.33 sec. (10000.84 ticks, 38169 iterations)
+Iteration: 38265   Dual objective     =       -145930.550312
+Iteration: 38451   Dual objective     =       -145930.581391
+Iteration: 38571   Dual objective     =       -145930.593991
+Iteration: 38834   Dual objective     =       -145930.623487
+Iteration: 39044   Dual objective     =       -145930.647772
+Iteration: 39256   Dual objective     =       -145930.685593
+Iteration: 39412   Dual objective     =       -145930.735641
+Iteration: 39623   Dual objective     =       -145930.763616
+Iteration: 39799   Dual objective     =       -145930.789433
+Iteration: 40061   Dual objective     =       -145930.844066
+Iteration: 40236   Dual objective     =       -145930.875351
+Iteration: 40462   Dual objective     =       -145930.893337
+Iteration: 40689   Dual objective     =       -145930.900555
+Iteration: 40838   Dual objective     =       -145930.901892
+Iteration: 40964   Dual objective     =       -145930.903071
+Iteration: 41127   Dual objective     =       -145930.905768
+Iteration: 41191   Dual objective     =       -145930.906454
+Iteration: 41343   Dual objective     =       -145930.908464
+Iteration: 41463   Dual objective     =       -145930.911320
+Iteration: 41610   Dual objective     =       -145930.913804
+Iteration: 41751   Dual objective     =       -145930.916799
+Iteration: 41906   Dual objective     =       -145930.920188
+Iteration: 42064   Dual objective     =       -145930.923728
+Iteration: 42126   Dual objective     =       -145930.924889
+Iteration: 42188   Dual objective     =       -145930.925946
+Iteration: 42342   Dual objective     =       -145930.929346
+Iteration: 42481   Dual objective     =       -145930.933289
+Iteration: 42543   Dual objective     =       -145930.935936
+Iteration: 42767   Dual objective     =       -145930.936836
+Iteration: 42874   Dual objective     =       -145930.937523
+Removing perturbation.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       -145930.317113
+Iteration:  1802   Dual objective     =       -145930.317113
+Root relaxation solution time = 49.72 sec. (25200.60 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                      -6.33977e+07  -145930.3171            99.77%
+Found incumbent of value -6.3397743e+07 after 61.00 sec. (30218.98 ticks)
+      0     0  -145930.3171   250  -6.33977e+07  -145930.3171    43010   99.77%
+      0     0  -145930.3171    21  -6.33977e+07     Cuts: 359    48597   99.77%
+*     0+    0                      -145930.3171  -145930.3171             0.00%
+Found incumbent of value -145930.317113 after 116.17 sec. (63348.82 ticks)
+      0     0        cutoff        -145930.3171  -145930.3171    48597    0.00%
+Elapsed time = 116.17 sec. (63348.82 ticks, tree = 0.01 MB, solutions = 2)
+
+Implied bound cuts applied:  156
+Flow cuts applied:  2
+Mixed integer rounding cuts applied:  1
+Gomory fractional cuts applied:  91
+
+Root node processing (before b&c):
+  Real time             =  116.25 sec. (63360.87 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =  116.25 sec. (63360.87 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 116.25sec (det. 63361.75 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225f\"
+Tried aggregator 1 time.
+LP Presolve eliminated 216483 rows and 235107 columns.
+Aggregator did 23889 substitutions.
+Reduced LP has 48818 rows, 47729 columns, and 244594 nonzeros.
+Presolve time = 0.92 sec. (312.38 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 30 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 263367
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.08 sec. (17.65 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 48848
+  Integer space required    = 112734
+  Total non-zeros in factor = 576762
+  Total FP ops to factor    = 8031764
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0  -6.0998104e+07   2.0279154e+05  2.01e+07  1.58e+06  1.61e+06  1.00e+00
+   1  -3.9629548e+07   3.3814897e+07  1.69e+07  1.33e+06  8.73e+05  2.07e-03
+   2  -1.0692379e+07   1.3657286e+07  3.36e+06  2.65e+05  4.01e+05  3.27e-03
+   3  -1.7023233e+06   4.3264297e+06  6.39e+05  5.04e+04  1.19e+05  1.03e-02
+   4  -7.0747365e+05   1.6400349e+06  2.85e+05  2.25e+04  4.34e+04  2.49e-02
+   5  -3.3459033e+05   7.1545781e+05  1.47e+05  1.16e+04  1.79e+04  4.44e-02
+   6  -1.1938433e+05   2.8999531e+05  5.72e+04  4.51e+03  7.00e+03  9.94e-02
+   7  -5.3604974e+04   1.3879583e+05  2.59e+04  2.04e+03  3.34e+03  1.79e-01
+   8  -3.8125347e+04   8.1940930e+04  1.77e+04  1.40e+03  2.02e+03  2.59e-01
+   9  -2.1644284e+04   6.5603846e+04  1.08e+04  8.48e+02  1.59e+03  2.70e-01
+  10  -1.5677990e+04   6.0593279e+03  5.81e+03  4.58e+02  3.16e+02  6.93e-01
+  11  -9.5572964e+04  -3.0083079e+04  2.55e+03  2.01e+02  2.46e+02  2.38e-01
+  12  -1.1955556e+05  -9.9571254e+04  1.29e+03  1.02e+02  9.64e+01  7.36e-01
+  13  -1.3345726e+05  -1.0746790e+05  5.54e+02  4.37e+01  7.92e+01  9.36e-01
+  14  -1.4429125e+05  -1.3824115e+05  6.11e+01  4.82e+00  1.53e+01  5.59e+00
+  15  -1.4577512e+05  -1.4550178e+05  5.82e+00  4.59e-01  8.57e-01  1.03e+02
+  16  -1.4592256e+05  -1.4590890e+05  2.90e-01  2.29e-02  4.28e-02  2.06e+03
+  17  -1.4592993e+05  -1.4592924e+05  1.45e-02  1.15e-03  2.14e-03  4.11e+04
+  18  -1.4593030e+05  -1.4593026e+05  7.28e-04  5.74e-05  1.07e-04  8.22e+05
+  19  -1.4593032e+05  -1.4593031e+05  4.22e-05  2.87e-06  5.38e-06  1.64e+07
+  20  -1.4593032e+05  -1.4593032e+05  1.51e-05  1.44e-07  2.70e-07  3.28e+08
+  21  -1.4593032e+05  -1.4593032e+05  1.18e-05  7.20e-09  1.41e-08  6.55e+09
+Barrier time = 1.92 sec. (1131.89 ticks)
+
+Primal crossover.
+  Primal:  Fixing 25524 variables.
+    25523 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+    20758 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+    18583 PMoves:  Infeasibility  5.10544419e-07  Objective -1.45930317e+05
+    16353 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+    14929 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+    13362 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+    10651 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+     9908 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+     8040 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+     6585 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+     4738 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+     3311 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+     1610 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+      961 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+      570 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+      256 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+        0 PMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+  Primal:  Pushed 15483, exchanged 10041.
+  Dual:  Fixing 2528 variables.
+     2527 DMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective -1.45930317e+05
+  Dual:  Pushed 2528, exchanged 0.
+Using devex.
+Total crossover time = 1.05 sec. (891.38 ticks)
+
+Total time on 1 threads = 3.94 sec. (2345.98 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 3.94sec (det. 2345.98 ticks)
+
+Proven optimal solution.
+
+MIP Solution:      -145930.317113    (48597 iterations, 0 nodes)
+Final Solve:       -145930.317113    (0 iterations)
+
+Best possible:     -145930.317113
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54622) 117 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54622) 138 Mb
+--- Executing after solve: elapsed 0:02:10.560
+--- Storage_dispatch_v22_1.gms(54841) 138 Mb
+--- Storage_dispatch_v22_1.gms(54990) 138 Mb
+--- Storage_dispatch_v22_1.gms(55093) 138 Mb
+--- Storage_dispatch_v22_1.gms(55216) 139 Mb
+--- Storage_dispatch_v22_1.gms(55216) 139 Mb
+--- Putfile input_echo_file C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Output\Storage_dispatch_inputs_Test_storage_with-import_no-sale_upd-ren_contrib_v4.csv
+--- Putfile results_file C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Output\Storage_dispatch_results_Test_storage_with-import_no-sale_upd-ren_contrib_v4.csv
+--- Putfile summary_file C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\CEC_proposal_305\Output\Storage_dispatch_summary_Test_storage_with-import_no-sale_upd-ren_contrib_v4.csv
+*** Status: Normal completion
+--- Job Storage_dispatch_v22_1.gms Stop 02/18/20 23:33:48 elapsed 0:02:11.293
