@@ -47,11 +47,11 @@ $if not set NG_price_instance           $set NG_price_instance              NG_p
 $if not set ren_prof_instance           $set ren_prof_instance              renewable_profiles_PV_hourly
 $if not set NSCR_instance               $set NSCR_instance                  NSCR
 $if not set MACRS_instance              $set MACRS_instance                 MACRS_depreciation_schedule
-$if not set load_prof_instance          $set load_prof_instance             Additional_load_BLDG_hourly
-$if not set energy_purchase_price_inst  $set energy_purchase_price_inst     Energy_purchase_prices_Wholesale_MWh_hourly
-$if not set energy_sale_price_inst      $set energy_sale_price_inst         Energy_sale_prices_Wholesale_MWh_hourly
+$if not set load_prof_instance          $set load_prof_instance             Additional_load_none_hourly
+$if not set energy_purchase_price_inst  $set energy_purchase_price_inst     Energy_purchase_prices_10-2_MWh_hourly
+$if not set energy_sale_price_inst      $set energy_sale_price_inst         Energy_sale_prices_10-2_MWh_hourly
 $if not set AS_price_inst               $set AS_price_inst                  Ancillary_services_PGE2017spin_hourly
-$if not set Max_input_prof_inst         $set Max_input_prof_inst            Max_input_cap_ones_hourly
+$if not set Max_input_prof_inst         $set Max_input_prof_inst            Max_input_cap_10-20k_hourly
 $if not set Max_output_prof_inst        $set Max_output_prof_inst           Max_output_cap_ones_hourly
 $if not set Device_parameters_inst      $set Device_parameters_inst         Devices_parameters_empty
 $if not set Device_ren_params_inst      $set Device_ren_params_inst         Devices_ren_parameters_empty
@@ -63,7 +63,7 @@ $if not set gas_price_instance     $set gas_price_instance     NA
 $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
-$if not set file_name_instance     $set file_name_instance     "Test_storage_with-import_no-sale_upd-ren_contrib_with-spinning_v1"
+$if not set file_name_instance     $set file_name_instance     "Test_batch"
 $if not set devices_instance       $set devices_instance       1
 $if not set use_alt_devices        $set use_alt_devices        0
 $if not set use_all_devices        $set use_all_devices        1
@@ -71,18 +71,18 @@ $if not set use_smart_charging     $set use_smart_charging     1
 $if not set soft_cons_device_inst  $set soft_cons_device_inst  0
 $if not set devices_ren_instance   $set devices_ren_instance   1
 $if not set val_from_batch_inst    $set val_from_batch_inst    2
-$if not set input_cap_instance     $set input_cap_instance     5
-$if not set output_cap_instance    $set output_cap_instance    5
+$if not set input_cap_instance     $set input_cap_instance     1
+$if not set output_cap_instance    $set output_cap_instance    1
 
 * Set the limiting price (must be less than infinity)
-$if not set price_cap_instance     $set price_cap_instance     10000
+$if not set price_cap_instance     $set price_cap_instance     1000000000
 
 $if not set max_output_cap_inst    $set max_output_cap_inst    Inf
 * "max_input_cap_inst" must be greater than load profile otherwise infeasibilities occur
 $if not set max_input_cap_inst     $set max_input_cap_inst     Inf
 $if not set allow_import_instance  $set allow_import_instance  1
 * by default allow_sales_instance should be 1; however, when it is 0, sales variables should be prohibited
-$if not set allow_sales_instance   $set allow_sales_instance   0
+$if not set allow_sales_instance   $set allow_sales_instance   1
 
 $if not set input_LSL_instance     $set input_LSL_instance     0
 $if not set output_LSL_instance    $set output_LSL_instance    0
@@ -145,19 +145,19 @@ $if not set op_period_instance     $set op_period_instance     8760
 $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
-$if not set energy_only_instance   $set energy_only_instance   0
+$if not set energy_only_instance   $set energy_only_instance   1
 * Setting storage dissipation term increases CF above specified value and can cause infeasibilities if dissipation and/or CF are too large
 $if not set CF_adj_inst            $set CF_adj_inst            0.4
 $if not set Product_price_instance $set Product_price_instance 0
 $if not set Product_use_instance   $set Product_use_instance   0
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
-$if not set Renewable_MW_instance  $set Renewable_MW_instance  5
+$if not set Renewable_MW_instance  $set Renewable_MW_instance  0
 $if not set REC_price_inst         $set REC_price_inst         0
 
 $if not set CF_opt_instance        $set CF_opt_instance        0
 * Select to run retail or wholesale analysis (0=wholesale, 1=retail, 2=hybrid (retail for purchase and wholesale for sale))
-$if not set run_retail_instance    $set run_retail_instance    2
+$if not set run_retail_instance    $set run_retail_instance    0
 $if not set NBC_instance           $set NBC_instance           19.19
 $if not set one_active_device_inst $set one_active_device_inst 1
 $if not set ITC_inst               $set ITC_inst               0
