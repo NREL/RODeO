@@ -1,0 +1,2327 @@
+--- Job Storage_dispatch_v22_1.gms Start 07/15/20 11:12:11 27.3.0 r58c491d WEX-WEI x86 64bit/MS Windows
+--- GAMS Parameters defined
+    Input C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch_v22_1.gms
+    PageSize 0
+    ScrDir C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\
+    SysDir C:\GAMS\win64\27.3\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+GAMS 27.3.0   Copyright (C) 1987-2019 GAMS Development. All rights reserved
+Licensee: Large MUD - 20 User License                    G180911:1426CO-GEN
+          National Renewable Energy Laboratory (NREL), Strategic EnerDC3485
+          License Admin: Kelly Eurek, kelly.eurek@nrel.gov                 
+--- Starting compilation
+--- Storage_dispatch_v22_1.gms(60) 2 Mb
+--- call if not exist Projects\UCI_project\Output\nul mkdir Projects\UCI_project\Output
+--- Storage_dispatch_v22_1.gms(400) 4 Mb
+--- . Projects\UCI_project\Data_files\TXT_files\Tariff_files\5e1676e95457a3f87673e3b0_hourly.txt(52691) 5 Mb
+--- Storage_dispatch_v22_1.gms(488) 5 Mb
+--- . Projects\UCI_project\Data_files\TXT_files\Devices_parameters_empty.csv(37) 5 Mb
+--- Storage_dispatch_v22_1.gms(493) 5 Mb
+--- . Projects\UCI_project\Data_files\TXT_files\Devices_ren_parameters_empty.csv(7) 5 Mb
+--- Storage_dispatch_v22_1.gms(555) 5 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Energy_purchase_prices_Wholesale_MWh_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Energy_purchase_prices_Wholesale_MWh_hourly.gdx ID=elec_purchase_price_interim UseHeader=y Index=1 
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(556) 5 Mb
+--- Storage_dispatch_v22_1.gms(557) 5 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Energy_purchase_prices_Wholesale_MWh_hourly.gdx
+--- Storage_dispatch_v22_1.gms(561) 5 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Energy_sale_prices_Wholesale_MWh_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Energy_sale_prices_Wholesale_MWh_hourly.gdx ID=elec_sale_price_interim UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(563) 5 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Energy_sale_prices_Wholesale_MWh_hourly.gdx
+--- Storage_dispatch_v22_1.gms(567) 6 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Product_price_Price1_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Product_price_Price1_hourly.gdx ID=product_price2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 63ms
+--- Storage_dispatch_v22_1.gms(568) 6 Mb
+--- Storage_dispatch_v22_1.gms(569) 6 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Product_price_Price1_hourly.gdx
+--- Storage_dispatch_v22_1.gms(570) 6 Mb
+--- Storage_dispatch_v22_1.gms(573) 11 Mb
+
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Product_consumption\Product_consumption_ones_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Product_consumption\Product_consumption_ones_hourly.gdx ID=product_consumed2 UseHeader=y In
+No errors, CSV2GDX time = 47ms
+--- Storage_dispatch_v22_1.gms(575) 11 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Product_consumption\Product_consumption_ones_hourly.gdx
+--- Storage_dispatch_v22_1.gms(579) 17 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Input_power_baseload.csv Output=Projects\UCI_project\Data_files\TXT_files\Input_power_baseload.gdx ID=input_power_baseload UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(580) 17 Mb
+--- Storage_dispatch_v22_1.gms(581) 17 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Input_power_baseload.gdx
+--- Storage_dispatch_v22_1.gms(585) 18 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\NG_price_Price1_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\NG_price_Price1_hourly.gdx ID=NG_price UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 15ms
+--- Storage_dispatch_v22_1.gms(587) 18 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\NG_price_Price1_hourly.gdx
+--- Storage_dispatch_v22_1.gms(591) 18 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Additional_load_none_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Additional_load_none_hourly.gdx ID=Load_profile UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(593) 18 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Additional_load_none_hourly.gdx
+--- Storage_dispatch_v22_1.gms(597) 18 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\renewable_profiles_blank_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\renewable_profiles_blank_hourly.gdx ID=renewable_signal2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 63ms
+--- Storage_dispatch_v22_1.gms(598) 18 Mb
+--- Storage_dispatch_v22_1.gms(599) 18 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\renewable_profiles_blank_hourly.gdx
+--- Storage_dispatch_v22_1.gms(603) 18 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\NSCR.csv Output=Projects\UCI_project\Data_files\TXT_files\NSCR.gdx ID=NSCR UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 15ms
+--- Storage_dispatch_v22_1.gms(605) 18 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\NSCR.gdx
+--- Storage_dispatch_v22_1.gms(610) 18 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Input_cap\Max_input_cap_ones_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Input_cap\Max_input_cap_ones_hourly.gdx ID=Max_input_cap2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 78ms
+--- Storage_dispatch_v22_1.gms(612) 18 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Input_cap\Max_input_cap_ones_hourly.gdx
+--- Storage_dispatch_v22_1.gms(613) 23 Mb
+--- Storage_dispatch_v22_1.gms(616) 23 Mb
+
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Output_cap\Max_output_cap_ones_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Output_cap\Max_output_cap_ones_hourly.gdx ID=Max_output_cap2 UseHeader=y Index=1 Values=(2..LastCol)
+No errors, CSV2GDX time = 718ms
+--- Storage_dispatch_v22_1.gms(617) 23 Mb
+--- Storage_dispatch_v22_1.gms(618) 23 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Output_cap\Max_output_cap_ones_hourly.gdx
+--- Storage_dispatch_v22_1.gms(619) 57 Mb
+--- Storage_dispatch_v22_1.gms(623) 80 Mb
+
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.gdx ID=regup_price_interim UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(624) 80 Mb
+--- Storage_dispatch_v22_1.gms(625) 80 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.gdx
+--- Storage_dispatch_v22_1.gms(629) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.gdx ID=regdn_price_interim UseHeader=y Index=1 Values=3
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(631) 80 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.gdx
+--- Storage_dispatch_v22_1.gms(635) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.gdx ID=spinres_price_interim UseHeader=y Index=1 Values=4
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(636) 80 Mb
+--- Storage_dispatch_v22_1.gms(637) 80 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.gdx
+--- Storage_dispatch_v22_1.gms(641) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.csv Output=Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.gdx ID=nonspinres_price_interim UseHeader=y Index=1 Values=5
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(643) 80 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Ancillary_services_none_hourly.gdx
+--- Storage_dispatch_v22_1.gms(651) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Compressors_cost.csv Output=Projects\UCI_project\Data_files\TXT_files\Compressors_cost.gdx ID=ProdComp_cap_cost_s UseHeader=y Index=1 Values=3
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(653) 80 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Compressors_cost.gdx
+--- Storage_dispatch_v22_1.gms(657) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\Compressors_cost.csv Output=Projects\UCI_project\Data_files\TXT_files\Compressors_cost.gdx ID=input_sizes UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(658) 80 Mb
+--- Storage_dispatch_v22_1.gms(659) 80 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\Compressors_cost.gdx
+--- Storage_dispatch_v22_1.gms(674) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\MACRS_depreciation_schedule.csv Output=Projects\UCI_project\Data_files\TXT_files\MACRS_depreciation_schedule.gdx ID=depreciation_schedule UseHeader=y Index=1 Values=2
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(675) 80 Mb
+--- Storage_dispatch_v22_1.gms(676) 80 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\MACRS_depreciation_schedule.gdx
+--- Storage_dispatch_v22_1.gms(729) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\controller_input_values.csv Output=Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx ID=current_interval2 UseHeader=y Values=1
+No errors, CSV2GDX time = 16ms
+--- Storage_dispatch_v22_1.gms(731) 80 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(735) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\controller_input_values.csv Output=Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx ID=next_interval2 UseHeader=y Values=2
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(736) 80 Mb
+--- Storage_dispatch_v22_1.gms(737) 80 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(741) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\controller_input_values.csv Output=Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx ID=current_storage_lvl2 UseHeader=y Values=3
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(743) 80 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(747) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\controller_input_values.csv Output=Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx ID=current_monthly_max2 UseHeader=y Values=4
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(748) 80 Mb
+--- Storage_dispatch_v22_1.gms(749) 80 Mb
+
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(753) 80 Mb
+--- call CSV2GDX Projects\UCI_project\Data_files\TXT_files\controller_input_values.csv Output=Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx ID=max_interval2 UseHeader=y Values=5
+No errors, CSV2GDX time = 0ms
+--- Storage_dispatch_v22_1.gms(755) 80 Mb
+--- GDXin=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\TXT_files\controller_input_values.gdx
+--- Storage_dispatch_v22_1.gms(769) 80 Mb
+--- call rm -rf Projects\UCI_project\Data_files\TXT_files\*.gdx
+--- Storage_dispatch_v22_1.gms(770) 80 Mb
+--- call rm -rf Projects\UCI_project\Data_files\TXT_files\Product_consumption\*.gdx
+--- Storage_dispatch_v22_1.gms(771) 80 Mb
+--- call rm -rf Projects\UCI_project\Data_files\TXT_files\Input_cap\*.gdx
+--- Storage_dispatch_v22_1.gms(772) 80 Mb
+--- call rm -rf Projects\UCI_project\Data_files\TXT_files\Output_cap\*.gdx
+--- Storage_dispatch_v22_1.gms(773) 80 Mb
+--- Storage_dispatch_v22_1.gms(2926) 80 Mb
+
+--- Starting execution: elapsed 0:00:04.516
+--- Storage_dispatch_v22_1.gms(53433) 82 Mb
+--- Storage_dispatch_v22_1.gms(54389) 106 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 106 Mb
+--- Storage_dispatch_v22_1.gms(53979) 106 Mb
+--- Storage_dispatch_v22_1.gms(54015) 115 Mb
+--- Storage_dispatch_v22_1.gms(54045) 129 Mb
+--- Storage_dispatch_v22_1.gms(54156) 134 Mb
+--- Storage_dispatch_v22_1.gms(54226) 154 Mb
+--- Storage_dispatch_v22_1.gms(54230) 159 Mb
+--- Storage_dispatch_v22_1.gms(54531) 179 Mb
+--- Storage_dispatch_v22_1.gms(54531) 180 Mb
+--- Storage_dispatch_v22_1.gms(54531) 181 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 1
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:00:06.438
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 0
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 262911 rows and 271668 columns.
+MIP Presolve modified 2 coefficients.
+Aggregator did 17537 substitutions.
+Reduced MIP has 8742 rows, 17502 columns, and 34984 nonzeros.
+Reduced MIP has 0 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.56 sec. (358.83 ticks)
+Tried aggregator 1 time.
+Reduced MIP has 8742 rows, 17502 columns, and 34984 nonzeros.
+Reduced MIP has 0 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.06 sec. (23.33 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =      -2101269.952653
+Iteration:   391   Dual objective     =      -2205030.414349
+Iteration:   747   Dual objective     =      -2287749.235183
+Iteration:  1071   Dual objective     =      -2320857.553557
+Iteration:  1361   Dual objective     =      -2361512.745528
+Iteration:  1819   Dual objective     =      -2384003.280811
+Iteration:  2154   Dual objective     =      -2424507.039339
+Iteration:  2307   Dual objective     =      -2459272.500320
+Iteration:  2414   Dual objective     =      -2470596.445096
+Iteration:  2573   Dual objective     =      -2473852.595327
+Iteration:  2744   Dual objective     =      -2474445.152839
+Iteration:  2884   Dual objective     =      -2474696.090546
+Root relaxation solution time = 0.52 sec. (619.90 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0     0      integral     0 -2474703.9011 -2474703.9011     2934    0.00%
+Elapsed time = 1.27 sec. (1057.40 ticks, tree = 0.00 MB, solutions = 1)
+Found incumbent of value -2474703.901144 after 1.27 sec. (1057.40 ticks)
+
+Root node processing (before b&c):
+  Real time             =    1.33 sec. (1067.13 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    1.33 sec. (1067.13 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 1.33sec (det. 1068.01 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254136 rows and 262893 columns.
+Aggregator did 26312 substitutions.
+Reduced LP has 8742 rows, 17502 columns, and 34984 nonzeros.
+Presolve time = 0.56 sec. (590.47 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 1 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 8741
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (1.07 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8743
+  Integer space required    = 9713
+  Total non-zeros in factor = 100486
+  Total FP ops to factor    = 1390344
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0  -2.7991083e+06   4.4124064e+07  1.00e+01  8.76e+03  1.54e-10  1.00e+00
+   1  -2.6612129e+06   1.1784420e+07  1.37e+00  1.20e+03  2.10e-09  1.00e-02
+   2  -2.6178071e+06   5.1475107e+04  6.77e-02  5.93e+01  7.39e-10  3.18e-02
+   3  -2.5483579e+06  -1.8851762e+06  9.40e-03  8.23e+00  1.63e-09  1.06e-01
+   4  -2.5188111e+06  -2.2295995e+06  4.02e-03  3.52e+00  7.78e-10  2.12e-01
+   5  -2.5062415e+06  -2.3491324e+06  2.44e-03  2.14e+00  4.74e-10  3.58e-01
+   6  -2.4964298e+06  -2.4148744e+06  1.69e-03  1.48e+00  1.92e-10  6.69e-01
+   7  -2.4871903e+06  -2.4410489e+06  1.08e-03  9.44e-01  1.30e-09  1.13e+00
+   8  -2.4833640e+06  -2.4493196e+06  7.84e-04  6.87e-01  2.19e-09  1.44e+00
+   9  -2.4805649e+06  -2.4594527e+06  5.57e-04  4.88e-01  5.58e-10  2.25e+00
+  10  -2.4781199e+06  -2.4644191e+06  3.44e-04  3.02e-01  1.02e-09  3.22e+00
+  11  -2.4766937e+06  -2.4674909e+06  2.01e-04  1.76e-01  1.20e-09  4.48e+00
+  12  -2.4758691e+06  -2.4703344e+06  1.14e-04  9.99e-02  7.28e-10  7.14e+00
+  13  -2.4755557e+06  -2.4720270e+06  8.16e-05  7.15e-02  1.25e-09  1.12e+01
+  14  -2.4751050e+06  -2.4730637e+06  3.82e-05  3.35e-02  5.53e-10  1.80e+01
+  15  -2.4749317e+06  -2.4741828e+06  2.10e-05  1.84e-02  1.37e-09  5.46e+01
+  16  -2.4747547e+06  -2.4744266e+06  4.77e-06  4.18e-03  1.23e-09  1.02e+02
+  17  -2.4747153e+06  -2.4746446e+06  1.06e-06  9.27e-04  4.82e-09  4.76e+02
+  18  -2.4747053e+06  -2.4746862e+06  1.01e-07  8.81e-05  1.01e-09  1.58e+03
+  19  -2.4747040e+06  -2.4747026e+06  5.20e-09  4.44e-06  2.89e-09  2.12e+04
+  20  -2.4747039e+06  -2.4747038e+06  3.84e-10  2.22e-07  4.56e-09  4.23e+05
+  21  -2.4747039e+06  -2.4747039e+06  1.30e-10  1.11e-08  1.84e-09  8.45e+06
+  22  -2.4747039e+06  -2.4747039e+06  1.42e-10  5.59e-10  2.15e-09  1.69e+08
+  23  -2.4747039e+06  -2.4747039e+06  1.68e-10  3.23e-11  1.25e-09  3.37e+09
+Barrier time = 0.27 sec. (279.83 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 8 variables.
+        7 DMoves:  Infeasibility  0.00000000e+00  Objective -2.47470390e+06
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective -2.47470390e+06
+  Dual:  Pushed 0, exchanged 8.
+Using devex.
+Total crossover time = 0.30 sec. (201.49 ticks)
+
+Total time on 1 threads = 1.17 sec. (1080.79 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.17sec (det. 1080.79 ticks)
+
+Proven optimal solution.
+
+MIP Solution:     -2474703.901144    (2934 iterations, 0 nodes)
+Final Solve:      -2474703.901143    (0 iterations)
+
+Best possible:    -2474703.901144
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 115 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 118 Mb
+--- Storage_dispatch_v22_1.gms(54531) 119 Mb
+--- Storage_dispatch_v22_1.gms(54531) 120 Mb
+--- Storage_dispatch_v22_1.gms(54531) 121 Mb
+--- Storage_dispatch_v22_1.gms(54531) 122 Mb
+--- Storage_dispatch_v22_1.gms(54531) 124 Mb
+--- Storage_dispatch_v22_1.gms(54531) 125 Mb
+--- Storage_dispatch_v22_1.gms(54531) 126 Mb
+--- Storage_dispatch_v22_1.gms(54531) 127 Mb
+--- Storage_dispatch_v22_1.gms(54531) 128 Mb
+--- Storage_dispatch_v22_1.gms(54531) 129 Mb
+--- Storage_dispatch_v22_1.gms(54531) 130 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 131 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 132 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 133 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 133 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54531) 134 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54531) 135 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54531) 136 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54531) 137 Mb  4 secs
+
+--- Executing after solve: elapsed 0:00:15.439
+--- Storage_dispatch_v22_1.gms(54389) 137 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53878) 137 Mb
+--- Storage_dispatch_v22_1.gms(53899) 138 Mb
+--- Storage_dispatch_v22_1.gms(53899) 140 Mb
+--- Storage_dispatch_v22_1.gms(54012) 155 Mb
+--- Storage_dispatch_v22_1.gms(54021) 161 Mb
+--- Storage_dispatch_v22_1.gms(54174) 188 Mb
+--- Storage_dispatch_v22_1.gms(54199) 193 Mb
+--- Storage_dispatch_v22_1.gms(54215) 207 Mb
+--- Storage_dispatch_v22_1.gms(54278) 209 Mb
+--- Storage_dispatch_v22_1.gms(54258) 224 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 2
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:00:17.918
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 1.06 sec. (675.43 ticks)
+Probing fixed 0 vars, tightened 36 bounds.
+Probing time = 0.00 sec. (5.86 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 2 rows and 0 columns.
+MIP Presolve modified 45 coefficients.
+Reduced MIP has 8834 rows, 17565 columns, and 44043 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.06 sec. (26.41 ticks)
+Probing fixed 0 vars, tightened 30 bounds.
+Probing time = 0.00 sec. (5.85 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =     101345006.812869
+Iteration:   103   Dual objective     =      19505979.357333
+Iteration:   601   Dual objective     =      18542469.331545
+Iteration:  1074   Dual objective     =      14507205.943849
+Iteration:  1509   Dual objective     =      12009440.386554
+Iteration:  1913   Dual objective     =       9382730.396924
+Iteration:  2267   Dual objective     =       7780037.160793
+Iteration:  2517   Dual objective     =       7726925.438536
+Iteration:  2683   Dual objective     =       7282776.602435
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       6908598.978298
+Root relaxation solution time = 0.55 sec. (510.22 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0  6908598.9783     4                6908598.9783     2772         
+*     0+    0                      6908598.9783  6908598.9783             0.00%
+Found incumbent of value 6908598.978298 after 2.00 sec. (1381.56 ticks)
+      0     0        cutoff        6908598.9783  6908598.9783     2772    0.00%
+Elapsed time = 2.00 sec. (1381.56 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    2.06 sec. (1391.54 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    2.06 sec. (1391.54 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 2.06sec (det. 1392.42 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254108 rows and 262878 columns.
+Aggregator did 26281 substitutions.
+Reduced LP has 8801 rows, 17548 columns, and 43918 nonzeros.
+Presolve time = 0.72 sec. (597.47 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 2 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17595
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8803
+  Integer space required    = 10278
+  Total non-zeros in factor = 109776
+  Total FP ops to factor    = 1606562
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   3.3897745e+08   1.0596950e+09  1.12e+04  6.38e+04  2.63e+02  1.00e+00
+   1   4.1903676e+08   8.5838112e+08  9.32e+03  5.31e+04  4.58e+01  3.19e-04
+   2   2.3744274e+08   6.0600983e+08  9.91e+03  5.64e+04  5.05e+01  1.57e-04
+   3   1.9380617e+08   4.0454896e+08  5.08e+03  2.89e+04  2.83e+01  1.48e-04
+   4   1.0335305e+08   1.1163596e+08  1.87e+03  1.06e+04  4.86e+00  3.24e-04
+   5   4.4689200e+07   4.7840309e+07  6.78e+02  3.86e+03  1.78e+00  8.93e-04
+   6   2.7374739e+07   3.8378911e+07  3.61e+02  2.06e+03  1.36e+00  1.05e-03
+   7   1.3042821e+07   3.2179019e+07  1.07e+02  6.10e+02  1.09e+00  1.26e-03
+   8   1.0447789e+07   1.8552248e+07  5.82e+01  3.31e+02  4.91e-01  2.72e-03
+   9   9.1145485e+06   1.4790475e+07  3.46e+01  1.97e+02  3.29e-01  3.86e-03
+  10   7.9480210e+06   1.2380423e+07  1.85e+01  1.05e+02  2.32e-01  5.17e-03
+  11   7.1084312e+06   9.2596613e+06  5.72e+00  3.26e+01  1.04e-01  1.13e-02
+  12   6.9473272e+06   7.3034979e+06  1.32e+00  7.52e+00  1.78e-02  6.79e-02
+  13   6.9138791e+06   6.9434755e+06  1.50e-01  8.55e-01  1.53e-03  7.93e-01
+  14   6.9090155e+06   6.9107004e+06  1.15e-02  6.57e-02  9.19e-05  1.32e+01
+  15   6.9086199e+06   6.9087045e+06  5.79e-04  3.29e-03  4.77e-06  2.64e+02
+  16   6.9086000e+06   6.9086043e+06  2.90e-05  1.65e-04  3.87e-07  5.26e+03
+  17   6.9085990e+06   6.9085992e+06  1.45e-06  8.26e-06  1.65e-07  1.05e+05
+  18   6.9085990e+06   6.9085990e+06  7.26e-08  4.13e-07  1.49e-07  2.09e+06
+  19   6.9085990e+06   6.9085990e+06  3.64e-09  2.07e-08  1.59e-07  4.18e+07
+Barrier time = 0.33 sec. (264.77 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 13 variables.
+       12 DMoves:  Infeasibility  0.00000000e+00  Objective  6.90859898e+06
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  6.90859898e+06
+  Dual:  Pushed 0, exchanged 13.
+Using devex.
+Total crossover time = 0.40 sec. (293.01 ticks)
+
+Total time on 1 threads = 1.48 sec. (1164.54 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.48sec (det. 1164.54 ticks)
+
+Proven optimal solution.
+
+MIP Solution:      6908598.978298    (2772 iterations, 0 nodes)
+Final Solve:       6908598.978297    (0 iterations)
+
+Best possible:     6908598.978298
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  5 secs
+--- Executing after solve: elapsed 0:00:28.648
+--- Storage_dispatch_v22_1.gms(54531) 160 Mb  5 secs
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(53899) 164 Mb
+--- Storage_dispatch_v22_1.gms(54015) 176 Mb
+--- Storage_dispatch_v22_1.gms(54156) 190 Mb
+--- Storage_dispatch_v22_1.gms(54162) 194 Mb
+--- Storage_dispatch_v22_1.gms(54177) 206 Mb
+--- Storage_dispatch_v22_1.gms(54215) 212 Mb
+--- Storage_dispatch_v22_1.gms(54258) 224 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 3
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:00:31.146
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.97 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 56 bounds.
+Probing time = 0.01 sec. (6.92 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 11 substitutions.
+Reduced MIP has 8819 rows, 17552 columns, and 43996 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.08 sec. (33.78 ticks)
+Probing fixed 1 vars, tightened 46 bounds.
+Probing time = 0.01 sec. (6.17 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:    63   Dual objective     =       3505030.920299
+Iteration:   181   Dual objective     =       3505030.920299
+Perturbation started.
+Iteration:   202   Dual objective     =       3505030.920299
+Iteration:   302   Dual objective     =       3505030.920257
+Iteration:   402   Dual objective     =       3505030.920228
+Iteration:   502   Dual objective     =       3505030.920202
+Iteration:   602   Dual objective     =       3505030.920179
+Iteration:   702   Dual objective     =       3505030.920154
+Iteration:   802   Dual objective     =       3505030.920133
+Iteration:   902   Dual objective     =       3505030.920113
+Iteration:  1002   Dual objective     =       3505030.920092
+Iteration:  1102   Dual objective     =       3505030.920071
+Iteration:  1314   Dual objective     =       3505030.919901
+Iteration:  1713   Dual objective     =       3505030.919835
+Iteration:  2053   Dual objective     =       3505030.919751
+Iteration:  2345   Dual objective     =       2885156.406659
+Iteration:  2605   Dual objective     =       2758696.558167
+Iteration:  2783   Dual objective     =       2551463.136241
+Removing perturbation.
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       2393318.831105
+Root relaxation solution time = 2.86 sec. (2968.59 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0  2393318.8311     8                2393318.8311     2848         
+*     0+    0                      2393318.8311  2393318.8311             0.00%
+Found incumbent of value 2393318.831105 after 4.23 sec. (3853.05 ticks)
+      0     0        cutoff        2393318.8311  2393318.8311     2848    0.00%
+Elapsed time = 4.23 sec. (3853.05 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    4.28 sec. (3863.03 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    4.28 sec. (3863.03 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 4.30sec (det. 3863.90 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254112 rows and 262880 columns.
+Aggregator did 26283 substitutions.
+Reduced LP has 8795 rows, 17544 columns, and 43900 nonzeros.
+Presolve time = 0.75 sec. (591.78 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 2 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17583
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8797
+  Integer space required    = 10272
+  Total non-zeros in factor = 109695
+  Total FP ops to factor    = 1605451
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   3.3653993e+08   1.8439913e+07  1.92e+04  2.21e+05  2.13e+02  1.00e+00
+   1   3.2289533e+07   1.6234327e+07  1.66e+03  1.91e+04  1.83e+01  1.98e+01
+   2   7.6425272e+06   5.1579557e+06  2.36e+02  2.72e+03  1.51e+00  4.20e+02
+   3   5.8836031e+06   3.8315528e+06  1.33e+02  1.53e+03  1.52e-01  9.19e+03
+   4   5.3205030e+06   3.7511412e+06  9.81e+01  1.13e+03  2.81e-02  1.46e+05
+   5   4.3319977e+06   3.5247116e+06  4.57e+01  5.26e+02  5.51e-03  9.19e+05
+   6   4.0084804e+06   3.3695121e+06  3.68e+01  4.24e+02  4.52e-03  1.06e+06
+   7   3.1537943e+06   3.1071706e+06  1.86e+01  2.14e+02  3.43e-03  1.07e+06
+   8   2.6208441e+06   2.8038143e+06  6.50e+00  7.48e+01  2.08e-03  1.58e+06
+   9   2.4283895e+06   2.4705849e+06  1.08e+00  1.24e+01  4.05e-04  8.70e+06
+  10   2.3960646e+06   2.4004174e+06  8.52e-02  9.81e-01  3.75e-05  9.53e+07
+  11   2.3934657e+06   2.3936789e+06  4.55e-03  5.24e-02  2.02e-06  1.88e+09
+  12   2.3933262e+06   2.3933369e+06  2.28e-04  2.62e-03  2.41e-07  3.77e+10
+  13   2.3933192e+06   2.3933197e+06  1.14e-05  1.31e-04  1.16e-07  7.53e+11
+  14   2.3933188e+06   2.3933189e+06  5.72e-07  6.58e-06  1.17e-07  1.51e+13
+  15   2.3933188e+06   2.3933188e+06  2.87e-08  3.30e-07  9.21e-08  3.01e+14
+Barrier time = 0.28 sec. (210.37 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 11 variables.
+       10 DMoves:  Infeasibility  0.00000000e+00  Objective  2.39331883e+06
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  2.39331883e+06
+  Dual:  Pushed 0, exchanged 11.
+Using devex.
+Total crossover time = 0.36 sec. (292.89 ticks)
+
+Total time on 1 threads = 1.42 sec. (1104.32 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.42sec (det. 1104.32 ticks)
+
+Proven optimal solution.
+
+MIP Solution:      2393318.831105    (2848 iterations, 0 nodes)
+Final Solve:       2393318.831104    (0 iterations)
+
+Best possible:     2393318.831105
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  5 secs
+--- Executing after solve: elapsed 0:00:44.067
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(54045) 187 Mb
+--- Storage_dispatch_v22_1.gms(54051) 192 Mb
+--- Storage_dispatch_v22_1.gms(54222) 204 Mb
+--- Storage_dispatch_v22_1.gms(54177) 207 Mb
+--- Storage_dispatch_v22_1.gms(54036) 220 Mb
+--- Storage_dispatch_v22_1.gms(54251) 224 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 4
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:00:46.403
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 1.09 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 52 bounds.
+Probing time = 0.01 sec. (6.36 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 8823 rows, 17556 columns, and 44008 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.09 sec. (33.75 ticks)
+Probing fixed 1 vars, tightened 46 bounds.
+Probing time = 0.00 sec. (5.94 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:   115   Dual objective     =       3505030.920299
+Perturbation started.
+Iteration:   202   Dual objective     =       3505030.920299
+Iteration:   551   Dual objective     =       3447152.752544
+Iteration:   774   Dual objective     =       2932242.794807
+Iteration:  1324   Dual objective     =       2816341.210074
+Iteration:  1766   Dual objective     =       1932688.311541
+Iteration:  2124   Dual objective     =       1851263.404938
+Iteration:  2434   Dual objective     =       1389955.916045
+Iteration:  2522   Dual objective     =       1182891.065369
+Iteration:  2706   Dual objective     =       1126326.593914
+Iteration:  2793   Dual objective     =        985777.825186
+Removing perturbation.
+
+Iteration log . . .
+Iteration:     1   Dual objective     =        974461.956769
+Root relaxation solution time = 0.86 sec. (733.61 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0   974461.9568     6                 974461.9568     2797         
+*     0+    0                       974461.9568   974461.9568             0.00%
+Found incumbent of value 974461.956769 after 2.42 sec. (1617.65 ticks)
+      0     0        cutoff         974461.9568   974461.9568     2797    0.00%
+Elapsed time = 2.42 sec. (1617.65 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    2.47 sec. (1626.17 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    2.47 sec. (1626.17 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 2.47sec (det. 1627.05 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254118 rows and 262883 columns.
+Aggregator did 26286 substitutions.
+Reduced LP has 8786 rows, 17538 columns, and 43873 nonzeros.
+Presolve time = 0.88 sec. (591.74 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 2 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17565
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.02 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8788
+  Integer space required    = 10251
+  Total non-zeros in factor = 109644
+  Total FP ops to factor    = 1605062
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   3.0955223e+08   6.4679674e+06  2.80e+04  3.58e+05  7.35e+01  1.00e+00
+   1   2.0608541e+07   5.3149321e+06  1.76e+03  2.25e+04  4.62e+00  1.98e+01
+   2   2.9947736e+06   1.7418758e+06  1.67e+02  2.12e+03  3.14e-01  4.11e+02
+   3   1.9692232e+06   1.2502409e+06  7.29e+01  9.31e+02  2.69e-02  8.92e+03
+   4   1.6665809e+06   1.2122347e+06  4.41e+01  5.63e+02  3.80e-03  1.73e+05
+   5   1.3671004e+06   1.1637829e+06  1.81e+01  2.32e+02  3.97e-04  3.44e+06
+   6   1.2798626e+06   1.1481792e+06  1.11e+01  1.41e+02  8.65e-05  2.94e+07
+   7   1.1682456e+06   1.0356583e+06  6.30e+00  8.04e+01  1.05e-05  6.75e+07
+   8   9.9190405e+05   9.8308857e+05  5.68e-01  7.25e+00  1.82e-06  4.33e+08
+   9   9.7558837e+05   9.7493323e+05  3.67e-02  4.68e-01  3.93e-07  7.97e+09
+  10   9.7451843e+05   9.7448559e+05  1.84e-03  2.35e-02  3.14e-07  1.59e+11
+  11   9.7446478e+05   9.7446314e+05  9.21e-05  1.17e-03  3.02e-07  3.18e+12
+  12   9.7446210e+05   9.7446202e+05  4.61e-06  5.88e-05  2.87e-07  6.35e+13
+  13   9.7446196e+05   9.7446196e+05  2.31e-07  2.95e-06  1.61e-07  1.27e+15
+  14   9.7446196e+05   9.7446196e+05  1.16e-08  1.47e-07  1.48e-07  2.54e+16
+Barrier time = 0.27 sec. (199.91 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 8 variables.
+        7 DMoves:  Infeasibility  0.00000000e+00  Objective  9.74461957e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  9.74461957e+05
+  Dual:  Pushed 0, exchanged 8.
+Using devex.
+Total crossover time = 0.49 sec. (300.27 ticks)
+
+Total time on 1 threads = 1.67 sec. (1101.21 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.67sec (det. 1101.21 ticks)
+
+Proven optimal solution.
+
+MIP Solution:       974461.956769    (2797 iterations, 0 nodes)
+Final Solve:        974461.956769    (0 iterations)
+
+Best possible:      974461.956769
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  5 secs
+--- Executing after solve: elapsed 0:00:58.279
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(54027) 180 Mb
+--- Storage_dispatch_v22_1.gms(54045) 185 Mb
+--- Storage_dispatch_v22_1.gms(54189) 198 Mb
+--- Storage_dispatch_v22_1.gms(54199) 200 Mb
+--- Storage_dispatch_v22_1.gms(54275) 212 Mb
+--- Storage_dispatch_v22_1.gms(54069) 213 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 5
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:01:00.736
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.98 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 52 bounds.
+Probing time = 0.00 sec. (6.31 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 8823 rows, 17556 columns, and 44008 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.08 sec. (33.75 ticks)
+Probing fixed 1 vars, tightened 44 bounds.
+Probing time = 0.02 sec. (5.86 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:   376   Dual objective     =       3336259.569240
+Iteration:   575   Dual objective     =       2247838.415876
+Iteration:  1101   Dual objective     =       1880573.663347
+Iteration:  1646   Dual objective     =       1799190.343331
+Iteration:  2011   Dual objective     =       1501236.074506
+Iteration:  2295   Dual objective     =        952075.801094
+Iteration:  2438   Dual objective     =        848532.783717
+Iteration:  2583   Dual objective     =        689616.110394
+Iteration:  2670   Dual objective     =        626460.970618
+
+Iteration log . . .
+Iteration:     1   Dual objective     =        542804.845606
+Root relaxation solution time = 0.53 sec. (477.15 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0     0      integral     0   542804.8456   542804.8456     2774    0.00%
+Elapsed time = 1.86 sec. (1307.27 ticks, tree = 0.00 MB, solutions = 1)
+Found incumbent of value 542804.845606 after 1.86 sec. (1307.27 ticks)
+
+Root node processing (before b&c):
+  Real time             =    1.91 sec. (1317.25 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    1.91 sec. (1317.25 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 1.91sec (det. 1318.12 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254120 rows and 262884 columns.
+Aggregator did 26287 substitutions.
+Reduced LP has 8783 rows, 17536 columns, and 43864 nonzeros.
+Presolve time = 0.84 sec. (591.73 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 1 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17772
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.02 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8784
+  Integer space required    = 10243
+  Total non-zeros in factor = 109730
+  Total FP ops to factor    = 1607680
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   2.3310035e+08   5.3965906e+06  1.81e+04  2.65e+05  6.35e+01  1.00e+00
+   1   1.4010555e+07   2.5373680e+06  1.02e+03  1.51e+04  3.60e+00  1.98e+01
+   2   2.2394218e+06   1.1280345e+06  1.13e+02  1.65e+03  2.43e-01  4.13e+02
+   3   1.8404284e+06   8.7835590e+05  8.09e+01  1.19e+03  2.32e-02  8.55e+03
+   4   1.5127410e+06   8.9744347e+05  5.28e+01  7.76e+02  4.02e-03  1.70e+05
+   5   1.0770532e+06   8.0799171e+05  2.08e+01  3.06e+02  5.46e-04  1.71e+06
+   6   9.8480764e+05   7.7124351e+05  1.48e+01  2.18e+02  1.70e-04  9.45e+06
+   7   7.2964822e+05   5.9157882e+05  6.26e+00  9.21e+01  3.59e-05  2.33e+07
+   8   5.5953715e+05   5.4782467e+05  5.60e-01  8.24e+00  3.77e-06  2.41e+08
+   9   5.4384237e+05   5.4308769e+05  3.47e-02  5.10e-01  3.11e-07  4.31e+09
+  10   5.4285684e+05   5.4281903e+05  1.74e-03  2.56e-02  1.17e-07  8.61e+10
+  11   5.4280745e+05   5.4280556e+05  8.70e-05  1.28e-03  1.11e-07  1.72e+12
+  12   5.4280498e+05   5.4280488e+05  4.36e-06  6.41e-05  1.01e-07  3.44e+13
+  13   5.4280485e+05   5.4280485e+05  2.19e-07  3.21e-06  9.73e-08  6.88e+14
+  14   5.4280485e+05   5.4280485e+05  1.10e-08  1.61e-07  1.02e-07  1.38e+16
+Barrier time = 0.25 sec. (197.53 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 7 variables.
+        6 DMoves:  Infeasibility  0.00000000e+00  Objective  5.42804846e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  5.42804846e+05
+  Dual:  Pushed 0, exchanged 7.
+Using devex.
+Total crossover time = 0.50 sec. (300.80 ticks)
+
+Total time on 1 threads = 1.63 sec. (1099.36 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.63sec (det. 1099.36 ticks)
+
+Proven optimal solution.
+
+MIP Solution:       542804.845606    (2774 iterations, 0 nodes)
+Final Solve:        542804.845606    (0 iterations)
+
+Best possible:      542804.845606
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  5 secs
+--- Executing after solve: elapsed 0:01:11.840
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 162 Mb
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(54012) 176 Mb
+--- Storage_dispatch_v22_1.gms(54018) 178 Mb
+--- Storage_dispatch_v22_1.gms(54171) 196 Mb
+--- Storage_dispatch_v22_1.gms(54189) 198 Mb
+--- Storage_dispatch_v22_1.gms(54215) 212 Mb
+--- Storage_dispatch_v22_1.gms(54076) 213 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 6
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:01:14.393
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.97 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 52 bounds.
+Probing time = 0.00 sec. (6.34 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 8823 rows, 17556 columns, and 44008 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.08 sec. (33.75 ticks)
+Probing fixed 1 vars, tightened 44 bounds.
+Probing time = 0.00 sec. (5.86 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:   372   Dual objective     =       3288429.311362
+Iteration:   521   Dual objective     =       2790335.854887
+Iteration:  1095   Dual objective     =       2643621.772565
+Iteration:  1564   Dual objective     =       1546429.034519
+Iteration:  1970   Dual objective     =       1290538.894888
+Iteration:  2148   Dual objective     =       1254026.245444
+Iteration:  2286   Dual objective     =        698791.536238
+Iteration:  2376   Dual objective     =        680776.237403
+Iteration:  2569   Dual objective     =        556661.430680
+Iteration:  2727   Dual objective     =        471172.690162
+
+Iteration log . . .
+Iteration:     1   Dual objective     =        419350.514741
+Root relaxation solution time = 0.56 sec. (478.01 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0   419350.5147     1                 419350.5147     2772         
+*     0+    0                       419350.5147   419350.5147             0.00%
+Found incumbent of value 419350.514741 after 1.94 sec. (1366.65 ticks)
+      0     0        cutoff         419350.5147   419350.5147     2772    0.00%
+Elapsed time = 1.94 sec. (1366.65 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    1.98 sec. (1376.63 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    1.98 sec. (1376.63 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 1.98sec (det. 1377.51 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254122 rows and 262885 columns.
+Aggregator did 26288 substitutions.
+Reduced LP has 8780 rows, 17534 columns, and 43855 nonzeros.
+Presolve time = 0.73 sec. (591.73 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 1 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17709
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.02 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8781
+  Integer space required    = 10240
+  Total non-zeros in factor = 109664
+  Total FP ops to factor    = 1606226
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   2.2341604e+08   4.4216635e+06  1.83e+04  2.61e+05  5.38e+01  1.00e+00
+   1   1.2868068e+07   1.8369135e+06  1.02e+03  1.44e+04  2.98e+00  1.99e+01
+   2   2.0714895e+06   7.3874839e+05  1.31e+02  1.86e+03  1.91e-01  4.10e+02
+   3   1.3965576e+06   5.6559189e+05  7.39e+01  1.05e+03  1.83e-02  8.59e+03
+   4   1.1527429e+06   5.8381325e+05  5.18e+01  7.35e+02  3.28e-03  1.72e+05
+   5   6.7215512e+05   4.9696093e+05  1.46e+01  2.08e+02  4.55e-04  1.44e+06
+   6   5.6143275e+05   4.8300338e+05  6.15e+00  8.74e+01  5.74e-05  2.81e+07
+   7   5.1317380e+05   4.6597945e+05  3.09e+00  4.38e+01  4.13e-06  2.86e+08
+   8   4.2018219e+05   4.2739617e+05  2.99e-01  4.24e+00  1.55e-06  3.40e+08
+   9   4.1944668e+05   4.1984950e+05  1.91e-02  2.72e-01  1.23e-07  5.84e+09
+  10   4.1935537e+05   4.1937556e+05  9.60e-04  1.36e-02  5.96e-08  1.17e+11
+  11   4.1935076e+05   4.1935177e+05  4.81e-05  6.83e-04  5.39e-08  2.33e+12
+  12   4.1935053e+05   4.1935058e+05  2.41e-06  3.42e-05  5.74e-08  4.65e+13
+  13   4.1935052e+05   4.1935052e+05  1.21e-07  1.71e-06  4.98e-08  9.28e+14
+  14   4.1935051e+05   4.1935051e+05  7.41e-09  8.57e-08  4.97e-08  1.85e+16
+Barrier time = 0.23 sec. (197.44 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 6 variables.
+        5 DMoves:  Infeasibility  0.00000000e+00  Objective  4.19350515e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  4.19350515e+05
+  Dual:  Pushed 0, exchanged 6.
+Using devex.
+Total crossover time = 0.44 sec. (300.93 ticks)
+
+Total time on 1 threads = 1.44 sec. (1099.39 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.44sec (det. 1099.39 ticks)
+
+Proven optimal solution.
+
+MIP Solution:       419350.514741    (2772 iterations, 0 nodes)
+Final Solve:        419350.514741    (0 iterations)
+
+Best possible:      419350.514741
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  5 secs
+--- Executing after solve: elapsed 0:01:24.913
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 161 Mb
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(54015) 176 Mb--- Storage_dispatch_v22_1.gms(54018) 179 Mb
+--- Storage_dispatch_v22_1.gms(54018) 179 Mb
+--- Storage_dispatch_v22_1.gms(54162) 192 Mb
+--- Storage_dispatch_v22_1.gms(54171) 196 Mb
+--- Storage_dispatch_v22_1.gms(54230) 208 Mb
+--- Storage_dispatch_v22_1.gms(54278) 212 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 7
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:01:27.455
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 1.02 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 52 bounds.
+Probing time = 0.00 sec. (6.36 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 8823 rows, 17556 columns, and 44008 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.08 sec. (33.75 ticks)
+Probing fixed 1 vars, tightened 44 bounds.
+Probing time = 0.02 sec. (5.86 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:   376   Dual objective     =       3274762.653679
+Iteration:   556   Dual objective     =       2413872.601932
+Iteration:  1034   Dual objective     =       1623341.588489
+Iteration:  1586   Dual objective     =       1535387.489299
+Iteration:  2018   Dual objective     =       1457483.060398
+Iteration:  2130   Dual objective     =       1231295.831911
+Iteration:  2295   Dual objective     =        739319.008690
+Iteration:  2425   Dual objective     =        703879.887065
+Iteration:  2535   Dual objective     =        521520.503894
+Iteration:  2672   Dual objective     =        433180.929760
+
+Iteration log . . .
+Iteration:     1   Dual objective     =        385112.915170
+Root relaxation solution time = 0.55 sec. (462.38 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0   385112.9152     3                 385112.9152     2717         
+*     0+    0                       385112.9152   385112.9152             0.00%
+Found incumbent of value 385112.915170 after 1.95 sec. (1351.39 ticks)
+      0     0        cutoff         385112.9152   385112.9152     2717    0.00%
+Elapsed time = 1.95 sec. (1351.39 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    1.98 sec. (1359.91 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    1.98 sec. (1359.91 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 1.98sec (det. 1360.79 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254122 rows and 262885 columns.
+Aggregator did 26288 substitutions.
+Reduced LP has 8780 rows, 17534 columns, and 43855 nonzeros.
+Presolve time = 0.83 sec. (591.73 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 1 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17709
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.02 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8781
+  Integer space required    = 10240
+  Total non-zeros in factor = 109664
+  Total FP ops to factor    = 1606226
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   2.2341597e+08   4.4217344e+06  1.87e+04  2.63e+05  5.38e+01  1.00e+00
+   1   1.2867237e+07   1.8360231e+06  1.03e+03  1.46e+04  2.98e+00  1.99e+01
+   2   2.0973964e+06   7.3886695e+05  1.35e+02  1.91e+03  1.91e-01  4.10e+02
+   3   1.4415732e+06   5.7116437e+05  7.89e+01  1.11e+03  1.88e-02  8.57e+03
+   4   1.2009822e+06   5.9751879e+05  5.64e+01  7.95e+02  3.64e-03  1.58e+05
+   5   6.9061397e+05   5.0062130e+05  1.63e+01  2.31e+02  5.76e-04  1.13e+06
+   6   5.8819303e+05   4.8481243e+05  8.31e+00  1.17e+02  8.47e-05  2.09e+07
+   7   5.2737691e+05   4.5008717e+05  4.76e+00  6.72e+01  9.21e-06  1.18e+08
+   8   3.9246237e+05   3.9479543e+05  3.82e-01  5.39e+00  2.11e-06  2.50e+08
+   9   3.8556796e+05   3.8568469e+05  2.36e-02  3.33e-01  1.89e-07  4.21e+09
+  10   3.8513573e+05   3.8514159e+05  1.18e-03  1.67e-02  8.26e-08  8.42e+10
+  11   3.8511406e+05   3.8511435e+05  5.92e-05  8.35e-04  7.22e-08  1.68e+12
+  12   3.8511297e+05   3.8511299e+05  2.96e-06  4.18e-05  7.17e-08  3.36e+13
+  13   3.8511292e+05   3.8511292e+05  1.51e-07  2.09e-06  2.13e-07  6.71e+14
+  14   3.8511292e+05   3.8511292e+05  7.74e-09  1.05e-07  4.36e-08  1.34e+16
+Barrier time = 0.20 sec. (197.44 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 6 variables.
+        5 DMoves:  Infeasibility  0.00000000e+00  Objective  3.85112915e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  3.85112915e+05
+  Dual:  Pushed 0, exchanged 6.
+Using devex.
+Total crossover time = 0.42 sec. (300.44 ticks)
+
+Total time on 1 threads = 1.50 sec. (1098.91 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.50sec (det. 1098.91 ticks)
+
+Proven optimal solution.
+
+MIP Solution:       385112.915170    (2717 iterations, 0 nodes)
+Final Solve:        385112.915170    (0 iterations)
+
+Best possible:      385112.915170
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Executing after solve: elapsed 0:01:37.818
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 161 Mb
+--- Storage_dispatch_v22_1.gms(53899) 161 Mb
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(54015) 176 Mb
+--- Storage_dispatch_v22_1.gms(54018) 178 Mb
+--- Storage_dispatch_v22_1.gms(54165) 194 Mb
+--- Storage_dispatch_v22_1.gms(54171) 196 Mb
+--- Storage_dispatch_v22_1.gms(54233) 210 Mb
+--- Storage_dispatch_v22_1.gms(54285) 212 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 8
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:01:40.436
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 1.03 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 52 bounds.
+Probing time = 0.02 sec. (6.37 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 8823 rows, 17556 columns, and 44008 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.08 sec. (33.75 ticks)
+Probing fixed 1 vars, tightened 44 bounds.
+Probing time = 0.00 sec. (5.87 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:   371   Dual objective     =       3280653.918910
+Iteration:   586   Dual objective     =       2270242.259724
+Iteration:  1066   Dual objective     =       1606598.809872
+Iteration:  1607   Dual objective     =       1535219.487405
+Iteration:  2039   Dual objective     =       1452547.659385
+Iteration:  2260   Dual objective     =        882978.917028
+Iteration:  2428   Dual objective     =        599476.793998
+Iteration:  2597   Dual objective     =        530943.050245
+Iteration:  2747   Dual objective     =        431812.701222
+
+Iteration log . . .
+Iteration:     1   Dual objective     =        375862.580029
+Root relaxation solution time = 0.59 sec. (500.46 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0   375862.5800     1                 375862.5800     2786         
+*     0+    0                       375862.5800   375862.5800             0.00%
+Found incumbent of value 375862.580029 after 2.08 sec. (1390.20 ticks)
+      0     0        cutoff         375862.5800   375862.5800     2786    0.00%
+Elapsed time = 2.08 sec. (1390.20 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    2.11 sec. (1400.18 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    2.11 sec. (1400.18 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 2.13sec (det. 1401.06 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254122 rows and 262885 columns.
+Aggregator did 26288 substitutions.
+Reduced LP has 8780 rows, 17534 columns, and 43855 nonzeros.
+Presolve time = 0.91 sec. (591.73 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 1 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17709
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.01 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8781
+  Integer space required    = 10240
+  Total non-zeros in factor = 109664
+  Total FP ops to factor    = 1606226
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   2.2341595e+08   4.4217523e+06  1.87e+04  2.64e+05  5.38e+01  1.00e+00
+   1   1.2867010e+07   1.8357807e+06  1.04e+03  1.46e+04  2.98e+00  1.99e+01
+   2   2.1044127e+06   7.3889987e+05  1.36e+02  1.92e+03  1.91e-01  4.09e+02
+   3   1.4569841e+06   5.7272400e+05  8.04e+01  1.13e+03  1.89e-02  8.56e+03
+   4   1.2120374e+06   5.9986663e+05  5.74e+01  8.10e+02  3.67e-03  1.59e+05
+   5   6.9633166e+05   5.0115459e+05  1.68e+01  2.37e+02  5.80e-04  1.15e+06
+   6   5.9538613e+05   4.8494834e+05  8.89e+00  1.26e+02  8.92e-05  1.99e+07
+   7   5.3021197e+05   4.4352208e+05  5.21e+00  7.35e+01  1.03e-05  1.02e+08
+   8   3.8475640e+05   3.8549162e+05  3.99e-01  5.63e+00  2.11e-06  2.53e+08
+   9   3.7641507e+05   3.7642348e+05  2.48e-02  3.50e-01  1.96e-07  4.31e+09
+  10   3.7589028e+05   3.7589071e+05  1.24e-03  1.76e-02  9.15e-08  8.61e+10
+  11   3.7586397e+05   3.7586399e+05  6.23e-05  8.79e-04  8.53e-08  1.72e+12
+  12   3.7586265e+05   3.7586265e+05  3.12e-06  4.40e-05  8.31e-08  3.44e+13
+  13   3.7586258e+05   3.7586258e+05  1.56e-07  2.20e-06  7.76e-08  6.87e+14
+  14   3.7586258e+05   3.7586258e+05  8.58e-09  1.10e-07  1.02e-07  1.37e+16
+Barrier time = 0.23 sec. (197.44 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 6 variables.
+        5 DMoves:  Infeasibility  0.00000000e+00  Objective  3.75862580e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  3.75862580e+05
+  Dual:  Pushed 0, exchanged 6.
+Using devex.
+Total crossover time = 0.44 sec. (300.44 ticks)
+
+Total time on 1 threads = 1.63 sec. (1098.91 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.63sec (det. 1098.91 ticks)
+
+Proven optimal solution.
+
+MIP Solution:       375862.580029    (2786 iterations, 0 nodes)
+Final Solve:        375862.580029    (0 iterations)
+
+Best possible:      375862.580029
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Executing after solve: elapsed 0:01:51.094
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(53899) 164 Mb--- Storage_dispatch_v22_1.gms(54012) 165 Mb
+--- Storage_dispatch_v22_1.gms(54012) 165 Mb
+--- Storage_dispatch_v22_1.gms(54045) 186 Mb--- Storage_dispatch_v22_1.gms(54156) 191 Mb
+--- Storage_dispatch_v22_1.gms(54156) 191 Mb
+--- Storage_dispatch_v22_1.gms(54222) 204 Mb
+--- Storage_dispatch_v22_1.gms(54177) 207 Mb
+--- Storage_dispatch_v22_1.gms(54004) 222 Mb
+--- Storage_dispatch_v22_1.gms(54258) 224 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 9
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:01:53.697
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 1.09 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 52 bounds.
+Probing time = 0.01 sec. (6.37 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 8823 rows, 17556 columns, and 44008 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.08 sec. (33.75 ticks)
+Probing fixed 1 vars, tightened 44 bounds.
+Probing time = 0.01 sec. (5.87 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:   372   Dual objective     =       3271180.372867
+Iteration:   563   Dual objective     =       2266138.298335
+Iteration:  1039   Dual objective     =       1599478.584038
+Iteration:  1578   Dual objective     =       1528386.558695
+Iteration:  1999   Dual objective     =       1446746.994234
+Iteration:  2176   Dual objective     =       1245428.746522
+Iteration:  2238   Dual objective     =        972767.468946
+Iteration:  2367   Dual objective     =        617533.882192
+Iteration:  2508   Dual objective     =        525172.690167
+Iteration:  2667   Dual objective     =        437857.895058
+Iteration:  2729   Dual objective     =        373363.318946
+
+Iteration log . . .
+Iteration:     1   Dual objective     =        373363.318945
+Root relaxation solution time = 0.61 sec. (472.27 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0   373363.3189     1                 373363.3189     2729         
+*     0+    0                       373363.3189   373363.3189             0.00%
+Found incumbent of value 373363.318945 after 2.14 sec. (1362.01 ticks)
+      0     0        cutoff         373363.3189   373363.3189     2729    0.00%
+Elapsed time = 2.14 sec. (1362.01 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    2.17 sec. (1371.99 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    2.17 sec. (1371.99 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 2.19sec (det. 1372.87 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254122 rows and 262885 columns.
+Aggregator did 26288 substitutions.
+Reduced LP has 8780 rows, 17534 columns, and 43855 nonzeros.
+Presolve time = 0.84 sec. (591.73 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 1 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17709
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8781
+  Integer space required    = 10240
+  Total non-zeros in factor = 109664
+  Total FP ops to factor    = 1606226
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   2.2341594e+08   4.4217523e+06  1.87e+04  2.64e+05  5.38e+01  1.00e+00
+   1   1.2866934e+07   1.8356999e+06  1.04e+03  1.47e+04  2.98e+00  1.99e+01
+   2   2.1063011e+06   7.3890769e+05  1.36e+02  1.92e+03  1.91e-01  4.09e+02
+   3   1.4610305e+06   5.7313890e+05  8.09e+01  1.14e+03  1.90e-02  8.56e+03
+   4   1.2149047e+06   6.0046896e+05  5.77e+01  8.13e+02  3.67e-03  1.60e+05
+   5   6.9791233e+05   5.0134443e+05  1.70e+01  2.39e+02  5.84e-04  1.15e+06
+   6   5.9728623e+05   4.8495843e+05  9.06e+00  1.28e+02  9.10e-05  1.94e+07
+   7   5.3091369e+05   4.4175943e+05  5.33e+00  7.52e+01  1.07e-05  9.68e+07
+   8   3.8259938e+05   3.8299767e+05  4.04e-01  5.70e+00  2.13e-06  2.50e+08
+   9   3.7393927e+05   3.7392345e+05  2.53e-02  3.56e-01  1.96e-07  4.28e+09
+  10   3.7339219e+05   3.7339141e+05  1.27e-03  1.78e-02  9.14e-08  8.54e+10
+  11   3.7336477e+05   3.7336473e+05  6.34e-05  8.94e-04  8.79e-08  1.71e+12
+  12   3.7336339e+05   3.7336339e+05  3.17e-06  4.47e-05  8.51e-08  3.41e+13
+  13   3.7336332e+05   3.7336332e+05  1.59e-07  2.24e-06  8.74e-08  6.81e+14
+  14   3.7336332e+05   3.7336332e+05  8.02e-09  1.12e-07  5.56e-08  1.36e+16
+Barrier time = 0.24 sec. (197.44 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 6 variables.
+        5 DMoves:  Infeasibility  0.00000000e+00  Objective  3.73363319e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  3.73363319e+05
+  Dual:  Pushed 0, exchanged 6.
+Using devex.
+Total crossover time = 0.44 sec. (300.91 ticks)
+
+Total time on 1 threads = 1.56 sec. (1099.37 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.56sec (det. 1099.37 ticks)
+
+Proven optimal solution.
+
+MIP Solution:       373363.318945    (2729 iterations, 0 nodes)
+Final Solve:        373363.318945    (0 iterations)
+
+Best possible:      373363.318945
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Executing after solve: elapsed 0:02:04.494
+--- Storage_dispatch_v22_1.gms(54531) 160 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(54018) 178 Mb
+--- Storage_dispatch_v22_1.gms(54030) 181 Mb
+--- Storage_dispatch_v22_1.gms(54165) 194 Mb
+--- Storage_dispatch_v22_1.gms(54174) 196 Mb
+--- Storage_dispatch_v22_1.gms(54222) 204 Mb--- Storage_dispatch_v22_1.gms(54177) 206 Mb
+--- Storage_dispatch_v22_1.gms(54177) 206 Mb
+--- Storage_dispatch_v22_1.gms(54090) 214 Mb
+--- Storage_dispatch_v22_1.gms(54033) 217 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 10
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:02:07.326
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.97 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 52 bounds.
+Probing time = 0.00 sec. (6.37 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 8823 rows, 17556 columns, and 44008 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.09 sec. (33.75 ticks)
+Probing fixed 1 vars, tightened 44 bounds.
+Probing time = 0.02 sec. (5.87 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:   368   Dual objective     =       3268230.141213
+Iteration:   551   Dual objective     =       2266803.729791
+Iteration:  1031   Dual objective     =       1598963.586466
+Iteration:  1580   Dual objective     =       1517028.748135
+Iteration:  1997   Dual objective     =       1218028.708373
+Iteration:  2059   Dual objective     =       1199491.828881
+Iteration:  2275   Dual objective     =        707804.779892
+Iteration:  2369   Dual objective     =        492190.044562
+Iteration:  2602   Dual objective     =        435346.462848
+Iteration:  2707   Dual objective     =        397254.594969
+
+Iteration log . . .
+Iteration:     1   Dual objective     =        372688.067090
+Root relaxation solution time = 0.55 sec. (487.28 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0   372688.0671     2                 372688.0671     2750         
+*     0+    0                       372688.0671   372688.0671             0.00%
+Found incumbent of value 372688.067090 after 1.91 sec. (1377.56 ticks)
+      0     0        cutoff         372688.0671   372688.0671     2750    0.00%
+Elapsed time = 1.91 sec. (1377.56 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    1.95 sec. (1386.08 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    1.95 sec. (1386.08 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 1.95sec (det. 1386.95 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254122 rows and 262885 columns.
+Aggregator did 26288 substitutions.
+Reduced LP has 8780 rows, 17534 columns, and 43855 nonzeros.
+Presolve time = 0.73 sec. (591.73 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 1 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17709
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8781
+  Integer space required    = 10240
+  Total non-zeros in factor = 109664
+  Total FP ops to factor    = 1606226
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   2.2341594e+08   4.4217523e+06  1.88e+04  2.64e+05  5.38e+01  1.00e+00
+   1   1.2866914e+07   1.8356780e+06  1.04e+03  1.47e+04  2.98e+00  1.99e+01
+   2   2.1068112e+06   7.3890981e+05  1.37e+02  1.93e+03  1.91e-01  4.09e+02
+   3   1.4621216e+06   5.7325116e+05  8.10e+01  1.14e+03  1.90e-02  8.56e+03
+   4   1.2156763e+06   6.0063088e+05  5.78e+01  8.14e+02  3.68e-03  1.60e+05
+   5   6.9833782e+05   5.0139531e+05  1.70e+01  2.40e+02  5.85e-04  1.15e+06
+   6   5.9780916e+05   4.8495927e+05  9.11e+00  1.28e+02  9.15e-05  1.93e+07
+   7   5.3110032e+05   4.4127995e+05  5.36e+00  7.56e+01  1.08e-05  9.56e+07
+   8   3.8201295e+05   3.8232337e+05  4.06e-01  5.72e+00  2.13e-06  2.49e+08
+   9   3.7327018e+05   3.7324801e+05  2.54e-02  3.58e-01  1.98e-07  4.27e+09
+  10   3.7271725e+05   3.7271615e+05  1.27e-03  1.79e-02  9.49e-08  8.52e+10
+  11   3.7268953e+05   3.7268947e+05  6.37e-05  8.98e-04  8.62e-08  1.70e+12
+  12   3.7268814e+05   3.7268814e+05  3.19e-06  4.49e-05  8.74e-08  3.40e+13
+  13   3.7268807e+05   3.7268807e+05  1.17e-05  2.33e-06  1.15e-03  6.81e+14
+  14   3.7268807e+05   3.7268807e+05  5.87e-07  1.17e-07  5.77e-05  1.36e+16
+Barrier time = 0.22 sec. (197.44 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 6 variables.
+        5 DMoves:  Infeasibility  0.00000000e+00  Objective  3.72688067e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  3.72688067e+05
+  Dual:  Pushed 0, exchanged 6.
+Using devex.
+Total crossover time = 0.44 sec. (300.44 ticks)
+
+Total time on 1 threads = 1.44 sec. (1098.91 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.44sec (det. 1098.91 ticks)
+
+Proven optimal solution.
+
+MIP Solution:       372688.067090    (2750 iterations, 0 nodes)
+Final Solve:        372688.067089    (0 iterations)
+
+Best possible:      372688.067090
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Executing after solve: elapsed 0:02:17.742
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(53899) 164 Mb--- Storage_dispatch_v22_1.gms(54012) 167 Mb
+--- Storage_dispatch_v22_1.gms(54012) 167 Mb
+--- Storage_dispatch_v22_1.gms(54045) 185 Mb
+--- Storage_dispatch_v22_1.gms(54156) 190 Mb
+--- Storage_dispatch_v22_1.gms(54218) 204 Mb
+--- Storage_dispatch_v22_1.gms(54226) 206 Mb
+--- Storage_dispatch_v22_1.gms(54036) 218 Mb
+--- Storage_dispatch_v22_1.gms(54009) 222 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 11
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:02:20.322
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.91 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 52 bounds.
+Probing time = 0.00 sec. (6.37 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 8823 rows, 17556 columns, and 44008 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.08 sec. (33.75 ticks)
+Probing fixed 1 vars, tightened 44 bounds.
+Probing time = 0.02 sec. (5.87 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:   369   Dual objective     =       3267805.960228
+Iteration:   551   Dual objective     =       2266507.317831
+Iteration:  1031   Dual objective     =       1598711.496402
+Iteration:  1580   Dual objective     =       1516776.658071
+Iteration:  1997   Dual objective     =       1217795.340490
+Iteration:  2059   Dual objective     =       1199257.003862
+Iteration:  2275   Dual objective     =        707606.690330
+Iteration:  2369   Dual objective     =        492005.364521
+Iteration:  2602   Dual objective     =        435162.954944
+Iteration:  2707   Dual objective     =        397069.472669
+
+Iteration log . . .
+Iteration:     1   Dual objective     =        372505.627139
+Root relaxation solution time = 0.58 sec. (486.92 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0   372505.6271     3                 372505.6271     2750         
+*     0+    0                       372505.6271   372505.6271             0.00%
+Found incumbent of value 372505.627139 after 1.84 sec. (1377.73 ticks)
+      0     0        cutoff         372505.6271   372505.6271     2750    0.00%
+Elapsed time = 1.84 sec. (1377.73 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    1.91 sec. (1387.71 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    1.91 sec. (1387.71 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 1.91sec (det. 1388.59 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254122 rows and 262885 columns.
+Aggregator did 26288 substitutions.
+Reduced LP has 8780 rows, 17534 columns, and 43855 nonzeros.
+Presolve time = 0.77 sec. (591.73 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 1 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17709
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.02 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8781
+  Integer space required    = 10240
+  Total non-zeros in factor = 109664
+  Total FP ops to factor    = 1606226
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   2.2341594e+08   4.4217523e+06  1.88e+04  2.64e+05  5.38e+01  1.00e+00
+   1   1.2866908e+07   1.8356721e+06  1.04e+03  1.47e+04  2.98e+00  1.99e+01
+   2   2.1069490e+06   7.3891038e+05  1.37e+02  1.93e+03  1.91e-01  4.09e+02
+   3   1.4624162e+06   5.7328150e+05  8.10e+01  1.14e+03  1.90e-02  8.56e+03
+   4   1.2158846e+06   6.0067457e+05  5.78e+01  8.15e+02  3.68e-03  1.60e+05
+   5   6.9845267e+05   5.0140902e+05  1.70e+01  2.40e+02  5.86e-04  1.14e+06
+   6   5.9795020e+05   4.8495936e+05  9.12e+00  1.29e+02  9.16e-05  1.93e+07
+   7   5.3115019e+05   4.4114966e+05  5.37e+00  7.58e+01  1.08e-05  9.53e+07
+   8   3.8185435e+05   3.8214106e+05  4.06e-01  5.73e+00  2.13e-06  2.49e+08
+   9   3.7308940e+05   3.7306551e+05  2.54e-02  3.58e-01  2.01e-07  4.27e+09
+  10   3.7253489e+05   3.7253370e+05  1.27e-03  1.79e-02  9.38e-08  8.52e+10
+  11   3.7250709e+05   3.7250703e+05  6.37e-05  8.99e-04  8.60e-08  1.70e+12
+  12   3.7250570e+05   3.7250570e+05  3.19e-06  4.50e-05  8.80e-08  3.40e+13
+  13   3.7250563e+05   3.7250563e+05  1.61e-07  2.25e-06  1.35e-07  6.80e+14
+  14   3.7250563e+05   3.7250563e+05  8.44e-09  1.13e-07  7.37e-08  1.36e+16
+Barrier time = 0.23 sec. (197.44 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 6 variables.
+        5 DMoves:  Infeasibility  0.00000000e+00  Objective  3.72505627e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  3.72505627e+05
+  Dual:  Pushed 0, exchanged 6.
+Using devex.
+Total crossover time = 0.42 sec. (300.89 ticks)
+
+Total time on 1 threads = 1.47 sec. (1099.35 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.47sec (det. 1099.35 ticks)
+
+Proven optimal solution.
+
+MIP Solution:       372505.627139    (2750 iterations, 0 nodes)
+Final Solve:        372505.627139    (0 iterations)
+
+Best possible:      372505.627139
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Executing after solve: elapsed 0:02:30.631
+--- Storage_dispatch_v22_1.gms(54531) 160 Mb  4 secs
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Generating MIP model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(53899) 162 Mb
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(53899) 163 Mb
+--- Storage_dispatch_v22_1.gms(54018) 178 Mb
+--- Storage_dispatch_v22_1.gms(54024) 180 Mb
+--- Storage_dispatch_v22_1.gms(54174) 197 Mb
+--- Storage_dispatch_v22_1.gms(54189) 200 Mb
+--- Storage_dispatch_v22_1.gms(54215) 212 Mb
+--- Storage_dispatch_v22_1.gms(54064) 212 Mb
+--- Storage_dispatch_v22_1.gms(54258) 224 Mb
+--- Storage_dispatch_v22_1.gms(54531) 224 Mb
+--- LOOPS FOR/WHILE = 1
+---       FOR/WHILE = 12
+---   289,190 rows  289,187 columns  832,607 non-zeroes
+---   35,055 discrete-columns
+--- Executing CPLEX: elapsed 0:02:33.283
+
+IBM ILOG CPLEX   27.3.0 r58c491d Released Jul 04, 2019 WEI x86 64bit/MS Window
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.9.0.0
+
+Reading parameter(s) from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+>>  scaind 1
+>>  lpmethod 4
+>>  *CPXPARAM_Barrier_Limits_Iteration 100000000
+>>  baritlim 100000000
+Finished reading from "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\cplex.opt"
+Reading data...
+Starting Cplex...
+Space for names approximately 19.95 Mb
+Use option 'names no' to turn use of names off
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 2 times.
+MIP Presolve eliminated 254074 rows and 262862 columns.
+MIP Presolve modified 49 coefficients.
+Aggregator did 26280 substitutions.
+Reduced MIP has 8836 rows, 17565 columns, and 44048 nonzeros.
+Reduced MIP has 15 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.94 sec. (675.43 ticks)
+Probing fixed 1 vars, tightened 52 bounds.
+Probing time = 0.02 sec. (6.37 ticks)
+Tried aggregator 2 times.
+MIP Presolve eliminated 6 rows and 2 columns.
+MIP Presolve modified 97 coefficients.
+Aggregator did 7 substitutions.
+Reduced MIP has 8823 rows, 17556 columns, and 44008 nonzeros.
+Reduced MIP has 14 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.08 sec. (33.75 ticks)
+Probing fixed 1 vars, tightened 44 bounds.
+Probing time = 0.00 sec. (5.87 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =       4110499.361635
+Iteration:   369   Dual objective     =       3269655.193712
+Iteration:   551   Dual objective     =       2266427.233072
+Iteration:  1031   Dual objective     =       1598643.386559
+Iteration:  1580   Dual objective     =       1516708.548228
+Iteration:  1997   Dual objective     =       1217732.289016
+Iteration:  2059   Dual objective     =       1199193.558699
+Iteration:  2275   Dual objective     =        707553.170374
+Iteration:  2369   Dual objective     =        491955.467558
+Iteration:  2602   Dual objective     =        435113.374669
+Iteration:  2707   Dual objective     =        397019.456216
+
+Iteration log . . .
+Iteration:     1   Dual objective     =        372456.335404
+Root relaxation solution time = 0.53 sec. (487.78 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0   372456.3354     1                 372456.3354     2750         
+*     0+    0                       372456.3354   372456.3354             0.00%
+Found incumbent of value 372456.335404 after 1.86 sec. (1377.54 ticks)
+      0     0        cutoff         372456.3354   372456.3354     2750    0.00%
+Elapsed time = 1.86 sec. (1377.54 ticks, tree = 0.01 MB, solutions = 1)
+
+Root node processing (before b&c):
+  Real time             =    1.91 sec. (1387.52 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    1.91 sec. (1387.52 ticks)
+MIP status(101): integer optimal solution
+Cplex Time: 1.91sec (det. 1388.40 ticks)
+Fixing integer variables, and solving final LP...
+CPXPARAM_Advance                                 2
+CPXPARAM_Read_Scale                              1
+CPXPARAM_LPMethod                                4
+CPXPARAM_Threads                                 1
+CPXPARAM_Parallel                                1
+CPXPARAM_MIP_Display                             4
+CPXPARAM_Barrier_Limits_Iteration                100000000
+CPXPARAM_TimeLimit                               86400
+CPXPARAM_Tune_TimeLimit                          17280
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+CPXPARAM_WorkDir                                 "C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225b\"
+Tried aggregator 1 time.
+LP Presolve eliminated 254122 rows and 262885 columns.
+Aggregator did 26288 substitutions.
+Reduced LP has 8780 rows, 17534 columns, and 43855 nonzeros.
+Presolve time = 0.77 sec. (591.73 ticks)
+Parallel mode: none, using 1 thread for barrier
+
+***NOTE: Found 1 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 17709
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.02 sec. (1.21 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 8781
+  Integer space required    = 10240
+  Total non-zeros in factor = 109664
+  Total FP ops to factor    = 1606226
+ Itn      Primal Obj        Dual Obj  Prim Inf Upper Inf  Dual Inf Inf Ratio
+   0   2.2341594e+08   4.4217523e+06  1.88e+04  2.64e+05  5.38e+01  1.00e+00
+   1   1.2866907e+07   1.8356705e+06  1.04e+03  1.47e+04  2.98e+00  1.99e+01
+   2   2.1069862e+06   7.3891053e+05  1.37e+02  1.93e+03  1.91e-01  4.09e+02
+   3   1.4624958e+06   5.7328970e+05  8.10e+01  1.14e+03  1.90e-02  8.56e+03
+   4   1.2159409e+06   6.0068637e+05  5.78e+01  8.15e+02  3.68e-03  1.60e+05
+   5   6.9848369e+05   5.0141272e+05  1.70e+01  2.40e+02  5.86e-04  1.14e+06
+   6   5.9798829e+05   4.8495937e+05  9.12e+00  1.29e+02  9.16e-05  1.92e+07
+   7   5.3116363e+05   4.4111440e+05  5.38e+00  7.58e+01  1.09e-05  9.52e+07
+   8   3.8181143e+05   3.8209179e+05  4.06e-01  5.73e+00  2.13e-06  2.49e+08
+   9   3.7304055e+05   3.7301621e+05  2.54e-02  3.58e-01  2.00e-07  4.27e+09
+  10   3.7248562e+05   3.7248441e+05  1.27e-03  1.80e-02  9.25e-08  8.52e+10
+  11   3.7245780e+05   3.7245774e+05  6.38e-05  8.99e-04  8.63e-08  1.70e+12
+  12   3.7245641e+05   3.7245641e+05  3.19e-06  4.50e-05  8.64e-08  3.40e+13
+  13   3.7245634e+05   3.7245634e+05  1.61e-07  2.25e-06  1.17e-07  6.79e+14
+  14   3.7245634e+05   3.7245634e+05  9.52e-09  1.13e-07  2.09e-07  1.36e+16
+Barrier time = 0.19 sec. (197.44 ticks)
+
+Primal crossover.
+  Primal:  Fixed no variables.
+  Dual:  Fixing 6 variables.
+        5 DMoves:  Infeasibility  0.00000000e+00  Objective  3.72456335e+05
+        0 DMoves:  Infeasibility  0.00000000e+00  Objective  3.72456335e+05
+  Dual:  Pushed 0, exchanged 6.
+Using devex.
+Total crossover time = 0.41 sec. (300.89 ticks)
+
+Total time on 1 threads = 1.41 sec. (1099.35 ticks)
+Fixed MIP status(1): optimal
+Cplex Time: 1.41sec (det. 1099.35 ticks)
+
+Proven optimal solution.
+
+MIP Solution:       372456.335404    (2750 iterations, 0 nodes)
+Final Solve:        372456.335404    (0 iterations)
+
+Best possible:      372456.335404
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Restarting execution
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb
+--- Reading solution for model arbitrage_and_AS
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  3 secs
+--- Storage_dispatch_v22_1.gms(54531) 159 Mb  4 secs
+--- Executing after solve: elapsed 0:02:43.406
+--- Storage_dispatch_v22_1.gms(54389) 160 Mb
+--- Storage_dispatch_v22_1.gms(54825) 160 Mb
+--- Storage_dispatch_v22_1.gms(54891) 160 Mb
+--- Storage_dispatch_v22_1.gms(55052) 160 Mb
+--- Storage_dispatch_v22_1.gms(55087) 160 Mb
+--- Storage_dispatch_v22_1.gms(55094) 160 Mb
+--- Storage_dispatch_v22_1.gms(55100) 160 Mb
+--- Storage_dispatch_v22_1.gms(55217) 161 Mb
+--- Putfile input_echo_file C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Output\Storage_dispatch_inputs_Test_batch.csv
+--- Putfile results_file C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Output\Storage_dispatch_results_Test_batch.csv
+--- Putfile summary_file C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Output\Storage_dispatch_summary_Test_batch.csv
+*** Status: Normal completion
+--- Job Storage_dispatch_v22_1.gms Stop 07/15/20 11:14:57 elapsed 0:02:45.218
