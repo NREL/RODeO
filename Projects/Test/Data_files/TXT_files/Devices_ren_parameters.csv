@@ -1,7 +1,0 @@
-"Table Device_ren_table(param_vals_ren,devices_ren)",1,2
-renew_cap_cost,1343000,1343000
-renew_FOM_cost,12000,12000
-renew_VOM_cost,0,0
-renew_interest_rate,0.07,0.07
-renew_lifetime,20,20
-Renewable_MW,20,100

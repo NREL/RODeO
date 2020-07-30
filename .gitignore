@@ -1,6 +1,4 @@
-Input_files/Default/*
-Output/Wind_farm_plus_storage/*
-Projects/Example/Output*
+Projects/Home_device/Output*
 Projects/Central_vs_distributed/Output*
 Projects/VTA_bus_project/Output*
 Projects/VTA_bus_project2/Output*
@@ -10,3 +8,4 @@ Projects/Solar_Hydrogen/Data_files/CSV_data/LMP_data_2017.csv
 Projects/Solar+Storage/Output*
 Projects/flex_bldg_load/Output*
 Projects/CEC_proposal_305/Output*
+Projects/UCI_project/Output*

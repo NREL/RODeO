@@ -28,7 +28,7 @@ Create file to keep track of predicted and actual values
 $OffText
 *===============================================================================
 * This toggle switches an iteration mode which updates the hydrogen break-even cost
-$if not set run_opt_breakeven      $set run_opt_breakeven   1
+$if not set run_opt_breakeven      $set run_opt_breakeven   0
 * If considering NEM benefits
 *       Assumes: NEM benefits are for energy only (does not affect demand charges)
 *                Must pay non-bypassable charges on any net metered electricity
@@ -39,31 +39,31 @@ $if not set NEM_nscr               $set NEM_nscr            0
 *set defaults for parameters usually passed in by a calling program
 *so that this script can be run directly if desired
 
-$if not set elec_rate_instance          $set elec_rate_instance             5e1676e95457a3f87673e3b0_hourly
-$if not set product_price_prof_inst     $set product_price_prof_inst        Product_price_Price1_hourly
-$if not set product_consumed_inst       $set product_consumed_inst          Product_consumption_ones_hourly
-$if not set baseload_pwr_instance       $set baseload_pwr_instance          Input_power_baseload
-$if not set NG_price_instance           $set NG_price_instance              NG_price_Price1_hourly
-$if not set ren_prof_instance           $set ren_prof_instance              renewable_profiles_blank_hourly
-$if not set NSCR_instance               $set NSCR_instance                  NSCR
-$if not set MACRS_instance              $set MACRS_instance                 MACRS_depreciation_schedule
-$if not set load_prof_instance          $set load_prof_instance             Additional_load_none_hourly
-$if not set energy_purchase_price_inst  $set energy_purchase_price_inst     Energy_purchase_prices_Wholesale_MWh_hourly2
-$if not set energy_sale_price_inst      $set energy_sale_price_inst         Energy_sale_prices_Wholesale_MWh_hourly
-$if not set AS_price_inst               $set AS_price_inst                  Ancillary_services_none_hourly
 $if not set Max_input_prof_inst         $set Max_input_prof_inst            Max_input_cap_ones_hourly
 $if not set Max_output_prof_inst        $set Max_output_prof_inst           Max_output_cap_ones_hourly
+$if not set product_consumed_inst       $set product_consumed_inst          Product_consumption_flat_hourly
+$if not set elec_rate_instance          $set elec_rate_instance             5ed987ec5457a3487edd15ae_hourly
+$if not set load_prof_instance          $set load_prof_instance             Additional_load_none_hourly
+$if not set AS_price_inst               $set AS_price_inst                  Ancillary_services_hourly
 $if not set Device_parameters_inst      $set Device_parameters_inst         Devices_parameters_empty
 $if not set Device_ren_params_inst      $set Device_ren_params_inst         Devices_ren_parameters_empty
-$if not set outdir                      $set outdir                         RODeO\Projects\UCI_project\Output
-$if not set indir                       $set indir                          RODeO\Projects\UCI_project\Data_files\TXT_files
+$if not set energy_purchase_price_inst  $set energy_purchase_price_inst     Energy_purchase_prices_Wholesale_MWh_hourly
+$if not set energy_sale_price_inst      $set energy_sale_price_inst         Energy_sale_prices_Wholesale_MWh_hourly
+$if not set baseload_pwr_instance       $set baseload_pwr_instance          Input_power_baseload_hourly
+$if not set MACRS_instance              $set MACRS_instance                 MACRS_depreciation_schedule
+$if not set NG_price_instance           $set NG_price_instance              NG_price_Price1_hourly
+$if not set NSCR_instance               $set NSCR_instance                  NSCR
+$if not set product_price_prof_inst     $set product_price_prof_inst        Product_price_Price1_hourly
+$if not set ren_prof_instance           $set ren_prof_instance              renewable_profiles_none_hourly
+$if not set outdir                      $set outdir                         Projects\Test\Output
+$if not set indir                       $set indir                          Projects\Test\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
 $if not set gas_price_instance     $set gas_price_instance     NA
 $if not set zone_instance          $set zone_instance          NA
 $if not set year_instance          $set year_instance          NA
 
-$if not set file_name_instance     $set file_name_instance     "Test_batch_Price4x"
+$if not set file_name_instance     $set file_name_instance     "Test"
 $if not set devices_instance       $set devices_instance       1
 $if not set use_alt_devices        $set use_alt_devices        0
 $if not set use_all_devices        $set use_all_devices        1
@@ -72,7 +72,7 @@ $if not set soft_cons_device_inst  $set soft_cons_device_inst  0
 $if not set devices_ren_instance   $set devices_ren_instance   1
 $if not set val_from_batch_inst    $set val_from_batch_inst    2
 $if not set input_cap_instance     $set input_cap_instance     1
-$if not set output_cap_instance    $set output_cap_instance    0
+$if not set output_cap_instance    $set output_cap_instance    1
 
 * Set the limiting price (must be less than infinity)
 $if not set price_cap_instance     $set price_cap_instance     1000000000
@@ -89,14 +89,14 @@ $if not set output_LSL_instance    $set output_LSL_instance    0
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0
 $if not set Output_start_cost_inst $set Output_start_cost_inst 0
 * Efficiency takes into account compressor. Otherwise, take 0.613669
-$if not set input_efficiency_inst  $set input_efficiency_inst  0.613669
-$if not set output_efficiency_inst $set output_efficiency_inst 0
+$if not set input_efficiency_inst  $set input_efficiency_inst  0.894427191
+$if not set output_efficiency_inst $set output_efficiency_inst 0.894427191
 
 $if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1745900
 $if not set input_cap_cost_inst    $set input_cap_cost_inst    1691000
 $if not set input_cap_alt_cst_inst $set input_cap_alt_cst_inst 0
-$if not set output_cap_cost_inst   $set output_cap_cost_inst   822
-$if not set ProdStor_cap_cost_inst $set ProdStor_cap_cost_inst 0
+$if not set output_cap_cost_inst   $set output_cap_cost_inst   0
+$if not set ProdStor_cap_cost_inst $set ProdStor_cap_cost_inst 822
 $if not set ProdComp_cap_cost_inst $set ProdComp_cap_cost_inst 0
 $if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    15600
 $if not set input_FOM_cost_inst    $set input_FOM_cost_inst    93840
@@ -105,17 +105,6 @@ $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
 $if not set renew_VOM_cost_inst    $set renew_VOM_cost_inst    0
 $if not set input_VOM_cost_inst    $set input_VOM_cost_inst    0
 $if not set output_VOM_cost_inst   $set output_VOM_cost_inst   0
-
-* Lifetime and interest rate not used in updated representation (uses WACC and "years" for lifetime)
-$if not set renew_lifetime_inst    $set renew_lifetime_inst    15
-$if not set input_lifetime_inst    $set input_lifetime_inst    15
-$if not set output_lifetime_inst   $set output_lifetime_inst   15
-$if not set ProdStor_lifetime_inst $set ProdStor_lifetime_inst 15
-$if not set ProdComp_lifetime_inst $set ProdComp_lifetime_inst 15
-$if not set interest_rate_inst     $set interest_rate_inst     0.07
-$if not set renew_interest_inst    $set renew_interest_inst    0.07
-$if not set ProdStor_interest_inst $set ProdStor_interest_inst 0.07
-$if not set ProdComp_interest_inst $set ProdComp_interest_inst 0.07
 
 $if not set in_heat_rate_instance  $set in_heat_rate_instance  0
 $if not set out_heat_rate_instance $set out_heat_rate_instance 0
@@ -146,11 +135,11 @@ $if not set int_length_instance    $set int_length_instance    1
 
 $if not set lookahead_instance     $set lookahead_instance     0
 $if not set energy_only_instance   $set energy_only_instance   1
-* Setting storage dissipation term increases CF above specified value and can cause infeasibilities if dissipation and/or CF are too large
+* Setting storage dissipation term (stor_dissipation_inst above) greater than zero increases CF above specified value and can cause infeasibilities if dissipation and/or CF are too large
+$if not set Product_use_instance   $set Product_use_instance   0
 $if not set CF_opt_instance        $set CF_opt_instance        1
 $if not set CF_adj_inst            $set CF_adj_inst            0.4
 $if not set Product_price_instance $set Product_price_instance 2
-$if not set Product_use_instance   $set Product_use_instance   1
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set Renewable_MW_instance  $set Renewable_MW_instance  0
@@ -243,7 +232,7 @@ Parameters
          storage_set_final(devices)              Turns on or off storage final value (set to zero if capacity factor is 100%)    /1 %storage_set_instance%/
          storage_init(devices)                   Storage level at beginning of simulation (interval = 1)                         /1 %storage_init_instance%/
          storage_final(devices)                  Storage level at end of simulation (interval = operating_period_length)         /1 %storage_final_instance%/
-         storage_dissipation(devices)            Storage dissipation term as a percentage of input power (MW)                                       /1 %stor_dissipation_inst%/
+         storage_dissipation(devices)            Storage dissipation term as a percentage of input power (MW)                    /1 %stor_dissipation_inst%/
 
          output_LSL_fraction(devices)            output lower sustainable limit as a fraction of the output capacity             /1 %output_LSL_instance%/
          output_regup_limit_fraction(devices)    regulation up capacity limit as a fraction of the output capacity (value set below)
@@ -278,17 +267,6 @@ Parameters
          input_VOM_cost(devices)                 "VOM cost ($/MWh)"                                      /1 %input_VOM_cost_inst%/
          output_VOM_cost(devices)                "VOM cost ($/MWh)"                                      /1 %output_VOM_cost_inst%/
          active_devices(devices)                 Value to set active devices                             /1 1/
-
-         renew_lifetime(devices_ren)             "equipment lifetime (years)"                            /1 %renew_lifetime_inst%/
-         input_lifetime(devices)                 "equipment lifetime (years)"                            /1 %input_lifetime_inst%/
-         output_lifetime(devices)                "equipment lifetime (years)"                            /1 %output_lifetime_inst%/
-         ProdStor_lifetime(devices)              "equipment lifetime (years)"                            /1 %ProdStor_lifetime_inst%/
-         ProdComp_lifetime(devices)              "equipment lifetime (years) additional (compressor)"    /1 %ProdComp_lifetime_inst%/
-
-         interest_rate(devices)                  "interest rate on debt"                                 /1 %interest_rate_inst%/
-         renew_interest_rate(devices_ren)        "interest rate on debt for renewables"                  /1 %renew_interest_inst%/
-         ProdStor_interest_rate(devices)         "interest rate on debt for storage"                     /1 %ProdStor_interest_inst%/
-         ProdComp_interest_rate(devices)         "interest rate on debt for storage - compressor"        /1 %ProdComp_interest_inst%/
 
          product_use(devices)                    "Determines if product is outputted or not (toggle)"    /1 %Product_use_instance%/
          product_price_adj(devices)              "Determines if price of outputted product"              /1 %Product_price_instance%/
@@ -475,12 +453,10 @@ Sets
                                                                  input_FOM_cost,     output_FOM_cost,
                                                                  input_FOM_alt_cost,
                                                                  input_VOM_cost,     output_VOM_cost,
-                                                                 input_lifetime,     output_lifetime, ProdStor_lifetime,      ProdComp_lifetime,
-                                                                 interest_rate,                       ProdStor_interest_rate, ProdComp_interest_rate,
                                                                  product_use, product_price_adj, CF_adjust,
                                                                  energy_only, baseload_operation,
                                                                  active_devices/
-         param_vals_ren    Load renewable device parameters     /renew_cap_cost, renew_FOM_cost, renew_VOM_cost, renew_interest_rate, renew_lifetime, Renewable_MW/
+         param_vals_ren    Load renewable device parameters     /renew_cap_cost, renew_FOM_cost, renew_VOM_cost, Renewable_MW/
 ;
 
 Table Device_table(param_vals,devices_load)                   'Load all device parameters'
@@ -523,13 +499,6 @@ if (val_from_batch=0,
          output_FOM_cost(devices)         = Device_table("output_FOM_cost",devices);
          input_VOM_cost(devices)          = Device_table("input_VOM_cost",devices);
          output_VOM_cost(devices)         = Device_table("output_VOM_cost",devices);
-         input_lifetime(devices)          = Device_table("input_lifetime",devices);
-         output_lifetime(devices)         = Device_table("output_lifetime",devices);
-         ProdStor_lifetime(devices)       = Device_table("ProdStor_lifetime",devices);
-         ProdComp_lifetime(devices)       = Device_table("ProdComp_lifetime",devices);
-         interest_rate(devices)           = Device_table("interest_rate",devices);
-         ProdStor_interest_rate(devices)  = Device_table("ProdStor_interest_rate",devices);
-         ProdComp_interest_rate(devices)  = Device_table("ProdComp_interest_rate",devices);
          product_use(devices)             = Device_table("product_use",devices);
          product_price_adj(devices)       = Device_table("product_price_adj",devices);
          CF_adjust(devices)               = Device_table("CF_adjust",devices);
@@ -540,8 +509,6 @@ if (val_from_batch=0,
          renew_cap_cost(devices_ren)      = Device_ren_table("renew_cap_cost",devices_ren);
          renew_FOM_cost(devices_ren)      = Device_ren_table("renew_FOM_cost",devices_ren);
          renew_VOM_cost(devices_ren)      = Device_ren_table("renew_VOM_cost",devices_ren);
-         renew_interest_rate(devices_ren) = Device_ren_table("renew_interest_rate",devices_ren);
-         renew_lifetime(devices_ren)      = Device_ren_table("renew_lifetime",devices_ren);
          Renewable_MW(devices_ren)        = Device_ren_table("Renewable_MW",devices_ren);
 );
 
@@ -789,13 +756,6 @@ Renewable_power(interval,devices_ren) = renewable_signal(interval,devices_ren) *
 * Adjust the properties appropriately if it is equal to zero and zero the cost components (i.e., raising to the power of 0 or dividing by zero throws an error)
 loop(devices,
          if (output_capacity_MW(devices)=0,          output_efficiency(devices)=1);
-         if (output_lifetime(devices)=0,     output_lifetime(devices)=1;    output_cap_cost(devices)=0;    output_FOM_cost(devices)=0;    output_VOM_cost(devices)=0;    interest_rate(devices)=0.01;);
-         if ( input_lifetime(devices)=0,     input_lifetime(devices)=1;     input_cap_cost(devices)=0;     input_FOM_cost(devices)=0;     input_VOM_cost(devices)=0;     interest_rate(devices)=0.01;   input_cap_alt_cost(devices)=0;  input_FOM_alt_cost(devices)=0;);
-         if (ProdStor_lifetime(devices)=0,   ProdStor_lifetime(devices)=1;  ProdStor_cap_cost(devices)=0;                                                                ProdStor_interest_rate(devices)=0.01;);
-         if (ProdComp_lifetime(devices)=0,   ProdComp_lifetime(devices)=1;  ProdComp_cap_cost(devices)=0;                                                                ProdComp_interest_rate(devices)=0.01;);
-);
-loop(devices_ren,
-         if ( renew_lifetime(devices_ren)=0, renew_lifetime(devices_ren)=1; renew_cap_cost(devices_ren)=0; renew_FOM_cost(devices_ren)=0; renew_VOM_cost(devices_ren)=0; renew_interest_rate(devices_ren)=0.01;);
 );
 
 *check to make sure operating period length is not longer than the number of intervals in the input file
