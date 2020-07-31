@@ -16,7 +16,7 @@ Select_file = 0;    % 0=utility rates, 1=nodes
     files2load = dir(path_name2); files2load2={files2load.name}';  % Identify files in a folder    
     for i0=1:length(files2load2) % Remove items from list that do not fit criteria
         load_file1(i0)=~isempty(strfind(files2load2{i0},'.csv'));       % Find only CSV files
-        load_file1(i0)=~isempty(strfind(files2load2{i0},'summary'));    % Find only Summary files
+        load_file1(i0)=~isempty(strfind(files2load2{i0},'summary_'));   % Find only Summary files
         load_file2(i0)=~isempty(strfind(files2load2{i0},'.csv'));       % Find only CSV files
         load_file2(i0)=~isempty(strfind(files2load2{i0},'dispatch_results'));    % Find only Results files
         load_file3(i0)=~isempty(strfind(files2load2{i0},'.csv'));       % Find only CSV files

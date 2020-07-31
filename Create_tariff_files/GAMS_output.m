@@ -90,11 +90,6 @@ num6 = interpolate_matrix(num6int2,Year_length,interval_length,2);
 num6B= interpolate_matrix(num6int,Year_length,interval_length,2);
 clear num6int num6int2
 
-% Load file with input baseload profiles
-[num7int,txt7,raw7] = xlsread('GAMS_input_baseload_power');
-num7 = interpolate_matrix(num7int,Year_length,interval_length,2);  
-clear num7int
-
 % Meter cost (cost per month for SCE and SDGE and cost per day for PGE)
 [num8] = xlsread('fixed_charge.csv');                       % ($/month/meter)
 num8 = num8(2:end,:);                                       % Remove first row which contains the scenario number
@@ -149,7 +144,6 @@ num31 = num3;  num31(isnan(num31)) = 0;         % Fuel price
 num41 = num4;  num41(isnan(num41)) = 0;         % Renewables
 num51 = num5;  num51(isnan(num51)) = 0;         % fixed demand
 num61 = num6;  num61(isnan(num61)) = 0;         % timed demand
-num71 = num7;  num71(isnan(num71)) = 0;         % baseload mode profile
 num81 = num8;  num81(isnan(num81)) = 0;         % fixed charge
 num91 = num9;  num91(isnan(num91)) = 0;         % Load profile
 num10B = num10A;  num10B(isnan(num10B)) = 0;    % H2 price
@@ -170,7 +164,6 @@ txt1CC = txt1BB(2,3:end);       % Energy Purchase Price
 txt21 = txt2(2,3:end);          % AS
 txt31 = txt3(2,3:end);          % Fuel price
 txt41 = txt4(2,3:end);          % Renewables
-txt71 = txt7(2,3:end);          % Baseload mode profile
 txt91 = txt9(2,3:end);          % Load profile
 txt10B = txt10A(2,3:end);       % Hydrogen price
 txt11B = txt11A(2,3:end);       % Hydrogen consumption
@@ -617,23 +610,6 @@ for i0=1:length(txt41)
     end
 display(['Creating renewable signal files (',num2str(i0),' of ',num2str(length(txt41)),')'])
 end  
-
-%%% Create files with baseload mode profiles
-for i0=1:length(txt71)
-        cHeader = {'Interval',txt71{i0}};          % header
-        commaHeader = [cHeader;repmat({','},1,numel(cHeader))]; %insert commas
-        commaHeader = commaHeader(:)';
-        textHeader = cell2mat(commaHeader);                     %cHeader in text with commas
-
-        %write header to file
-        fid = fopen([dir0,'Input_power_',txt71{i0},add_txt1,'.csv'],'w'); 
-        fprintf(fid,'%s\n',textHeader);
-        fclose(fid);
-
-        %write data to end of file
-        dlmwrite([dir0,'Input_power_',txt71{i0},add_txt1,'.csv'],[[1:Year_length*interval_length]',[num71(:,i0+1)]],'-append');
-display(['Creating baseload signal files (',num2str(i0),' of ',num2str(length(txt71)),')'])
-end
 
 %%% Create files with additional load profiles
 for i0=1:length(txt91)
