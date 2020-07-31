@@ -79,7 +79,7 @@ At a high level, RODeO will take in direct input or load from files and perform 
 *ren_prof_instance* | Normalized (max is 1) timeseries of renewable generation from renewable device (later multiplied by *Renewable_MW_instance*)
 *outdir* | Path to output directory (because of the potential size of this folder github will not save data in this folder [see .gitignore in repository])
 *indir* | Path to input directory
-
+ | 
 *file_name_instance* | User defined filename for the outputs (consider making this structured and machine readable for later processing)
 *devices_instance* | Determines the number of devices to be optimized (if greater than 1 RODeO will draw from *Device_parameters_inst*
 *use_alt_devices* | Used to create an alternative technology to compare with all devices (e.g., compare the cost of an electric bus fleet to a diesel hybrid bus fleet without post-processing)
@@ -89,40 +89,36 @@ At a high level, RODeO will take in direct input or load from files and perform 
 *input_cap_instance* | Input storage or demand response installed capacity. [MW]
 *output_cap_instance* | Output generator or storage installed capacity. [MW]
 *Renewable_MW_instance* | Sets the installed renewable capacity [MW]
-
+ | 
 *price_cap_instance* | Implements a cap on *energy_purchase_price_inst* and *energy_sale_price_inst* [$/MWh]
 *max_output_cap_inst* | Implements a maximum AC export power (e.g., inverter size) [MW]
 *max_input_cap_inst* | Implements a maximum AC import power [MW]
 *allow_import_instance* | Enables or disables electricity import from the grid 
 *allow_sales_instance* | Enables or disables electricity export to the grid
-
+ | 
 *input_LSL_instance* | Lower sustainable operation limit fraction for input device [0 to 1] (i.e., the input device will operate between 100% capacity and this value but must shutoff at any setpoints below this value). 
 *output_LSL_instance* | Lower sustainable operation limit fraction for output device [0 to 1] (i.e., the output device will operate between 100% capacity and this value but must shutoff at any setpoints below this value).
 *Input_start_cost_inst* | Cost value for the input device to start [$/start]
 *Output_start_cost_inst* | Cost value for the output device to start [$/start]
 *input_efficiency_inst* | Efficiency of input device [0 to 1]
 *output_efficiency_inst* | Efficiency of output device [0 to 1]
-
+*input_heat_rate* | Input heatrate for devices that consume natural gas (e.g., steam methane reformer) [MMBtu/MWh produced]
+*output_heat_rate* | Output heatrate for devices that consume natural gas (e.g., combustion turbine) [MMBtu/MWh produced]
+ | 
 *renew_cap_cost_inst* | Renewable device capital cost [$/MW]
 *input_cap_cost_inst* | Input device capital cost [$/MW]
 *input_cap_alt_cst_inst* | Alternate input device capital cost [$/MW] (goes along with *use_alt_devices*)
 *output_cap_cost_inst* | Output device capital cost [$/MW]
 *ProdStor_cap_cost_inst* | Capital cost for energy storage [$/unit of product] (included if purchased separately, e.g., hydrogen tank)
 *ProdComp_cap_cost_inst* | Capital cost for compressor [$/unit of product/hour]
-
 *renew_FOM_cost_inst* | Renewable device fixed operation and maintenance cost [$/MW-yr]
 *input_FOM_cost_inst* | Input device fixed operation and maintenance cost [$/MW-yr]
 *input_FOM_alt_cost_inst* | Alternate input device fixed operation and maintenance cost [$/MW-yr] (goes along with *use_alt_devices*)
 *output_FOM_cost_inst* | Output device fixed operation and maintenance cost [$/MW-yr]
-
 *input_VOM_cost_inst* | Variable operation and maintenance cost for input device [$/MWh]
 *output_VOM_cost_inst* | Variable operation and maintenance cost for output device [$/MWh]
-
-*input_heat_rate* | Input heatrate for devices that consume natural gas (e.g., steam methane reformer) [MMBtu/MWh produced]
-*output_heat_rate* | Output heatrate for devices that consume natural gas (e.g., combustion turbine) [MMBtu/MWh produced]
-
+ | 
 *storage_cap_instance* | Hours of duration for **input device** to fill the storage system [hours] (can be changed to output device by changing *storage_level_accounting_init_eqn*, *storage_level_accounting_final_eqn*, and *storage_level_limit_eqn* in GAMS)
-
 *storage_set_instance* | Toggles a feature that sets the initial volume and end volume levels (particularly useful for long-duration energy storage)
 *storage_init_instance* | Setpoint for the initial volume level as a fraction of the entire storage system [0 to 1]
 *storage_final_instance* | Setpoint for the final volume level as a fraction of the entire storage system [0 to 1]
@@ -130,7 +126,7 @@ At a high level, RODeO will take in direct input or load from files and perform 
 *reg_cost_instance* | Variable costs associated with providing regulation [$/MW-h]
 *min_runtime_instance* | The minimum number of intervals that the input and output device must be on. 
 *ramp_penalty_instance* | Penalty for ramping input and output devices [$/MW/interval]
-
+ | 
 *wacc_instance* | Weighted Average Cost of Capital (this value is calculated based on the next values)
 *perc_equity_instance* | Percentage of equity towards the capital cost of all devices [0 to 1]
 *ror_instance* | Rate of Return [0 to 1]
@@ -140,12 +136,12 @@ At a high level, RODeO will take in direct input or load from files and perform 
 *bonus_deprec_instance* | Bonus depreciation fraction [0 to 1]
 *inflation_inst* | Annual inflation rate [0 to 1]
 *study_years_inst* | Years considered in study period [years]
-
+ | 
 *op_length_instance* | Number of time intervals in study period
 *op_period_instance* | Number of intervals in each operating period (rolling solution window)
 *int_length_instance* | Length of interval (e.g., 1 for hourly, 0.25 for 15 minute)
 *lookahead_instance* | Number of additional intervals to look past the current operating period
-
+ | 
 *energy_only_instance* | Toggle between optimizing only energy arbitrage and co-optimizing energy arbitrage and ancillary services
 *Product_use_instance* | Determines if product is sold
 *product_conv_inst* | Conversion factor used to establish the units of product produced, stored, and sold (e.g., hydrogen, electricity)
@@ -155,21 +151,18 @@ At a high level, RODeO will take in direct input or load from files and perform 
 *base_op_instance* | Toggle that forces the input device to operate in baseload mode (i.e., at rated capacity for every interval)
 *NG_price_adj_instance* | Sets the price of natural gas [$/MMBtu]
 *REC_price_inst* | Price for Renewable Energy Credits (RECs) [$/MWh]
-
 *run_retail_instance* | Toggles between different grid interaction configurations (wholesale, retail and hybrid)
 *NBC_instance* | NEM2.0 Non-bypassable charges [$/MWh]
 *one_active_device_inst* | Toggle that enables or disables storage devices from simultaneously charging and discharging
 *ITC_inst* | Business Energy Investment Tax Credit (ITC) level [0 to 1]. Determines the fraction of capital cost that is eligible for a tax subsidy.
-
-**Real-time controller optimization**
+ | 
 *current_int_instance* | Current interval for real-time controller optimization
 *next_int_instance* | Next interval for real-time controller optimization
 *current_stor_instance* | Current storage level for real-time controller optimization [0 to 1]
 *current_max_instance* | Current monthly maximum demand for real-time controller optimization of retail rates [0 to 1]
 *max_int_instance* | Maximum interval for real-time controller optimization
 *read_MPC_file_instance* | Toggle to enable or disable the model from read controller values from csv file *controller_input_values.csv*.
-
-**Low Carbon Fuel Standard (LCFS) parameters**
+ | 
 *EneDens_inst* | Energy density of fuel (e.g., H2 = 120 MJ/kg)
 *EER_inst* | Energy economy ratio relative to alternative fuel (pull from CARB documentation)
 *Grid_CarbInt_inst* | Carbon intensity of electricity from the grid [gCO2e/MJ] (pull from CARB documentation)
