@@ -60,7 +60,7 @@ At a high level, RODeO will take in direct input or load from files and perform 
 
 **Property** | **Description**
 ------------ | -------------
-*run_opt_breakeven* | Switches to an iteration mode that updates the product cost until a break-even value across the lifetime is achieved
+*run_opt_breakeven* | Switches to an iteration mode that updates the product cost until a break-even value is achieved
 *NEM_nscr* | Toggles on and off the use of Net Energy Metering (NEM)
 *Max_input_prof_inst* | The maximum setpoint for input devices as a fraction of their installed power
 *Max_output_prof_inst* | The maximum setpoint for output devices as a fraction of their installed power
