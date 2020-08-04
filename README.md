@@ -56,7 +56,7 @@ There are several ways of compiling those results.
 
 ## Setting up RODeO for your analysis
 
-At a high level, RODeO will take in direct input or load from files and perform the desired optimization. There are several toggles that change the mode of operation that are important to understand and will be described below along with a general description of other inputs. Additional details can also be found in the code.
+At a high level, RODeO will take in direct input or load from files and perform the desired optimization. There are several toggles that change the mode of operation that are important to understand and will be described below along with a general description of other inputs. 
 
 **Property** | **Description**
 ------------ | -------------
