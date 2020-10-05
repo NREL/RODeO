@@ -28,7 +28,7 @@ Create file to keep track of predicted and actual values
 $OffText
 *===============================================================================
 * This toggle switches an iteration mode which updates the product break-even cost
-$if not set run_opt_breakeven      $set run_opt_breakeven   0
+$if not set run_opt_breakeven      $set run_opt_breakeven   1
 * If considering NEM benefits
 *       Assumes: NEM benefits are for energy only (does not affect demand charges)
 *                Must pay non-bypassable charges on any net metered electricity
@@ -42,32 +42,32 @@ $if not set NEM_nscr               $set NEM_nscr            0
 $if not set Max_input_prof_inst         $set Max_input_prof_inst            Max_input_cap_ones_hourly
 $if not set Max_output_prof_inst        $set Max_output_prof_inst           Max_output_cap_ones_hourly
 $if not set product_consumed_inst       $set product_consumed_inst          Product_consumption_flat_hourly
-$if not set elec_rate_instance          $set elec_rate_instance             5ed987ec5457a3487edd15ae_hourly
+$if not set elec_rate_instance          $set elec_rate_instance             5e1676e95457a3f87673e3b0_hourly
 $if not set load_prof_instance          $set load_prof_instance             Additional_load_none_hourly
 $if not set AS_price_inst               $set AS_price_inst                  Ancillary_services_hourly
 $if not set Device_parameters_inst      $set Device_parameters_inst         Devices_parameters_empty
 $if not set Device_ren_params_inst      $set Device_ren_params_inst         Devices_ren_parameters_empty
-$if not set energy_purchase_price_inst  $set energy_purchase_price_inst     Energy_purchase_prices_Wholesale_MWh_hourly
-$if not set energy_sale_price_inst      $set energy_sale_price_inst         Energy_sale_prices_Wholesale_MWh_hourly
+$if not set energy_purchase_price_inst  $set energy_purchase_price_inst     Energy_purchase_prices_SCE_LAP_2018_minus_20_hourly
+$if not set energy_sale_price_inst      $set energy_sale_price_inst         Energy_sale_prices_SCE_LAP_2018_minus_20_hourly
 $if not set MACRS_instance              $set MACRS_instance                 MACRS_depreciation_schedule
 $if not set NG_price_instance           $set NG_price_instance              NG_price_Price1_hourly
 $if not set NSCR_instance               $set NSCR_instance                  NSCR
 $if not set product_price_prof_inst     $set product_price_prof_inst        Product_price_Price1_hourly
-$if not set ren_prof_instance           $set ren_prof_instance              renewable_profiles_none_hourly
-$if not set outdir                      $set outdir                         Projects\Test\Output
-$if not set indir                       $set indir                          Projects\Test\Data_files\TXT_files
+$if not set ren_prof_instance           $set ren_prof_instance              renewable_profiles_MorenoValley_hourly
+$if not set outdir                      $set outdir                         Projects\UCI_project\Output
+$if not set indir                       $set indir                          Projects\UCI_project\Data_files\TXT_files
 $call 'if not exist %outdir%\nul mkdir %outdir%'
 
-$if not set file_name_instance     $set file_name_instance     "Test"
+$if not set file_name_instance     $set file_name_instance     "Test9"
 $if not set devices_instance       $set devices_instance       1
 $if not set use_alt_devices        $set use_alt_devices        0
 $if not set use_all_devices        $set use_all_devices        1
 $if not set use_smart_charging     $set use_smart_charging     1
 $if not set soft_cons_device_inst  $set soft_cons_device_inst  0
 $if not set devices_ren_instance   $set devices_ren_instance   1
-$if not set input_cap_instance     $set input_cap_instance     1
-$if not set output_cap_instance    $set output_cap_instance    1
-$if not set Renewable_MW_instance  $set Renewable_MW_instance  0
+$if not set input_cap_instance     $set input_cap_instance     50
+$if not set output_cap_instance    $set output_cap_instance    0
+$if not set Renewable_MW_instance  $set Renewable_MW_instance  100
 
 * Set the limiting price (must be less than infinity)
 $if not set price_cap_instance     $set price_cap_instance     1000000000
@@ -83,17 +83,18 @@ $if not set output_LSL_instance    $set output_LSL_instance    0
 $if not set Input_start_cost_inst  $set Input_start_cost_inst  0
 $if not set Output_start_cost_inst $set Output_start_cost_inst 0
 * Efficiency takes into account compressor. Otherwise, take 0.613669
-$if not set input_efficiency_inst  $set input_efficiency_inst  0.894427191
-$if not set output_efficiency_inst $set output_efficiency_inst 0.894427191
+$if not set input_efficiency_inst  $set input_efficiency_inst  0.613669
+$if not set output_efficiency_inst $set output_efficiency_inst 0
 
-$if not set renew_cap_cost_inst    $set renew_cap_cost_inst    1745900
-$if not set input_cap_cost_inst    $set input_cap_cost_inst    1691000
+$if not set renew_cap_cost_inst    $set renew_cap_cost_inst    687791.288659046
+$if not set input_cap_cost_inst    $set input_cap_cost_inst    1000000
 $if not set input_cap_alt_cst_inst $set input_cap_alt_cst_inst 0
 $if not set output_cap_cost_inst   $set output_cap_cost_inst   0
 $if not set ProdStor_cap_cost_inst $set ProdStor_cap_cost_inst 822
+* Product compressor cost is defined as a function of input device size in "Compressors_cost.csv"
 $if not set ProdComp_cap_cost_inst $set ProdComp_cap_cost_inst 0
-$if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    15600
-$if not set input_FOM_cost_inst    $set input_FOM_cost_inst    93840
+$if not set renew_FOM_cost_inst    $set renew_FOM_cost_inst    8054.9811686567
+$if not set input_FOM_cost_inst    $set input_FOM_cost_inst    50000
 $if not set input_FOM_alt_cst_inst $set input_FOM_alt_cst_inst 0
 $if not set output_FOM_cost_inst   $set output_FOM_cost_inst   0
 $if not set renew_VOM_cost_inst    $set renew_VOM_cost_inst    0
@@ -111,8 +112,8 @@ $if not set reg_cost_instance      $set reg_cost_instance      0
 $if not set min_runtime_instance   $set min_runtime_instance   0
 $if not set ramp_penalty_instance  $set ramp_penalty_instance  0
 
+* WACC is calculated based on below values. You can change them to adjust wacc
 $if not set wacc_instance          $set wacc_instance          0.07
-* The equity percentage is calculated based on wacc = 7% so, it has to be recalculated if wacc is changed
 $if not set perc_equity_instance   $set perc_equity_instance   0.419
 * Rate of return (ROR) and rate of equity (ROE) are company and project specific
 $if not set ror_instance           $set ror_instance           0.0489
@@ -132,12 +133,12 @@ $if not set lookahead_instance     $set lookahead_instance     0
 
 $if not set energy_only_instance   $set energy_only_instance   1
 * Setting storage dissipation term (stor_dissipation_inst above) greater than zero increases CF above specified value and can cause infeasibilities if dissipation and/or CF are too large
-$if not set Product_use_instance   $set Product_use_instance   0
+$if not set Product_use_instance   $set Product_use_instance   1
 * Product conversion instance sets the units that will be used for storage of product (e.g., Hydrogen [LHV] 0.033322222 (MWh/kg), electricity 1 (MWh/MWh)
 $if not set product_conv_inst      $set product_conv_inst      0.033322222
 $if not set CF_opt_instance        $set CF_opt_instance        1
 $if not set CF_adj_inst            $set CF_adj_inst            0.4
-$if not set Product_price_instance $set Product_price_instance 2
+$if not set Product_price_instance $set Product_price_instance 5
 $if not set base_op_instance       $set base_op_instance       0
 $if not set NG_price_adj_instance  $set NG_price_adj_instance  1
 $if not set REC_price_inst         $set REC_price_inst         0
@@ -161,7 +162,7 @@ $if not set EneDens_inst           $set EneDens_inst           120
 $if not set EER_inst               $set EER_inst               2.5
 $if not set Grid_CarbInt_inst      $set Grid_CarbInt_inst      81.49
 $if not set CI_base_line_inst      $set CI_base_line_inst      88.62
-$if not set LCFS_price_inst        $set LCFS_price_inst        180
+$if not set LCFS_price_inst        $set LCFS_price_inst        40
 
 
 *        energy_only_instance = 0, 1 (1 = Energy only operation, 0 = All ancillary services included)
@@ -614,7 +615,7 @@ $GDXIN
 ;
 loop(devices,
          loop(input_size_instances,
-                  if (input_capacity_MW(devices) = input_sizes(input_size_instances),
+                  if (input_capacity_MW(devices) >= input_sizes(input_size_instances),
                      ProdComp_cap_cost(devices) = ProdComp_cap_cost_s(input_size_instances) ;
                   );
          );;
@@ -731,7 +732,7 @@ execseed = 1 + gmillisec(jnow);
 elec_sale_price(interval) = (price_cap+elec_sale_price(interval)-ABS(elec_sale_price(interval)-price_cap))/2;
 elec_purchase_price(interval) = (price_cap+elec_purchase_price(interval)-ABS(elec_purchase_price(interval)-price_cap))/2;
 elec_sale_price_forecast(interval) = elec_sale_price(interval);
-if (sum(interval,elec_purchase_price(interval))=sum(interval,elec_sale_price(interval))),
+if ( (sum(interval,elec_purchase_price(interval))=sum(interval,elec_sale_price(interval))),
     elec_purchase_price_forecast(interval) = elec_purchase_price(interval)+nominal_penalty;
 else
     elec_purchase_price_forecast(interval) = elec_purchase_price(interval);
@@ -795,7 +796,7 @@ Scalars
          rolling_window_min_index        value of first index in current rolling window
          rolling_window_max_index        value of last index in current rolling window
          big_M                           big number for linearisation of net surplus electricity compensation constraints /5000/
-         big_Mtaxes                      big number for taxes linearization                                              /30000000/
+         big_Mtaxes                      big number for taxes linearization                                              /50000000/
          small_M                         small number for linearization of net surplus electricity compensation constraints /0.05/
 ;
 
@@ -1177,7 +1178,7 @@ taxes_lin5(years)..
 reserved_taxes_eqn(years)..
 reserved_taxes(years)  =e= reserved_taxes(years-1) - yearly_taxes(years) - cftr*(yearly_operating_profit*inflation_vec(years) - amount_depreciated(years))
                          + ITC*deprec_base_reduction*[sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
-                         + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices) * active_devices(devices) + input_cap_alt_cost(devices) * input_capacity_MW(devices) * (1-active_devices(devices)) + output_cap_cost(devices) * output_capacity_MW(devices) * active_devices(devices))]$(ord(years)=1);
+                                                    + sum(devices, input_cap_cost(devices) * input_capacity_MW(devices) * active_devices(devices) + input_cap_alt_cost(devices) * input_capacity_MW(devices) * (1-active_devices(devices)) + output_cap_cost(devices) * output_capacity_MW(devices) * active_devices(devices))]$(ord(years)=1);
 
 debt_service_eqn..
 debt_service    =e= [debt_interest*(1-equity)*([sum(devices_ren, renew_cap_cost(devices_ren) * Renewable_MW(devices_ren))
@@ -1484,7 +1485,8 @@ option limcol = 3;
 option solprint = on;
 option sysout = on;
 
-$ontext
+* Turn on/off "ontext/offtext" to either produce or not produce log files for debugging
+*$ontext
 $inlinecom /* */
 * Turn off the listing of the input file
 $offlisting
@@ -1494,7 +1496,7 @@ option solprint = off;
 option sysout = off;
 option limrow = 0;
 option limcol = 0;
-$offtext
+*$offtext
 
 $onecho > cplex.opt
 scaind 1
@@ -1694,14 +1696,12 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
 *=====================================================================================================================
          %run_opt_breakeven% = 1,
 
+                 display product_price_adj;
+                 
                  while(
                        (abs(epsilon) gt 0.001),
 
-                       display product_price_adj, product_price ;
-
                        Solve arbitrage_and_AS using MIP maximizing operating_profit;
-
-                       display product_price_adj, product_price ;
 
                        Total_product_sold              = sum(years,sum((interval,devices),product_sold.l(interval,devices))/to_NPV(years));
 
@@ -1748,29 +1748,31 @@ while ( solve_index <= number_of_solves and no_error = 1 ,
 
                        DebtsPERprod                          = sum(years,- debt_service.l/to_NPV(years))/Total_product_sold;
 
-                       elec_cost_ren_vec(devices_ren)   = sum(years,sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) )*inflation_vec(years)/to_NPV(years));
-
-                       renewable_sales                  = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
-                                                        + sum(years,[sum((months,TOU_energy_period),(NSCR(months)-NBC)*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
-                                                        + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period)*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),
-                                                         (sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)*(1-esurplus_active.l(months,TOU_energy_period))*interval_length)))]))*(%NEM_nscr%)]*inflation_vec(years)/to_NPV(years));
-
+                       
+                       elec_cost_ren_vec(devices_ren) = sum(interval, elec_sale_price(interval) * renewable_power_MW_sold.l(interval,devices_ren) * interval_length);
+                        
+                       renewable_sales = sum(devices_ren, elec_cost_ren_vec(devices_ren))*(1-%NEM_nscr%)
+                                       + sum((months,TOU_energy_period),(NSCR(months)-NBC)*electricity_surplus.l(months,TOU_energy_period))*(%NEM_nscr%)
+                                       + sum((months,TOU_energy_period),(TOU_energy_prices(TOU_energy_period)*[sum(interval$(month_interval(months,interval) and elec_TOU_bins(TOU_energy_period,interval) and rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index),
+                                        (sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)*(1-esurplus_active.l(months,TOU_energy_period))*interval_length)))]))*(%NEM_nscr%);
+                      
                        Renewable_cap_costPERprod             = sum(devices_ren,renew_cap_cost2_vec(devices_ren))/Total_product_sold;
                        Renewable_FOM_costPERprod             = sum(devices_ren,renew_FOM_cost2_vec(devices_ren))/Total_product_sold;
                        Renewable_revenuePERprod              = (sum(years,(sum((interval,devices_ren), REC_price * renewable_power_MW_sold.l(interval,devices_ren)) * interval_length
-                                                         + sum((interval,devices),output_power_MW_ren_sold.l(interval,devices)) * interval_length)*inflation_vec(years)/to_NPV(years)) + renewable_sales)
-                                                        /Total_product_sold;
+                                                                         + sum((interval,devices), REC_price * output_power_MW_ren_sold.l(interval,devices)) * interval_length
+                                                                         + renewable_sales)*inflation_vec(years)/to_NPV(years)))
+                                                               /Total_product_sold;
                        Renewable_cost                   = Renewable_cap_costPERprod + Renewable_FOM_costPERprod + Renewable_revenuePERprod;
 
                        product_revenue_vec(devices)          = sum(years,sum(interval$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index ), product_price_adj(devices) * product_sold.l(interval,devices))*inflation_vec(years)/to_NPV(years));
 
                        product_break_even_cost               = LCFS_revenuePERprod + Energy_chargePERprod + Fixed_demand_chargePERprod + Timed_demand_chargePERprod + Meters_costPERprod + Storage_costPERprod
                                                         + Compressor_costPERprod +  input_cap_costPERprod + input_FOM_costPERprod + Renewable_cost + TaxesPERprod + DebtsPERprod;
-
+                       
                        epsilon = (sum(devices,product_price_adj(devices)) + product_break_even_cost)/sum(devices$(ord(devices) <= %devices_instance%),1) ;
 
                        product_price_adj(devices) = -product_break_even_cost ;
-                       display product_price_adj, product_price ;
+                       display product_price_adj;
                            loop(devices,
                                if (product_use(devices) = 0,
                                     product_consumed(interval,devices) = product_consumed(interval,devices) * 0;
@@ -2295,7 +2297,7 @@ else
          input_FOM_costPERprod        = input_FOM_cost2_NPV/Total_product_sold;
          Renewable_cap_costPERprod    = renew_cap_cost2/Total_product_sold;
          Renewable_FOM_costPERprod    = renew_FOM_cost2_NPV/Total_product_sold;
-         Renewable_revenuePERprod     = sum(years, renewable_sales + (sum(interval, REC_price * sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)) * interval_length + sum(devices,output_power_MW_ren_sold.l(interval,devices)) * interval_length ))*inflation_vec(years)/to_NPV(years))
+         Renewable_revenuePERprod     = sum(years, (renewable_sales + sum(interval, REC_price * (sum(devices_ren,renewable_power_MW_sold.l(interval,devices_ren)) + sum(devices,output_power_MW_ren_sold.l(interval,devices)))) * interval_length) * inflation_vec(years)/to_NPV(years))
                                    /Total_product_sold;
 *        Appears this doesn't take into account non-ren revenue for other output devices (see previous).
          Renewable_cost          = Renewable_cap_costPERprod + Renewable_FOM_costPERprod + Renewable_revenuePERprod;

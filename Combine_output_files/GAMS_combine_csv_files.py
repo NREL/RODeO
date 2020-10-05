@@ -12,7 +12,7 @@ import pandas as pd
 import warnings 
 warnings.simplefilter("ignore",UserWarning)
 
-Scenario1 = 'Test'
+Scenario1 = 'UCI_project'
 
 
 dir0 = 'C:/Users/jeichman/Documents/gamsdir/projdir/RODeO/Projects/'+Scenario1+'/Output/'   # Location to put database files
@@ -200,6 +200,35 @@ for files2load in os.listdir(dir1):
             files2load_summary_title[c0[2]] = int1
         files2load_title_header = ['Utility','Services','Location','Charge Power','Charge Properties','Bus Type','Additional Technologies','Renewable level']
 
+    elif Scenario1=='UCI_project':
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_input*'):
+            c0[0]=c0[0]+1
+            files2load_input[c0[0]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+            int1[1] = int1[1].replace('config', '')
+            int1[2:] = [''.join(int1[2:])]
+            int1[-1] = int1[-1].replace('.csv', '')
+            files2load_input_title[c0[0]] = int1
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_results_*'):
+            c0[1]=c0[1]+1
+            files2load_results[c0[1]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]
+            int1[1] = int1[1].replace('config', '')
+            int1[2:] = [''.join(int1[2:])]
+            int1[-1] = int1[-1].replace('.csv', '')
+            files2load_results_title[c0[1]] = int1
+        if fnmatch.fnmatch(files2load, 'Storage_dispatch_summary_*'):
+            c0[2]=c0[2]+1
+            files2load_summary[c0[2]] = files2load
+            int1 = files2load.split("_")
+            int1 = int1[3:]            
+            int1[1] = int1[1].replace('config', '')
+            int1[2:] = [''.join(int1[2:])]
+            int1[-1] = int1[-1].replace('.csv', '')
+            files2load_summary_title[c0[2]] = int1
+        files2load_title_header = ['Location','Configuration','Price']
 
 # Connecting to the database file
 ### conn.close()
@@ -244,7 +273,7 @@ if 1==1:            # This section captures the scenario table from summary file
         c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
                                              'Tariff' text,                                             
                                              'Capacity Factor (%)' real,
-                                             'Storage duration (hours)' real)''')    
+                                             'Storage duration (hours)' real)''') 
         sql = "INSERT INTO Scenarios VALUES (?,?,?,?)"
         params=list()
         for i0 in range(len(files2load_summary)):    
@@ -253,7 +282,18 @@ if 1==1:            # This section captures the scenario table from summary file
         c.executemany(sql, params)
         conn.commit()         
 
-
+    elif Scenario1=='UCI_project':
+        c.execute('''CREATE TABLE Scenarios ('Scenario Number' real,
+                                             'Location' text,                                             
+                                             'Configuration' real,
+                                             'Price' text)''')       
+        sql = "INSERT INTO Scenarios VALUES (?,?,?,?)"
+        params=list()
+        for i0 in range(len(files2load_summary)):    
+            params.insert(i0,tuple(list([str(i0+1)])+files2load_summary_title[i0+1]))
+            print('Scenario data: '+str(i0+1)+' of '+str(len(files2load_summary)))
+        c.executemany(sql, params)
+        conn.commit()       
         
 if 1==1:            # This section captures the summary files         
     # Creating Summary Table

@@ -1,0 +1,16 @@
+Input=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch.gms
+Output=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Storage_dispatch.lst
+Action=R
+SubSys=C:\GAMS\win64\27.3\gmscmpnt.txt
+ScrDir=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225f\
+SysDir=C:\GAMS\win64\27.3\
+CurDir=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\
+WorkDir=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\
+PutDir=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\
+GridDir=C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\225f\
+ScriptNext=225f\gamsnext.cmd
+ScriptFrst="@echo off"
+AppendOut=1
+License=C:\GAMS\win64\27.3\gamslice.txt
+LibIncDir=C:\GAMS\win64\27.3\inclib\
+SysIncDir=C:\GAMS\win64\27.3\

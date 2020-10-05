@@ -1,7 +1,7 @@
 %% Collect, configure and output data into text files for use with GAMS
 clear all, close all, clc
 
-dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\Test\Data_files\'];
+dir2 = ['C:\Users\jeichman\Documents\gamsdir\projdir\RODeO\Projects\UCI_project\Data_files\'];
 
 dir1 = [dir2,'CSV_data\'];      % Input folder
 [status1,msg1] = mkdir(dir1);   % Create directory if it doesn't exist
