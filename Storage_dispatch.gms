@@ -1375,13 +1375,13 @@ load_profile_eqn(interval)$( rolling_window_min_index <= ord(interval) and ord(i
          Load_profile(interval) =e= Load_profile_non_ren(interval) + Load_profile_ren(interval);
 
 storage_level_accounting_init_eqn(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices) > 0 and baseload_operation(devices)=0 and ord(interval)=1)..
-         storage_level_MWh(interval,devices)+storage_level_MWh_ren(interval,devices) =e= storage_init(devices)*storage_capacity_hours(devices)*input_capacity_MW(devices)
+         storage_level_MWh(interval,devices)+storage_level_MWh_ren(interval,devices) =e= storage_init(devices)*storage_capacity_hours(devices)*input_capacity_MW(devices)*input_efficiency(devices)
          + (input_power_MW(interval,devices)+input_power_MW_ren(interval,devices)) * interval_length * input_efficiency(devices)
          - (output_power_MW(interval,devices)+output_power_MW_ren_sold(interval,devices)+output_power_MW_ren_load(interval,devices)) * interval_length / output_efficiency(devices)
          - (product_sold(interval,devices)+product_sold_ren(interval,devices)) * product_conversion;
 
 storage_level_accounting_final_eqn(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices) > 0 and baseload_operation(devices)=0 and ord(interval)=operating_period_length and storage_set_final(devices)=1)..
-         storage_level_MWh(interval,devices)+storage_level_MWh_ren(interval,devices) =e= storage_final(devices)*storage_capacity_hours(devices)*input_capacity_MW(devices);
+         storage_level_MWh(interval,devices)+storage_level_MWh_ren(interval,devices) =e= storage_final(devices)*storage_capacity_hours(devices)*input_capacity_MW(devices)*input_efficiency(devices);
 
 storage_level_accounting_eqn(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices) > 0 and baseload_operation(devices)=0 and ord(interval)>current_interval and ord(interval)<max_interval and ord(interval)>1)..
          storage_level_MWh(interval,devices) =e= storage_level_MWh(interval-1,devices)*(1-storage_dissipation(devices))
@@ -1413,11 +1413,11 @@ product_renewable_eqn(interval,devices)$(rolling_window_min_index <= ord(interva
          product_sold(interval,devices) =e= product_sold_non_ren(interval,devices) + product_sold_ren(interval,devices);
 
 storage_level_limit_eqn(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices)>0 and ord(interval)>current_interval and ord(interval)<max_interval )..
-         storage_level_MWh(interval,devices) + storage_level_MWh_ren(interval,devices) =l= input_capacity_MW(devices) * storage_capacity_hours(devices)
+         storage_level_MWh(interval,devices) + storage_level_MWh_ren(interval,devices) =l= input_capacity_MW(devices) * input_efficiency(devices) * storage_capacity_hours(devices)
          - input_regdn_MW(interval,devices) * interval_length * 0.5;
 
 storage_level_limit_eqn2(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and input_capacity_MW(devices)<=0 and ord(interval)>current_interval and ord(interval)<max_interval )..
-         storage_level_MWh(interval,devices) + storage_level_MWh_ren(interval,devices) =l= output_capacity_MW(devices) * storage_capacity_hours(devices)
+         storage_level_MWh(interval,devices) + storage_level_MWh_ren(interval,devices) =l= output_capacity_MW(devices) / output_efficiency(devices) * storage_capacity_hours(devices)
          - input_regdn_MW(interval,devices) * interval_length * 0.5;
 
 storage_level_limit_eqn3(interval,devices)$(rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>current_interval and ord(interval)<max_interval )..
@@ -1434,13 +1434,13 @@ RT_eqn1(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(in
          input_power_MW(interval,devices) =e= current_monthly_max * input_capacity_MW(devices);
 
 RT_eqn2(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)<=current_interval and current_storage_lvl>=0)..
-         storage_level_MWh(interval,devices) + storage_level_MWh_ren(interval,devices) =e= current_storage_lvl * input_capacity_MW(devices) * storage_capacity_hours(devices);
+         storage_level_MWh(interval,devices) + storage_level_MWh_ren(interval,devices) =e= current_storage_lvl * input_capacity_MW(devices) * input_efficiency(devices) * storage_capacity_hours(devices);
 
 RT_eqn3(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>=max_interval and current_monthly_max>=0)..
          input_power_MW(interval,devices) =e= current_monthly_max * input_capacity_MW(devices);
 
 RT_eqn4(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and ord(interval)>=max_interval and current_storage_lvl>=0)..
-         storage_level_MWh(interval,devices) + storage_level_MWh_ren(interval,devices) =e= current_storage_lvl * input_capacity_MW(devices) * storage_capacity_hours(devices);
+         storage_level_MWh(interval,devices) + storage_level_MWh_ren(interval,devices) =e= current_storage_lvl * input_capacity_MW(devices) * input_efficiency(devices) * storage_capacity_hours(devices);
 
 one_active_device_eqn(interval,devices)$( rolling_window_min_index <= ord(interval) and ord(interval) <= rolling_window_max_index and one_active_device=1)..
          input_active(interval,devices) + output_active(interval,devices) =l= 1;
