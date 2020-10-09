@@ -731,7 +731,7 @@ execseed = 1 + gmillisec(jnow);
 elec_sale_price(interval) = (price_cap+elec_sale_price(interval)-ABS(elec_sale_price(interval)-price_cap))/2;
 elec_purchase_price(interval) = (price_cap+elec_purchase_price(interval)-ABS(elec_purchase_price(interval)-price_cap))/2;
 elec_sale_price_forecast(interval) = elec_sale_price(interval);
-if (sum(interval,elec_purchase_price(interval))=sum(interval,elec_sale_price(interval))),
+if (sum(interval,elec_purchase_price(interval))=sum(interval,elec_sale_price(interval)),
     elec_purchase_price_forecast(interval) = elec_purchase_price(interval)+nominal_penalty;
 else
     elec_purchase_price_forecast(interval) = elec_purchase_price(interval);
