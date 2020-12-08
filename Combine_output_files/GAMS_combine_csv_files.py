@@ -368,7 +368,7 @@ if 1==1:            # This section captures a subset of the results files
             files2load_results_data_all = files2load_results_data
         else:
             files2load_results_data_all = files2load_results_data_all.append(files2load_results_data, ignore_index=True)
-        print('Combining Data: '+str(i0+1)+' of '+str(len(files2load_results_title)))
+        print('Combining Results Data: '+str(i0+1)+' of '+str(len(files2load_results_title)))
         
     # Create database table for each column
     files2load_results_header = files2load_results_data_all.columns.tolist()
