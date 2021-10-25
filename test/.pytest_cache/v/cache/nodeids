@@ -1,0 +1,4 @@
+[
+  "test_rodeo_python_support.py::test_interpolate_linear",
+  "test_rodeo_python_support.py::test_interpolate_repeat"
+]
